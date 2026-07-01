@@ -138,9 +138,8 @@ function productCard(p){
   const dealer = p.dealers?.razon || '';
   const cat = p.categories?.name || '';
   return `<div class="card" style="overflow:hidden;display:flex;flex-direction:column;cursor:pointer" onclick="go('producto:${p.id}')">
-    <div style="height:150px;background:#F1F1F3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-bottom:1px solid #E7E7EA;position:relative">
-      <span style="font-family:'Archivo';font-weight:800;font-size:17px;color:#44414A">${esc(p.brand||'')}</span>
-      <span style="font-size:11.5px;color:#918A8E">${esc(cat)}</span>
+    <div style="height:150px;background:#F1F1F3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-bottom:1px solid #E7E7EA;position:relative;overflow:hidden">
+      ${p.photo_url?`<img src="${esc(p.photo_url)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:`<span style="font-family:'Archivo';font-weight:800;font-size:17px;color:#44414A">${esc(p.brand||'')}</span><span style="font-size:11.5px;color:#918A8E">${esc(cat)}</span>`}
       ${p.is_deal?`<span class="tag" style="position:absolute;top:10px;left:10px;background:#E6A100;color:#1C1B1F">OFERTA</span>`:''}
     </div>
     <div style="padding:15px 16px;display:flex;flex-direction:column;flex:1">
@@ -277,9 +276,8 @@ async function viewProducto(v, id){
   v.innerHTML=`
     <a onclick="go('catalogo')" style="cursor:pointer;color:#6E646A;font-size:14px;font-weight:600">← Volver al catálogo</a>
     <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px;align-items:start">
-      <div class="card" style="height:380px;background:#F1F1F3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
-        <span style="font-family:'Archivo';font-weight:800;font-size:28px;color:#44414A">${esc(p.brand||'')}</span>
-        <span style="font-size:14px;color:#918A8E">${esc(cat)}</span>
+      <div class="card" style="height:380px;background:#F1F1F3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden">
+        ${p.photo_url?`<img src="${esc(p.photo_url)}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-family:'Archivo';font-weight:800;font-size:28px;color:#44414A">${esc(p.brand||'')}</span><span style="font-size:14px;color:#918A8E">${esc(cat)}</span>`}
       </div>
       <div>
         <span style="font-size:12px;font-weight:700;color:#918A8E;text-transform:uppercase">${esc(dealer)} · ${esc(p.dealers?.sede||'')}</span>
@@ -533,6 +531,11 @@ function productForm(p){
         <div><label class="lbl">Precio socio</label><input id="pSocio" class="fld" type="number" value="${p?p.price_socio:''}"></div>
         <div><label class="lbl">Stock</label><input id="pStock" class="fld" type="number" value="${p?p.stock:''}"></div>
       </div>
+      <div style="margin-bottom:12px"><label class="lbl">Foto del producto</label>
+        <img id="pPhotoPrev" src="${p&&p.photo_url?esc(p.photo_url):''}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;margin-top:6px;${p&&p.photo_url?'':'display:none'}">
+        <input type="file" id="pPhoto" accept="image/*" class="fld" style="padding:8px" onchange="previewPhoto(this)">
+        <input type="hidden" id="pPhotoUrl" value="${p?esc(p.photo_url||''):''}">
+      </div>
       <div style="margin-bottom:16px"><label class="lbl">Descripción</label><textarea id="pDesc" class="fld" style="min-height:70px">${p?esc(p.description||''):''}</textarea></div>
       <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:14px"><input type="checkbox" id="pDeal" ${p&&p.is_deal?'checked':''}> Mostrar en ofertas del día</label>
       <div style="display:flex;gap:10px;justify-content:flex-end">
@@ -543,12 +546,21 @@ function productForm(p){
 }
 function newProduct(){ $('modal').innerHTML = productForm(null); }
 function editProduct(p){ $('modal').innerHTML = productForm(p); }
+function previewPhoto(inp){ const f=inp.files[0]; if(!f) return; const img=$('pPhotoPrev'); img.src=URL.createObjectURL(f); img.style.display='block'; }
 
 async function saveProduct(){
   const id=$('pid').value;
+  let photo_url = $('pPhotoUrl').value || null;
+  const file = $('pPhoto') && $('pPhoto').files[0];
+  if(file){
+    const path = me.dealer_id+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const up = await sb.storage.from('product-photos').upload(path, file, {upsert:true});
+    if(up.error){ toast('Error subiendo la foto: '+up.error.message); return; }
+    photo_url = sb.storage.from('product-photos').getPublicUrl(path).data.publicUrl;
+  }
   const rec = {
     dealer_id: me.dealer_id, name:$('pName').value.trim(), brand:$('pBrand').value.trim(),
-    category_id:$('pCat').value||null, description:$('pDesc').value.trim(),
+    category_id:$('pCat').value||null, description:$('pDesc').value.trim(), photo_url,
     price_list:parseInt($('pList').value||0,10), price_socio:parseInt($('pSocio').value||0,10),
     stock:parseInt($('pStock').value||0,10), is_deal:$('pDeal').checked
   };
