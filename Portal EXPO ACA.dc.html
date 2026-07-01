@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:#ECECEE;color:#1C1B1F;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:'Archivo',system-ui,sans-serif;margin:0;letter-spacing:-0.02em}
+  a{color:inherit;text-decoration:none}
+  input,button{font-family:'Public Sans'}
+  ::selection{background:#C8102E;color:#fff}
+  @keyframes acaFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .acaScroll::-webkit-scrollbar{height:8px}
+  .acaScroll::-webkit-scrollbar-thumb{background:#C7D0E0;border-radius:8px}
+</style>
+</helmet>
+
+<div style="min-height:100%;background:#ECECEE">
+
+  <!-- TOAST -->
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:999;background:#1C1B1F;color:#fff;padding:14px 22px;border-radius:12px;font-size:14.5px;font-weight:600;box-shadow:0 16px 40px -12px rgba(0,0,0,.5);animation:acaFade .3s ease">{{ toast }}</div>
+  </sc-if>
+
+  <!-- UTILITY BAR -->
+  <div style="background:#1C1B1F;color:#B3ABAE;font-size:12.5px;letter-spacing:.02em">
+    <div style="max-width:1280px;margin:0 auto;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <button onClick="{{ toggleSocio }}" style="cursor:pointer;border:none;background:{{ socioBtnBg }};color:{{ socioBtnColor }};font-weight:700;font-size:12.5px;padding:5px 12px;border-radius:100px;display:inline-flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:50%;background:{{ socioDot }};display:inline-block"></span>{{ socioLabel }}</button>
+      <span style="display:flex;gap:18px;align-items:center">
+        <a onClick="{{ goConcLogin }}" style="cursor:pointer">Soy concesionario</a>
+        <a style="cursor:pointer">Seguir mi pedido</a>
+        <a style="cursor:pointer">Ayuda</a>
+        <span style="color:#6E646A">ES · EN</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- MAIN NAV -->
+  <header style="position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #DEDEE2">
+    <div style="max-width:1280px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:22px">
+      <a onClick="{{ goHome }}" style="cursor:pointer;display:flex;align-items:center;gap:12px;flex:none">
+        <span style="width:42px;height:42px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900;font-size:18px;letter-spacing:-.04em">EA</span>
+        <span style="line-height:1.05">
+          <span style="display:block;font-family:'Archivo';font-weight:800;font-size:17px;letter-spacing:-.03em">ExpoACA</span>
+          <span style="display:block;font-size:10.5px;color:#6E646A;font-weight:600;letter-spacing:.04em">Tienda online</span>
+        </span>
+      </a>
+      <div style="flex:1;display:flex;align-items:center;gap:8px;background:#F1F1F3;border:1px solid #DEDEE2;border-radius:12px;padding:4px 4px 4px 16px" style-focus-within="border-color:#C8102E">
+        <span style="color:#918A8E;font-size:16px">⌕</span>
+        <input placeholder="Buscar productos, marcas, categorías…" style="flex:1;background:transparent;border:none;outline:none;font-size:15px;color:#1C1B1F;padding:8px 0">
+        <button onClick="{{ goCatalogo }}" style="cursor:pointer;border:none;background:#C8102E;color:#fff;font-weight:700;font-size:14px;padding:10px 20px;border-radius:9px">Buscar</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex:none">
+        <a onClick="{{ goRegistro }}" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:9px 12px;border-radius:10px;color:#C8102E"><span style="font-size: 17px; color: #FF0000">◌</span>Ingresar</a>
+        <a onClick="{{ goCarrito }}" style="cursor:pointer;position:relative;display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;padding:10px 16px;border-radius:10px;background:#C8102E;color:#fff">
+          <span style="font-size: 16px; color: #FFFFFF">🛒</span>Carrito
+          <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:-7px;right:-7px;min-width:21px;height:21px;border-radius:11px;background:#E6A100;color:#1C1B1F;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff">{{ cartCount }}</span>
+          </sc-if>
+        </a>
+      </div>
+    </div>
+    <!-- CATEGORY BAR -->
+    <div style="border-top:1px solid #ECECEE">
+      <div class="acaScroll" style="max-width:1280px;margin:0 auto;padding:10px 28px;display:flex;gap:6px;align-items:center;overflow-x:auto">
+        <a onClick="{{ goCatalogo }}" style="cursor:pointer;flex:none;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#C8102E;padding:7px 14px;border-radius:8px;background:#FBE9EC">≡ Todas las categorías</a>
+        <sc-for list="{{ navCats }}" as="c" hint-placeholder-count="7">
+          <a onClick="{{ goCatalogo }}" style="cursor:pointer;flex:none;font-weight:600;font-size:13.5px;color:#44414A;padding:7px 12px;border-radius:8px" style-hover="background:#F1F1F3">{{ c }}</a>
+        </sc-for>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div>
+
+        <!-- HERO -->
+        <section style="background:radial-gradient(120% 130% at 85% 0%,#C8102E 0%,#1C1B1F 55%,#141316 100%);color:#fff;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:64px 64px;opacity:.4"></div>
+          <div style="max-width:1280px;margin:0 auto;padding:56px 28px 60px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;position:relative">
+            <div>
+              <span style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:100px;background:#ffffff14;border:1px solid #ffffff22;font-size:13px;font-weight:600">Tienda Online del Automóvil Club Argentino</span>
+              <h1 style="font-size:54px;line-height:1;font-weight:900;margin-top:20px;letter-spacing:-.035em">Todo para tu auto,<br>moto y aventura</h1>
+              <p style="font-size:17.5px;line-height:1.55;color:#CFC6C9;max-width:480px;margin-top:18px">Comprá accesorios, repuestos y equipamiento, desde tu casa y con <strong style="color: rgb(255, 255, 255);">precio exclusivo para socios</strong>.</p>
+              <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">
+                <a onClick="{{ goCatalogo }}" style="cursor:pointer;font-weight:700;font-size:16px;padding:15px 28px;border-radius:12px;background:#fff;color:#1C1B1F;box-shadow:0 14px 34px -12px rgba(0,0,0,.6)">Explorar el catálogo →</a>
+                <a onClick="{{ goConcesionario }}" style="cursor:pointer;font-weight:700;font-size:16px;padding:15px 28px;border-radius:12px;background:#ffffff14;border:1px solid #ffffff2e;color:#fff">Quiero vender</a>
+              </div>
+              <div style="display:flex;gap:28px;margin-top:30px">
+                <div><div style="font-family:'Archivo';font-weight:800;font-size:26px">12.400+</div><div style="font-size:13px;color:#B3ABAE">productos</div></div>
+                <div><div style="font-family:'Archivo';font-weight:800;font-size:26px">85</div><div style="font-size:13px;color:#B3ABAE">ExpoACA</div></div>
+                <div><div style="font-family:'Archivo';font-weight:800;font-size:26px;color:#E6A100">hasta 25%</div><div style="font-size:13px;color:#B3ABAE">de ahorro socio</div></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <sc-for list="{{ heroTiles }}" as="t" hint-placeholder-count="4">
+                <a onClick="{{ goCatalogo }}" style="cursor:pointer;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:16px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:124px" style-hover="background:#ffffff17;border-color:#ffffff33">
+                  <span style="width:40px;height:40px;border-radius:11px;background:{{ t.tone }};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:15px">{{ t.tag }}</span>
+                  <div><div style="font-weight:700;font-size:15.5px;color:#fff;margin-top:14px">{{ t.name }}</div><div style="font-size:12.5px;color:#B3ABAE;margin-top:3px">{{ t.count }} productos</div></div>
+                </a>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <!-- OFERTAS DEL DÍA (SLIDER) -->
+        <section style="max-width:1280px;margin:0 auto;padding:40px 28px 8px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+            <span style="width:42px;height:42px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px">⚡</span>
+            <div><h2 style="font-size:28px">Ofertas del día</h2><p style="color:#6E646A;font-size:14px;margin-top:1px">Renuevan cada 24 horas · seleccionadas por los concesionarios</p></div>
+          </div>
+          <div style="position:relative;overflow:hidden;border-radius:20px">
+            <div style="{{ dealTrackStyle }}">
+              <sc-for list="{{ dealSlides }}" as="d" hint-placeholder-count="3">
+                <div style="flex:0 0 100%;min-width:100%">
+                  <div style="{{ d.panelStyle }}">
+                    <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:54px 54px"></div>
+                    <div style="position:relative;max-width:58%">
+                      <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff22;border:1px solid #ffffff33;padding:6px 13px;border-radius:100px">{{ d.kicker }}</span>
+                      <h2 style="font-size:38px;color:#fff;line-height:1.05;margin-top:16px;letter-spacing:-.03em">{{ d.name }}</h2>
+                      <p style="font-size:16px;color:#ffffffcc;margin-top:10px">{{ d.sub }}</p>
+                      <div style="display:flex;align-items:baseline;gap:12px;margin-top:18px">
+                        <span style="font-family:'Archivo';font-weight:900;font-size:40px;color:#fff">{{ d.priceMain }}</span>
+                        <span style="font-size:18px;color:#ffffff99;text-decoration:line-through">{{ d.priceOld }}</span>
+                      </div>
+                      <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">
+                        <button onClick="{{ d.add }}" style="cursor:pointer;border:none;background:#fff;color:#1C1B1F;font-weight:700;font-size:15px;padding:13px 26px;border-radius:11px">Agregar al carrito</button>
+                        <button onClick="{{ d.view }}" style="cursor:pointer;border:1px solid #ffffff44;background:#ffffff1a;color:#fff;font-weight:700;font-size:15px;padding:13px 24px;border-radius:11px">Ver producto</button>
+                      </div>
+                    </div>
+                    <div style="position:relative;flex:none;width:200px;height:200px;border-radius:50%;background:#ffffff14;border:1px solid #ffffff33;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                      <span style="font-size:13px;font-weight:700;color:#ffffffcc;letter-spacing:.05em">AHORRÁS</span>
+                      <span style="font-family:'Archivo';font-weight:900;font-size:62px;color:#E6A100;line-height:.9">{{ d.disc }}</span>
+                      <span style="font-size:12.5px;color:#ffffffcc;margin-top:4px">con precio socio</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="position:absolute;bottom:18px;left:46px;display:flex;gap:8px">
+              <sc-for list="{{ dealDots }}" as="dot" hint-placeholder-count="3">
+                <button onClick="{{ dot.onClick }}" style="{{ dot.style }}"></button>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <!-- CATEGORIES -->
+        <section style="max-width:1280px;margin:0 auto;padding:48px 28px 8px">
+          <h2 style="font-size:30px">Comprá por categoría</h2>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px">
+            <sc-for list="{{ categories }}" as="c" hint-placeholder-count="8">
+              <a onClick="{{ goCatalogo }}" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px" style-hover="border-color:#CFC6C9;box-shadow:0 12px 30px -20px rgba(11,27,51,.4);transform:translateY(-2px)">
+                <span style="width:50px;height:50px;border-radius:13px;background:{{ c.tone }};flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">{{ c.tag }}</span>
+                <div><div style="font-weight:700;font-size:15px;line-height:1.25">{{ c.name }}</div><div style="font-size:12.5px;color:#918A8E;margin-top:3px">{{ c.count }} productos</div></div>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- OFERTAS SOCIO -->
+        <section style="max-width:1280px;margin:0 auto;padding:48px 28px 8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="width:46px;height:46px;border-radius:12px;background:#E6A100;display:flex;align-items:center;justify-content:center;font-size:22px">%</span>
+              <div><h2 style="font-size:30px">Ofertas para socios ACA</h2><p style="color:#6E646A;font-size:14.5px;margin-top:2px">Precios exclusivos por ser parte del club</p></div>
+            </div>
+            <a onClick="{{ goCatalogo }}" style="cursor:pointer;font-weight:700;font-size:15px;padding:12px 22px;border-radius:11px;border:1px solid #D6D6DA;color:#C8102E">Ver todas las ofertas →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:24px">
+            <sc-for list="{{ ofertas }}" as="p" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;overflow:hidden;display:flex;flex-direction:column" style-hover="box-shadow:0 16px 40px -22px rgba(11,27,51,.4);border-color:#CFC6C9">
+                <a onClick="{{ p.view }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;height:170px;background:#F1F1F3;border-bottom:1px solid #E7E7EA">
+                  <span style="font-family:'Archivo';font-weight:800;font-size:18px;color:#44414A">{{ p.brand }}</span>
+                  <span style="font-size:11.5px;color:#918A8E">{{ p.cat }}</span>
+                  <sc-if value="{{ p.hasTag }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;color:#1C1B1F;background:#E6A100;padding:4px 10px;border-radius:7px">{{ p.tag }}</span></sc-if>
+                </a>
+                <div style="padding:15px 16px 16px;display:flex;flex-direction:column;flex:1">
+                  <span style="font-size:11.5px;font-weight:700;color:#918A8E">{{ p.dealerName }}</span>
+                  <a onClick="{{ p.view }}" style="cursor:pointer;font-weight:600;font-size:14.5px;line-height:1.3;margin-top:5px;display:block;min-height:38px">{{ p.name }}</a>
+                  <div style="display:flex;align-items:baseline;gap:9px;margin-top:10px">
+                    <span style="font-family:'Archivo';font-weight:800;font-size:21px;color:#C8102E">{{ p.priceMain }}</span>
+                    <sc-if value="{{ p.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">{{ p.priceOld }}</span></sc-if>
+                  </div>
+                  <sc-if value="{{ p.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:#0E8F6E;margin-top:3px">Ahorrás {{ p.disc }} con tu cuota</span></sc-if>
+                  <button onClick="{{ p.add }}" style="cursor:pointer;margin-top:14px;border:1px solid #C8102E;background:#C8102E;color:#fff;font-weight:700;font-size:14px;padding:11px;border-radius:10px">Agregar al carrito</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- CONCESIONARIOS -->
+        <section style="max-width:1280px;margin:0 auto;padding:48px 28px 8px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap">
+            <div><h2 style="font-size:30px">Concesionarios destacados</h2><p style="color:#6E646A;font-size:14.5px;margin-top:4px">Comercios ACA que ya venden online</p></div>
+            <a onClick="{{ goCatalogo }}" style="cursor:pointer;font-weight:700;font-size:15px;color:#C8102E">Ver todos →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px">
+            <sc-for list="{{ dealers }}" as="d" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:20px">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <span style="width:48px;height:48px;border-radius:13px;background:{{ d.tone }};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:17px">{{ d.initial }}</span>
+                  <div><div style="font-weight:700;font-size:16px">{{ d.name }}</div><div style="font-size:12px;color:#918A8E;margin-top:2px">★ {{ d.rating }} · {{ d.items }}</div></div>
+                </div>
+                <p style="font-size:13px;color:#6E646A;margin-top:14px">{{ d.cat }}</p>
+                <p style="font-size:12.5px;color:#918A8E;margin-top:4px">📍 {{ d.loc }}</p>
+                <a onClick="{{ goCatalogo }}" style="cursor:pointer;display:block;text-align:center;margin-top:16px;border:1px solid #D6D6DA;font-weight:700;font-size:13.5px;padding:10px;border-radius:10px;color:#C8102E">Visitar tienda</a>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- EXPOACA CERCANO -->
+        <section style="max-width:1280px;margin:0 auto;padding:48px 28px 8px">
+          <a onClick="{{ goBuscador }}" style="cursor:pointer;display:block;border-radius:22px;overflow:hidden;border:1px solid #E2E2E5;background:#fff">
+            <div style="display:grid;grid-template-columns:1.05fr .95fr;min-height:280px">
+              <div style="padding:44px 46px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(115deg,#1C1B1F,#2A2629)">
+                <span style="display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.1em;color:#E6A100;width:fit-content">📍 TIENDAS FÍSICAS</span>
+                <h2 style="font-size:36px;color:#fff;line-height:1.05;margin-top:14px;letter-spacing:-.03em">Buscá un ExpoACA<br>más cercano</h2>
+                <p style="font-size:16px;color:#CFC6C9;margin-top:12px;max-width:420px;line-height:1.55">Encontrá el local ExpoACA más próximo en el mapa, consultá horarios y llegá con Google Maps en un clic.</p>
+                <span style="margin-top:22px;width:fit-content;font-weight:700;font-size:15px;padding:14px 26px;border-radius:11px;background:#C8102E;color:#fff">Abrir el buscador con mapa →</span>
+              </div>
+              <div style="position:relative;background:#ECECEE;overflow:hidden">
+                <div style="position:absolute;inset:0;background-image:linear-gradient(#00000010 1px,transparent 1px),linear-gradient(90deg,#00000010 1px,transparent 1px);background-size:34px 34px"></div>
+                <div style="position:absolute;top:22%;left:34%;width:26px;height:26px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#C8102E;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.3)"></div>
+                <div style="position:absolute;top:46%;left:58%;width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#2A2629;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.3)"></div>
+                <div style="position:absolute;top:64%;left:40%;width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#B0631A;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.3)"></div>
+                <div style="position:absolute;top:36%;left:72%;width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#0E8F6E;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.3)"></div>
+                <div style="position:absolute;bottom:18px;right:18px;background:#fff;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;color:#1C1B1F;box-shadow:0 6px 18px -8px rgba(0,0,0,.4)">+40 locales en todo el país</div>
+              </div>
+            </div>
+          </a>
+        </section>
+
+        <!-- BENEFICIO SOCIO BANNER -->
+        <section style="max-width:1280px;margin:0 auto;padding:48px 28px">
+          <div style="background:linear-gradient(120deg,#C8102E,#1C1B1F);border-radius:22px;padding:44px 48px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:54px 54px"></div>
+            <div style="position:relative;z-index:2;max-width:560px">
+              <h2 style="font-size:32px;color:#fff;line-height:1.1">¿Todavía no sos socio del Automóvil Club Argentino?</h2>
+              <p style="font-size:16px;color:#CFC6C9;margin-top:12px;line-height:1.55">Asociate y accedé a descuentos de hasta 25% en todos los articulos.</p>
+            </div>
+            <div style="position:relative;z-index:2;display:flex;gap:12px;flex-wrap:wrap">
+              <a href="https://www.aca.org.ar/promociones/empeza-a-disfrutar-de-aca/indexas.php?idevento=373C3E&utm_source=GOOGLE&utm_medium=cpc&utm_campaign=disfruta+aca&utm_id=ASOCIACION&gad_source=1&gad_campaignid=21467502421&gbraid=0AAAAACw0_GMjpB-WNFr9-S8QxLNHeiIUy&gclid=CjwKCAjwpcTNBhA5EiwAdO1S9kwWMDI_YN0o7xr84Fo8HW0b5ZfwJxn6qAOIsffQeQk9I1LKPXGaFhoCCz4QAvD_BwE" target="_blank" rel="noopener noreferrer" style="cursor:pointer;font-weight:700;font-size:16px;padding:15px 28px;border-radius:12px;background:#E6A100;color:#1C1B1F">Asociarme ahora</a>
+              <a href="https://www.aca.org.ar/" target="_blank" rel="noopener noreferrer" style="cursor:pointer;font-weight:700;font-size:16px;padding:15px 28px;border-radius:12px;background:#ffffff26;border:1px solid #ffffff4d;color:#fff">Ver beneficios</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- MAS VENDIDOS -->
+        <section style="max-width:1280px;margin:0 auto;padding:8px 28px 72px">
+          <h2 style="font-size:30px">Lo más vendido</h2>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px">
+            <sc-for list="{{ masVendidos }}" as="p" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;overflow:hidden;display:flex;flex-direction:column" style-hover="box-shadow:0 16px 40px -22px rgba(11,27,51,.4);border-color:#CFC6C9">
+                <a onClick="{{ p.view }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;height:170px;background:#F1F1F3;border-bottom:1px solid #E7E7EA">
+                  <span style="font-family:'Archivo';font-weight:800;font-size:18px;color:#44414A">{{ p.brand }}</span>
+                  <span style="font-size:11.5px;color:#918A8E">{{ p.cat }}</span>
+                </a>
+                <div style="padding:15px 16px 16px;display:flex;flex-direction:column;flex:1">
+                  <span style="font-size:11.5px;font-weight:700;color:#918A8E">{{ p.dealerName }} · {{ p.sold }}</span>
+                  <a onClick="{{ p.view }}" style="cursor:pointer;font-weight:600;font-size:14.5px;line-height:1.3;margin-top:5px;display:block;min-height:38px">{{ p.name }}</a>
+                  <div style="display:flex;align-items:baseline;gap:9px;margin-top:10px">
+                    <span style="font-family:'Archivo';font-weight:800;font-size:21px;color:#C8102E">{{ p.priceMain }}</span>
+                    <sc-if value="{{ p.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">{{ p.priceOld }}</span></sc-if>
+                  </div>
+                  <button onClick="{{ p.add }}" style="cursor:pointer;margin-top:14px;border:1px solid #D6D6DA;background:#fff;color:#C8102E;font-weight:700;font-size:14px;padding:11px;border-radius:10px">Agregar al carrito</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </sc-if>
+    <!-- ============ CATÁLOGO ============ -->
+    <sc-if value="{{ isCatalogo }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:1280px;margin:0 auto;padding:28px 28px 72px;display:grid;grid-template-columns:248px 1fr;gap:28px;align-items:start">
+        <aside style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px;position:sticky;top:150px">
+          <h3 style="font-size:16px;margin-bottom:16px">Filtros</h3>
+          <div style="font-size:13px;font-weight:700;color:#918A8E;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px">Categoría</div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;color:#44414A">
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" checked="" style="accent-color:#C8102E;width:16px;height:16px">Accesorios para auto</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Repuestos</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Neumáticos</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Motos</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Aire libre</label>
+          </div>
+          <div style="height:1px;background:#ECECEE;margin:18px 0"></div>
+          <div style="font-size:13px;font-weight:700;color:#918A8E;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">Precio</div>
+          <div style="display:flex;gap:8px"><input placeholder="Mín" style="width:50%;padding:9px 11px;border:1px solid #D6D6DA;border-radius:9px;font-size:13.5px;outline:none"><input placeholder="Máx" style="width:50%;padding:9px 11px;border:1px solid #D6D6DA;border-radius:9px;font-size:13.5px;outline:none"></div>
+          <div style="height:1px;background:#ECECEE;margin:18px 0"></div>
+          <div style="font-size:13px;font-weight:700;color:#918A8E;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px">Concesionario</div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;color:#44414A">
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">AutoParts Pro</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">NeumaTech</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Patagonia Outdoor</label>
+          </div>
+        </aside>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px">
+            <div><h2 style="font-size:28px">Catálogo completo</h2><p style="color:#6E646A;font-size:14px;margin-top:3px">{{ productCount }} productos · precio socio aplicado</p></div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="color:#918A8E">Ordenar por</span><span style="border:1px solid #D6D6DA;border-radius:10px;padding:9px 16px;font-weight:600;cursor:pointer;background:#fff">Más vendidos ▾</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ productsAll }}" as="p" hint-placeholder-count="12">
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;overflow:hidden;display:flex;flex-direction:column" style-hover="box-shadow:0 16px 40px -22px rgba(11,27,51,.4);border-color:#CFC6C9">
+                <a onClick="{{ p.view }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;height:160px;background:#F1F1F3;border-bottom:1px solid #E7E7EA">
+                  <span style="font-family:'Archivo';font-weight:800;font-size:18px;color:#44414A">{{ p.brand }}</span>
+                  <span style="font-size:11.5px;color:#918A8E">{{ p.cat }}</span>
+                  <sc-if value="{{ p.hasTag }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;color:#1C1B1F;background:#E6A100;padding:4px 10px;border-radius:7px">{{ p.tag }}</span></sc-if>
+                  <sc-if value="{{ p.soldOut }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:#F1F1F3cc;display:flex;align-items:center;justify-content:center"><span style="font-size:12px;font-weight:800;color:#C8102E;background:#fff;border:1px solid #F2B8C1;padding:6px 14px;border-radius:8px;letter-spacing:.03em">SIN STOCK</span></span></sc-if>
+                </a>
+                <div style="padding:15px 16px 16px;display:flex;flex-direction:column;flex:1">
+                  <span style="font-size:11.5px;font-weight:700;color:#918A8E">{{ p.dealerName }} · ★ {{ p.rating }}</span>
+                  <a onClick="{{ p.view }}" style="cursor:pointer;font-weight:600;font-size:14.5px;line-height:1.3;margin-top:5px;display:block;min-height:38px">{{ p.name }}</a>
+                  <div style="display:flex;align-items:baseline;gap:9px;margin-top:10px">
+                    <span style="font-family:'Archivo';font-weight:800;font-size:20px;color:#C8102E">{{ p.priceMain }}</span>
+                    <sc-if value="{{ p.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">{{ p.priceOld }}</span></sc-if>
+                  </div>
+                  <button onClick="{{ p.add }}" style="cursor:{{ p.ctaCursor }};margin-top:14px;border:1px solid {{ p.ctaBorder }};background:{{ p.ctaBg }};color:{{ p.ctaColor }};font-weight:700;font-size:14px;padding:10px;border-radius:10px">{{ p.ctaLabel }}</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PRODUCTO (PDP) ============ -->
+    <sc-if value="{{ isProducto }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:1180px;margin:0 auto;padding:22px 28px 72px">
+        <div style="font-size:13px;color:#918A8E;margin-bottom:18px"><a onClick="{{ goCatalogo }}" style="cursor:pointer">Catálogo</a> › {{ pdp.cat }} › <span style="color:#44414A">{{ pdp.name }}</span></div>
+        <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start">
+          <div>
+            <div style="background:#F1F1F3;border:1px solid #E2E2E5;border-radius:18px;height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+              <span style="font-family:'Archivo';font-weight:800;font-size:30px;color:#44414A">{{ pdp.brand }}</span>
+              <span style="font-size:14px;color:#918A8E">{{ pdp.cat }}</span>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px">
+              <div style="width:78px;height:78px;border-radius:11px;border:2px solid #C8102E;background:#F1F1F3"></div>
+              <div style="width:78px;height:78px;border-radius:11px;border:1px solid #E2E2E5;background:#F4F4F6"></div>
+              <div style="width:78px;height:78px;border-radius:11px;border:1px solid #E2E2E5;background:#F4F4F6"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px;font-weight:700;color:#C8102E;background:#FBE9EC;padding:4px 11px;border-radius:7px">{{ pdp.dealerName }}</span>
+              <span style="font-size:13px;color:#918A8E">★ {{ pdp.rating }} · {{ pdp.sold }}</span>
+            </div>
+            <h1 style="font-size:32px;margin-top:14px;line-height:1.1">{{ pdp.name }}</h1>
+            <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px;margin-top:22px">
+              <div style="display:flex;align-items:baseline;gap:12px">
+                <span style="font-family:'Archivo';font-weight:900;font-size:36px;color:#C8102E">{{ pdp.priceMain }}</span>
+                <sc-if value="{{ pdp.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:18px;color:#ADA6AA;text-decoration:line-through">{{ pdp.priceOld }}</span></sc-if>
+              </div>
+              <sc-if value="{{ pdp.showOld }}" hint-placeholder-val="{{ false }}">
+                <div style="display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:#E3F6EE;color:#0B7A55;font-weight:700;font-size:13px;padding:7px 12px;border-radius:9px"><span style="width:7px;height:7px;border-radius:50%;background:#0E8F6E"></span>Precio socio ACA · ahorrás {{ pdp.disc }}</div>
+              </sc-if>
+              <div style="display:flex;gap:18px;margin-top:18px;font-size:13.5px;color:#6E646A">
+                <span>✓ Envío a todo el país</span><span>✓ Garantía oficial</span><span>✓ Retiro en estación ACA</span>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:20px">
+                <button onClick="{{ pdpBuy }}" style="flex:1;cursor:pointer;border:none;background:#25D366;color:#fff;font-weight:700;font-size:16px;padding:15px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:9px"><span style="font-size:19px">✆</span>Comprar por WhatsApp</button>
+                <button onClick="{{ pdp.add }}" style="flex:none;cursor:pointer;border:1px solid #C8102E;background:#fff;color:#C8102E;font-weight:700;font-size:16px;padding:15px 22px;border-radius:12px">+ Carrito</button>
+              </div>
+              <div style="font-size:12.5px;color:#918A8E;margin-top:10px;text-align:center">Coordinás la compra directo con {{ pdp.dealerName }} por WhatsApp</div>
+            </div>
+            <div style="margin-top:22px">
+              <h3 style="font-size:17px;margin-bottom:10px">Descripción</h3>
+              <p style="font-size:15px;color:#44414A;line-height:1.65">Producto original con garantía oficial, disponible para compra online a través del concesionario {{ pdp.dealerName }}, comercio adherido a la red ExpoACA. Los socios del Automóvil Club acceden a precio preferencial y financiación en cuotas.</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:44px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+            <h2 style="font-size:24px">Comparar precios en otros ExpoACA</h2>
+            <span style="font-size:12px;font-weight:700;color:#0B7A55;background:#E3F6EE;padding:4px 11px;border-radius:100px">Mismo artículo</span>
+          </div>
+          <p style="font-size:14px;color:#6E646A;margin-bottom:18px">El mismo producto ofrecido por distintos concesionarios de la red. Elegí el mejor precio y comprá directo por WhatsApp.</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ pdpCompare }}" as="o" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:18px;background:{{ o.rowBg }};border:1.5px solid {{ o.rowBorder }};border-radius:14px;padding:16px 20px;flex-wrap:wrap">
+                <span style="width:46px;height:46px;border-radius:12px;background:{{ o.tone }};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:16px;flex:none">{{ o.initial }}</span>
+                <div style="flex:1;min-width:150px">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span style="font-weight:700;font-size:16px">{{ o.displayName }}</span><sc-if value="{{ o.isCurrent }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:#C8102E;background:#FBE9EC;padding:3px 9px;border-radius:6px">Estás viendo este</span></sc-if></div>
+                  <div style="font-size:13px;color:#918A8E;margin-top:3px">📍 {{ o.loc }} · ★ {{ o.rating }}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end">
+                    <span style="font-family:'Archivo';font-weight:800;font-size:22px;color:#C8102E">{{ o.priceLabel }}</span>
+                    <sc-if value="{{ o.showOld }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">{{ o.listLabel }}</span></sc-if>
+                  </div>
+                  <span style="font-size:11.5px;font-weight:700;color:{{ o.badgeColor }};background:{{ o.badgeBg }};padding:3px 10px;border-radius:100px;display:inline-block;margin-top:5px">{{ o.diffLabel }}</span>
+                </div>
+                <button onClick="{{ o.buy }}" style="flex:none;cursor:pointer;border:none;background:#25D366;color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:10px;display:flex;align-items:center;gap:7px"><span style="font-size:16px">✆</span>Comprar</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:48px">
+          <h2 style="font-size:24px;margin-bottom:20px">También te puede interesar</h2>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ related }}" as="p" hint-placeholder-count="3">
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;overflow:hidden;display:flex;flex-direction:column" style-hover="box-shadow:0 16px 40px -22px rgba(11,27,51,.4)">
+                <a onClick="{{ p.view }}" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:150px;background:#F1F1F3;border-bottom:1px solid #E7E7EA"><span style="font-family:'Archivo';font-weight:800;font-size:16px;color:#44414A">{{ p.brand }}</span><span style="font-size:11px;color:#918A8E">{{ p.cat }}</span></a>
+                <div style="padding:15px 16px;display:flex;flex-direction:column;flex:1">
+                  <span style="font-size:11.5px;font-weight:700;color:#918A8E">{{ p.dealerName }}</span>
+                  <a onClick="{{ p.view }}" style="cursor:pointer;font-weight:600;font-size:14px;line-height:1.3;margin-top:5px;min-height:36px">{{ p.name }}</a>
+                  <span style="font-family:'Archivo';font-weight:800;font-size:19px;color:#C8102E;margin-top:8px">{{ p.priceMain }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ CARRITO ============ -->
+    <sc-if value="{{ isCarrito }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:1180px;margin:0 auto;padding:28px 28px 72px">
+        <h1 style="font-size:32px">Tu carrito</h1>
+        <sc-if value="{{ hasCartItems }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:1.6fr .9fr;gap:28px;align-items:start;margin-top:24px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ cartView }}" as="c" hint-placeholder-count="2">
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:18px;display:flex;gap:18px;align-items:center">
+                  <div style="width:90px;height:90px;border-radius:12px;background:#F1F1F3;border:1px solid #E7E7EA;flex:none;display:flex;align-items:center;justify-content:center"><span style="font-family:'Archivo';font-weight:800;font-size:13px;color:#44414A">{{ c.brand }}</span></div>
+                  <div style="flex:1">
+                    <span style="font-size:11.5px;font-weight:700;color:#918A8E">{{ c.dealer }}</span>
+                    <h3 style="font-size:16.5px;margin-top:3px;line-height:1.25">{{ c.name }}</h3>
+                    <div style="font-size:13px;color:#6E646A;margin-top:5px">{{ c.unitLabel }} c/u</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <button onClick="{{ c.dec }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #D6D6DA;background:#fff;cursor:pointer;font-size:17px;color:#C8102E;font-weight:700">−</button>
+                      <span style="font-family:'Archivo';font-weight:800;font-size:17px;min-width:22px;text-align:center">{{ c.qty }}</span>
+                      <button onClick="{{ c.inc }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #C8102E;background:#C8102E;color:#fff;cursor:pointer;font-size:17px;font-weight:700">+</button>
+                    </div>
+                    <span style="font-family:'Archivo';font-weight:800;font-size:18px;color:#1C1B1F">{{ c.lineLabel }}</span>
+                    <button onClick="{{ c.remove }}" style="border:none;background:none;cursor:pointer;font-size:12.5px;color:#C0392B;font-weight:600">Quitar</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="position:sticky;top:150px;background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+              <h3 style="font-size:18px;margin-bottom:18px">Resumen de compra</h3>
+              <div style="display:flex;justify-content:space-between;font-size:14.5px;color:#44414A;margin-bottom:11px"><span>Subtotal</span><span>{{ subtotalLabel }}</span></div>
+              <sc-if value="{{ showAhorro }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;font-size:14.5px;color:#0E8F6E;font-weight:700;margin-bottom:11px"><span>Descuento socio ACA</span><span>− {{ ahorroLabel }}</span></div></sc-if>
+              <div style="display:flex;justify-content:space-between;font-size:14.5px;color:#44414A;margin-bottom:11px"><span>Envío</span><span>{{ envioLabel }}</span></div>
+              <div style="height:1px;background:#E2E2E5;margin:16px 0"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;font-size:16px">Total</span><span style="font-family:'Archivo';font-weight:900;font-size:28px;color:#C8102E">{{ totalLabel }}</span></div>
+              <button style="width:100%;border:none;cursor:pointer;margin-top:18px;padding:15px;border-radius:12px;background:#C8102E;color:#fff;font-weight:700;font-size:16px">Finalizar compra</button>
+              <button onClick="{{ goCatalogo }}" style="width:100%;border:none;background:none;cursor:pointer;margin-top:10px;color:#C8102E;font-weight:700;font-size:14px">Seguir comprando</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasCartItems }}" hint-placeholder-val="{{ false }}"></sc-if>
+        <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border:1px solid #E2E2E5;border-radius:18px;padding:60px;text-align:center;margin-top:24px">
+            <div style="font-size:44px">🛒</div>
+            <h3 style="font-size:22px;margin-top:14px">Tu carrito está vacío</h3>
+            <p style="color:#6E646A;font-size:15px;margin-top:8px">Descubrí miles de productos con precio de socio.</p>
+            <a onClick="{{ goCatalogo }}" style="cursor:pointer;display:inline-block;margin-top:20px;background:#C8102E;color:#fff;font-weight:700;font-size:15px;padding:13px 26px;border-radius:11px">Explorar catálogo</a>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ============ REGISTRO / LOGIN ============ -->
+    <sc-if value="{{ isRegistro }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 152px)">
+        <div style="background:radial-gradient(120% 120% at 20% 10%,#C8102E 0%,#1C1B1F 60%,#141316 100%);color:#fff;padding:60px 56px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:54px 54px"></div>
+          <div style="position:relative;max-width:420px">
+            <span style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:100px;background:#ffffff14;border:1px solid #ffffff22;font-size:13px;font-weight:600">Cuenta ExpoACA</span>
+            <h2 style="font-size:40px;line-height:1.05;margin-top:20px;color:#fff">Comprá con<br>precio de socio</h2>
+            <p style="color:#CFC6C9;font-size:16px;line-height:1.6;margin-top:16px">Ingresá con tu credencial del Automóvil Club y accedé a descuentos exclusivos en todo el marketplace.</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:30px">
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">%</span>Hasta 25% de descuento como socio</span>
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">↻</span>Seguimiento de pedidos y devoluciones</span>
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">♡</span>Favoritos y financiación exclusiva</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:56px 40px;background:#fff">
+          <div style="width:100%;max-width:400px">
+            <div style="display:flex;background:#ECECEE;border-radius:12px;padding:5px;gap:4px">
+              <button onClick="{{ setLogin }}" style="flex:1;border:none;cursor:pointer;padding:11px;border-radius:9px;font-weight:700;font-size:14.5px;background:{{ logTabBg }};color:{{ logTabColor }};box-shadow:{{ logTabSh }}">Ingresar</button>
+              <button onClick="{{ setReg }}" style="flex:1;border:none;cursor:pointer;padding:11px;border-radius:9px;font-weight:700;font-size:14.5px;background:{{ regTabBg }};color:{{ regTabColor }};box-shadow:{{ regTabSh }}">Crear cuenta</button>
+            </div>
+            <h3 style="font-size:26px;margin-top:28px">{{ authTitle }}</h3>
+            <p style="color:#6E646A;font-size:14.5px;margin-top:6px">{{ authSub }}</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px">
+              <sc-if value="{{ authReg }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Nombre</span><input placeholder="Juan" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Apellido</span><input placeholder="Pérez" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                </div>
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">N° de socio ACA <span style="color:#918A8E;font-weight:400">(opcional)</span></span><input placeholder="Ej: 024198" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              </sc-if>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Email</span><input placeholder="tu@email.com" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Contraseña</span><input type="password" placeholder="••••••••" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <button onClick="{{ goHome }}" style="border:none;cursor:pointer;margin-top:6px;padding:14px;border-radius:11px;background:#C8102E;color:#fff;font-weight:700;font-size:15.5px">{{ authCta }}</button>
+              <div style="display:flex;align-items:center;gap:12px;margin:6px 0"><span style="flex:1;height:1px;background:#E2E2E5"></span><span style="font-size:12.5px;color:#918A8E">o</span><span style="flex:1;height:1px;background:#E2E2E5"></span></div>
+              <button style="border:1px solid #D6D6DA;background:#fff;cursor:pointer;padding:12px;border-radius:10px;font-weight:600;font-size:14.5px;color:#44414A">Ingresar con credencial ACA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ CONCESIONARIO · LOGIN ============ -->
+    <sc-if value="{{ isConcLogin }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 152px)">
+        <div style="background:radial-gradient(120% 120% at 20% 10%,#2A2629 0%,#1C1B1F 60%,#141316 100%);color:#fff;padding:60px 56px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:54px 54px"></div>
+          <div style="position:relative;max-width:430px">
+            <span style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:100px;background:#ffffff14;border:1px solid #ffffff22;font-size:13px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#E6A100"></span>Acceso exclusivo</span>
+            <h2 style="font-size:40px;line-height:1.05;margin-top:20px;color:#fff">Portal de<br>Concesionarios</h2>
+            <p style="color:#CFC6C9;font-size:16px;line-height:1.6;margin-top:16px">Espacio privado para los comercios adheridos a ExpoACA. Gestioná tus productos, ofertas del día, pedidos y KPIs de venta desde un solo lugar.</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:30px">
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">▦</span>Publicá y administrá tu catálogo</span>
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">%</span>Elegí qué productos van en oferta del día</span>
+              <span style="display:flex;align-items:center;gap:12px;font-size:15px"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff14;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800">📊</span>Seguí tus ventas y pedidos en vivo</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:56px 40px;background:#fff">
+          <div style="width:100%;max-width:400px">
+            <h3 style="font-size:26px">Ingresá a tu portal</h3>
+            <p style="color:#6E646A;font-size:14.5px;margin-top:6px">Usá el usuario y contraseña que te asignó ACA.</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px">
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Cuenta demo</span>
+                <select onChange="{{ setDealerAccount }}" value="{{ dealerId }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none;background:#fff">
+                  <sc-for list="{{ acctOptions }}" as="a" hint-placeholder-count="3"><option value="{{ a.id }}">{{ a.name }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Usuario</span><input placeholder="Ej: autopartspro" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Contraseña</span><input type="password" placeholder="••••••••" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
+                <label style="display:flex;align-items:center;gap:8px;color:#44414A;cursor:pointer"><input type="checkbox" style="accent-color:#C8102E;width:16px;height:16px">Recordarme</label>
+                <a style="color:#C8102E;font-weight:600;cursor:pointer">¿Olvidaste tu contraseña?</a>
+              </div>
+              <button onClick="{{ doDealerLogin }}" style="border:none;cursor:pointer;margin-top:4px;padding:14px;border-radius:11px;background:#C8102E;color:#fff;font-weight:700;font-size:15.5px;box-shadow:0 10px 26px -10px rgba(200,16,46,.6)">Ingresar a mi portal →</button>
+              <div style="font-size:12px;color:#918A8E;text-align:center">Demo: cualquier usuario y contraseña ingresa al portal</div>
+            </div>
+            <div style="border-top:1px solid #ECECEE;margin-top:26px;padding-top:22px;text-align:center">
+              <p style="font-size:14px;color:#6E646A">¿Todavía no sos parte de ExpoACA?</p>
+              <button onClick="{{ goConcAlta }}" style="width:100%;margin-top:12px;border:1.5px solid #1C1B1F;background:#fff;cursor:pointer;padding:13px;border-radius:11px;color:#1C1B1F;font-weight:700;font-size:15px">Quiero ser concesionario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ CONCESIONARIO · ALTA ============ -->
+    <sc-if value="{{ isConcAlta }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="background:linear-gradient(115deg,#1C1B1F,#2A2629);color:#fff;padding:44px 28px 38px">
+          <div style="max-width:900px;margin:0 auto">
+            <a onClick="{{ goConcLogin }}" style="cursor:pointer;font-size:14px;color:#B3ABAE;font-weight:600">← Volver al ingreso</a>
+            <span style="display:block;margin-top:14px;font-family:'Archivo';font-weight:800;font-size:13px;color:#E6A100;letter-spacing:.08em;text-transform:uppercase">Sumate a la red</span>
+            <h1 style="font-size:38px;color:#fff;margin-top:8px">Quiero ser concesionario</h1>
+            <p style="color:#B3ABAE;font-size:16px;margin-top:10px;max-width:560px">Completá tus datos y el equipo de ExpoACA se contactará para darte de alta y entregarte tu usuario de acceso al portal.</p>
+          </div>
+        </div>
+        <div style="max-width:900px;margin:0 auto;padding:32px 28px 72px">
+          <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:28px">
+            <h3 style="font-size:18px;margin-bottom:18px">Datos del comercio</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Razón social / nombre comercial</span><input placeholder="Ej: AutoParts Pro S.A." style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">CUIT</span><input placeholder="30-00000000-0" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Estación de servicio ACA asociada</span><input placeholder="Ej: Estación ACA Palermo" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Rubro principal</span><select style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none;background:#fff"><option>Accesorios para auto</option><option>Repuestos</option><option>Neumáticos</option><option>Lubricantes</option><option>Motos</option><option>Audio y tecnología</option><option>Vida al aire libre</option></select></label>
+            </div>
+            <h3 style="font-size:18px;margin:26px 0 18px">Datos de contacto</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Nombre y apellido</span><input placeholder="Responsable de la cuenta" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Teléfono</span><input placeholder="+54 11 0000-0000" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <label style="display:block;grid-column:span 2"><span style="font-size:13px;font-weight:600;color:#44414A">Email</span><input placeholder="ventas@tucomercio.com" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:26px;flex-wrap:wrap">
+              <button onClick="{{ submitAlta }}" style="border:none;cursor:pointer;padding:14px 28px;border-radius:11px;background:#C8102E;color:#fff;font-weight:700;font-size:15.5px">Enviar solicitud</button>
+              <button onClick="{{ goConcLogin }}" style="border:1px solid #D6D6DA;background:#fff;cursor:pointer;padding:14px 24px;border-radius:11px;color:#44414A;font-weight:700;font-size:15px">Ya tengo cuenta</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PANEL CONCESIONARIO ============ -->
+    <sc-if value="{{ isConcesionario }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 152px)">
+        <aside style="background:#1C1B1F;color:#B3ABAE;padding:26px 18px">
+          <div style="display:flex;align-items:center;gap:11px;padding:0 8px 18px">
+            <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:15px">{{ acctInitial }}</span>
+            <div><div style="color:#fff;font-weight:700;font-size:14.5px">{{ acctName }}</div><div style="font-size:11.5px;color:#918A8E">{{ acctRubro }}</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button onClick="{{ goResumen }}" style="{{ navResumenStyle }}">▣ Resumen</button>
+            <button onClick="{{ goProductos }}" style="{{ navProductosStyle }}">▦ Mis productos</button>
+            <button onClick="{{ goPedidos }}" style="{{ navPedidosStyle }}">🧾 Pedidos</button>
+            <button onClick="{{ goPerfil }}" style="{{ navPerfilStyle }}">🏪 Perfil del expo</button>
+            <span style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:14.5px;color:#6E646A">📊 Estadísticas</span>
+            <span style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:14.5px;color:#6E646A">⚙ Configuración</span>
+          </div>
+          <button onClick="{{ dealerLogout }}" style="margin-top:22px;width:100%;border:1px solid #ffffff26;background:#ffffff0d;color:#CFC6C9;cursor:pointer;padding:11px 12px;border-radius:10px;font-size:14px;font-weight:600;text-align:left">⏻ Cerrar sesión</button>
+        </aside>
+        <div style="background:#ECECEE;padding:30px 36px;overflow-y:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+            <div><h2 style="font-size:28px">Hola, {{ acctName }} 👋</h2><p style="color:#6E646A;font-size:14px;margin-top:3px">Este portal muestra sólo tus productos y pedidos · actualizado hace 5 min</p></div>
+            <button onClick="{{ openCreate }}" style="border:none;cursor:pointer;background:#C8102E;color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:11px">+ Publicar artículo</button>
+          </div>
+
+          <!-- ALERTAS DE STOCK -->
+          <sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #F2B8C1;border-left:4px solid #C8102E;border-radius:14px;padding:16px 18px;margin-top:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">🔔</span><h3 style="font-size:16px">Alertas de stock</h3><span style="font-size:12px;font-weight:700;color:#C8102E;background:#FBE9EC;padding:3px 10px;border-radius:100px">{{ alertCount }}</span></div>
+                <button onClick="{{ goProductos }}" style="border:none;background:transparent;cursor:pointer;color:#C8102E;font-weight:700;font-size:13.5px">Gestionar stock →</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                <sc-for list="{{ stockAlerts }}" as="a" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 13px;background:{{ a.bg }};border-radius:10px">
+                    <span style="font-size:15px">{{ a.icon }}</span>
+                    <span style="flex:1;font-size:14px;font-weight:600;color:#44414A">{{ a.name }}</span>
+                    <span style="font-size:12.5px;font-weight:700;color:{{ a.color }}">{{ a.msg }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TAB: RESUMEN -->
+          <sc-if value="{{ tabResumen }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px">
+                <sc-for list="{{ dealerKpis }}" as="k" hint-placeholder-count="4">
+                  <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:20px">
+                    <div style="font-size:13px;color:#918A8E;font-weight:600">{{ k.label }}</div>
+                    <div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:8px">{{ k.n }}</div>
+                    <div style="font-size:12.5px;font-weight:700;margin-top:8px;color:{{ k.deltaColor }}">{{ k.delta }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:18px;align-items:start">
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px">
+                  <h3 style="font-size:18px">Ventas · últimas 8 semanas</h3>
+                  <div style="display:flex;align-items:flex-end;gap:12px;height:170px;margin-top:22px">
+                    <sc-for list="{{ dealerBars }}" as="b" hint-placeholder-count="8">
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="{{ b.style }}"></div></div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px">
+                  <h3 style="font-size:18px;margin-bottom:18px">Tus productos más vendidos</h3>
+                  <div style="display:flex;flex-direction:column;gap:16px">
+                    <sc-for list="{{ dealerTop }}" as="t" hint-placeholder-count="3">
+                      <div>
+                        <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px"><span style="font-weight:600;color:#44414A">{{ t.name }}</span><span style="color:#918A8E">{{ t.units }}</span></div>
+                        <div style="height:8px;background:#ECECEE;border-radius:100px;overflow:hidden"><div style="width:{{ t.pct }}%;height:100%;background:{{ t.tone }};border-radius:100px"></div></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px;margin-top:18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3 style="font-size:18px">Pedidos recientes</h3><a onClick="{{ goPedidos }}" style="font-size:13.5px;font-weight:700;color:#C8102E;cursor:pointer">Gestionar pedidos →</a></div>
+                <div style="display:grid;grid-template-columns:1fr 1.6fr 1fr .8fr 1fr 1.1fr;gap:12px;padding:0 4px 12px;border-bottom:1px solid #ECECEE;font-size:12px;font-weight:700;color:#918A8E;letter-spacing:.04em;text-transform:uppercase"><span>Pedido</span><span>Cliente</span><span>Tipo</span><span>Ítems</span><span>Total</span><span>Estado</span></div>
+                <sc-for list="{{ dealerOrders }}" as="o" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:1fr 1.6fr 1fr .8fr 1fr 1.1fr;gap:12px;padding:14px 4px;border-bottom:1px solid #F4F6FB;align-items:center;font-size:14px">
+                    <span style="font-weight:700;color:#C8102E">{{ o.id }}</span>
+                    <span style="font-weight:600">{{ o.cliente }}</span>
+                    <span style="color:#6E646A">{{ o.tipo }}</span>
+                    <span style="color:#6E646A">{{ o.items }}</span>
+                    <span style="font-weight:700">{{ o.total }}</span>
+                    <span><span style="font-size:11.5px;font-weight:700;color:{{ o.color }};background:{{ o.bg }};padding:4px 10px;border-radius:7px">{{ o.estado }}</span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TAB: MIS PRODUCTOS -->
+          <sc-if value="{{ tabProductos }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px;margin-top:24px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                  <div><h3 style="font-size:18px">Mis productos y stock</h3><p style="font-size:13px;color:#6E646A;margin-top:2px">Ajustá el stock disponible de cada artículo</p></div>
+                  <button onClick="{{ openCreate }}" style="border:1px solid #C8102E;background:#fff;color:#C8102E;cursor:pointer;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:10px">+ Nuevo artículo</button>
+                </div>
+                <div style="display:grid;grid-template-columns:2.2fr .9fr .9fr 1.2fr 1.1fr;gap:12px;padding:12px 4px;border-bottom:1px solid #ECECEE;font-size:12px;font-weight:700;color:#918A8E;letter-spacing:.04em;text-transform:uppercase"><span>Producto</span><span>Precio socio</span><span>Estado</span><span style="text-align:center">Stock</span><span style="text-align:center">Acciones</span></div>
+                <sc-for list="{{ dealerCatalog }}" as="p" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:2.2fr .9fr .9fr 1.2fr 1.1fr;gap:12px;padding:14px 4px;border-bottom:1px solid #F4F6FB;align-items:center;font-size:14px;opacity:{{ p.rowOpacity }}">
+                    <div><div style="font-weight:600">{{ p.name }}</div><div style="font-size:12px;color:#918A8E;margin-top:2px">{{ p.brand }} · {{ p.cat }}</div></div>
+                    <span style="font-weight:700;color:#C8102E">{{ p.priceLabel }}</span>
+                    <span><span style="font-size:11.5px;font-weight:700;color:{{ p.statusColor }};background:{{ p.statusBg }};padding:4px 10px;border-radius:7px">{{ p.statusLabel }}</span></span>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+                      <button onClick="{{ p.dec }}" style="width:30px;height:30px;border-radius:9px;border:1px solid #D6D6DA;background:#fff;cursor:pointer;font-size:16px;color:#C8102E;font-weight:700">−</button>
+                      <span style="font-family:'Archivo';font-weight:800;font-size:16px;min-width:30px;text-align:center">{{ p.stock }}</span>
+                      <button onClick="{{ p.inc }}" style="width:30px;height:30px;border-radius:9px;border:1px solid #C8102E;background:#C8102E;color:#fff;cursor:pointer;font-size:16px;font-weight:700">+</button>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                      <button onClick="{{ p.edit }}" title="Editar" style="width:34px;height:34px;border-radius:9px;border:1px solid #D6D6DA;background:#fff;cursor:pointer;font-size:14px">✎</button>
+                      <button onClick="{{ p.pause }}" title="{{ p.pauseLabel }}" style="padding:0 11px;height:34px;border-radius:9px;border:1px solid #D6D6DA;background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:#44414A">{{ p.pauseLabel }}</button>
+                      <button onClick="{{ p.remove }}" title="Eliminar" style="width:34px;height:34px;border-radius:9px;border:1px solid #F2B8C1;background:#FBE9EC;color:#C8102E;cursor:pointer;font-size:14px">🗑</button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ hasRemoved }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#FAFAFB;border:1px dashed #D6D6DA;border-radius:14px;padding:16px 18px;margin-top:14px">
+                  <div style="font-size:13px;font-weight:700;color:#6E646A;margin-bottom:10px">🗑 Productos eliminados</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ removedList }}" as="r" hint-placeholder-count="1">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;background:#fff;border:1px solid #E2E2E5;border-radius:9px">
+                        <span style="font-size:14px;color:#918A8E;text-decoration:line-through">{{ r.name }}</span>
+                        <button onClick="{{ r.restore }}" style="border:1px solid #D6D6DA;background:#fff;cursor:pointer;font-size:12.5px;font-weight:700;color:#C8102E;padding:7px 13px;border-radius:8px">Restaurar</button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px;margin-top:18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px">⚡</span>
+                    <div><h3 style="font-size:18px">Ofertas del día</h3><p style="font-size:13px;color:#6E646A;margin-top:1px">Elegí qué productos mostrar en el slider de ofertas del marketplace</p></div>
+                  </div>
+                  <span style="font-size:13px;font-weight:700;color:#C8102E;background:#FBE9EC;padding:7px 14px;border-radius:9px">{{ dealerDealCount }} activas hoy</span>
+                </div>
+                <div style="display:flex;flex-direction:column;margin-top:10px">
+                  <sc-for list="{{ dealerProducts }}" as="p" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;border:1px solid {{ p.rowBorder }};background:{{ p.rowBg }};border-radius:13px;margin-top:10px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font-weight:600;font-size:15px">{{ p.name }}</div>
+                        <div style="font-size:12.5px;color:#918A8E;margin-top:2px">{{ p.cat }}</div>
+                      </div>
+                      <div style="text-align:right;flex:none">
+                        <div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end">
+                          <span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">{{ p.listLabel }}</span>
+                          <span style="font-family:'Archivo';font-weight:800;font-size:17px;color:#C8102E">{{ p.socioLabel }}</span>
+                        </div>
+                        <span style="font-size:11.5px;font-weight:700;color:#0E8F6E">precio socio {{ p.discLabel }}</span>
+                      </div>
+                      <div style="flex:none;width:120px;text-align:center">
+                        <button onClick="{{ p.toggle }}" style="position:relative;width:46px;height:26px;border-radius:100px;border:none;cursor:pointer;background:{{ p.switchBg }};transition:background .2s">
+                          <span style="{{ p.knobStyle }}"></span>
+                        </button>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;color:{{ p.statusColor }}">{{ p.statusLabel }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TAB: PEDIDOS -->
+          <sc-if value="{{ tabPedidos }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ dealerOrders }}" as="o" hint-placeholder-count="4">
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:20px 22px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+                    <div style="display:flex;align-items:center;gap:16px">
+                      <span style="font-family:'Archivo';font-weight:800;font-size:17px;color:#C8102E">{{ o.id }}</span>
+                      <div><div style="font-weight:700;font-size:15px">{{ o.cliente }}</div><div style="font-size:12.5px;color:#918A8E;margin-top:2px">{{ o.tipo }} · {{ o.items }} · {{ o.total }}</div></div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:14px">
+                      <span style="font-size:12px;font-weight:700;color:{{ o.color }};background:{{ o.bg }};padding:5px 12px;border-radius:8px">{{ o.estado }}</span>
+                      <sc-if value="{{ o.canAdvance }}" hint-placeholder-val="{{ true }}"><button onClick="{{ o.advance }}" style="border:none;cursor:pointer;background:#1C1B1F;color:#fff;font-weight:700;font-size:13px;padding:10px 16px;border-radius:9px">{{ o.advanceLabel }} →</button></sc-if>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:0;margin-top:18px">
+                    <sc-for list="{{ o.steps }}" as="s" hint-placeholder-count="4">
+                      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative">
+                        <span style="width:15px;height:15px;border-radius:50%;background:{{ s.dotBg }};border:2px solid #fff;box-shadow:0 0 0 1px {{ s.dotBg }}"></span>
+                        <span style="font-size:11.5px;font-weight:600;color:{{ s.txt }}">{{ s.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- TAB: PERFIL -->
+          <sc-if value="{{ tabPerfil }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:24px;display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:18px">
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+                  <h3 style="font-size:17px;margin-bottom:4px">Datos del concesionario</h3>
+                  <p style="font-size:13px;color:#6E646A;margin-bottom:16px">Esta información identifica a tu ExpoACA dentro del portal.</p>
+                  <label style="display:block;margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:#44414A">Razón social / nombre comercial</span><input value="{{ prof.razon }}" onChange="{{ setPName }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">ExpoACA / sede</span><input value="{{ prof.expo }}" onChange="{{ setPExpo }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">CUIT</span><input value="{{ prof.cuit }}" onChange="{{ setPCuit }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  </div>
+                  <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Rubro principal</span><input value="{{ prof.rubro }}" onChange="{{ setPRubro }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                </div>
+
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+                  <h3 style="font-size:17px;margin-bottom:4px">Contacto y ventas</h3>
+                  <p style="font-size:13px;color:#6E646A;margin-bottom:16px">El teléfono se usa como <strong>WhatsApp</strong> para que los socios coordinen la compra con vos.</p>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#0B7A55">Teléfono / WhatsApp</span><input value="{{ prof.tel }}" onChange="{{ setPTel }}" placeholder="+54 9 11 0000-0000" style="width:100%;margin-top:6px;padding:12px 14px;border:1.5px solid #25D366;border-radius:10px;font-size:15px;outline:none"></label>
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Email</span><input value="{{ prof.email }}" onChange="{{ setPEmail }}" placeholder="ventas@tucomercio.com" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Dirección</span><input value="{{ prof.dir }}" onChange="{{ setPDir }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                    <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Horario de atención</span><input value="{{ prof.horario }}" onChange="{{ setPHorario }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  </div>
+                </div>
+
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><span style="font-size:18px">📍</span><h3 style="font-size:17px">Ubicación en Google Maps</h3></div>
+                  <p style="font-size:13px;color:#6E646A;margin-bottom:14px">Pegá el <strong>link del pin</strong> de tu local en Google Maps. Se usa en el buscador "Encontrá tu ExpoACA más cercano" para mostrarte en el mapa y guiar a los socios.</p>
+                  <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Link del pin de Google Maps</span><input value="{{ prof.mapLink }}" onChange="{{ setPMapLink }}" placeholder="https://maps.app.goo.gl/…  o  https://www.google.com/maps?q=…" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:14px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                  <sc-if value="{{ prof.mapLink }}" hint-placeholder-val="{{ false }}">
+                    <a href="{{ prof.mapLink }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:13.5px;font-weight:700;color:#C8102E;cursor:pointer">🔗 Probar el enlace del pin</a>
+                  </sc-if>
+                  <div style="font-size:12px;color:#918A8E;margin-top:10px;line-height:1.5">Tip: en Google Maps buscá tu local → <strong>Compartir</strong> → copiá el enlace y pegalo acá. El botón "Cómo llegar" abrirá este pin exacto. El mapa del buscador ubica tu local por tu <strong>nombre + dirección</strong>, así que completá bien la dirección.</div>
+                </div>
+
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+                  <h3 style="font-size:17px;margin-bottom:12px">Descripción del comercio</h3>
+                  <textarea value="{{ prof.desc }}" onChange="{{ setPDesc }}" placeholder="Contá brevemente qué ofrece tu ExpoACA…" style="width:100%;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none;min-height:90px;resize:vertical;font-family:'Public Sans'" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></textarea>
+                </div>
+
+                <button onClick="{{ saveProfile }}" style="align-self:flex-start;border:none;cursor:pointer;background:#C8102E;color:#fff;font-weight:700;font-size:15.5px;padding:14px 30px;border-radius:12px">Guardar cambios</button>
+              </div>
+
+              <div style="position:sticky;top:150px;display:flex;flex-direction:column;gap:16px">
+                <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px">
+                  <h3 style="font-size:15px;margin-bottom:14px">Vista pública en el marketplace</h3>
+                  <div style="display:flex;align-items:center;gap:13px">
+                    <span style="width:52px;height:52px;border-radius:13px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">{{ acctInitial }}</span>
+                    <div><div style="font-weight:700;font-size:16px">{{ prof.razon }}</div><div style="font-size:12.5px;color:#918A8E;margin-top:2px">📍 {{ prof.expo }}</div></div>
+                  </div>
+                  <div style="height:1px;background:#ECECEE;margin:16px 0"></div>
+                  <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:#44414A">
+                    <div style="display:flex;gap:8px"><span style="color:#918A8E;min-width:70px">Rubro</span><span style="font-weight:600">{{ prof.rubro }}</span></div>
+                    <div style="display:flex;gap:8px"><span style="color:#918A8E;min-width:70px">Horario</span><span style="font-weight:600">{{ prof.horario }}</span></div>
+                    <div style="display:flex;gap:8px"><span style="color:#918A8E;min-width:70px">Email</span><span style="font-weight:600">{{ prof.email }}</span></div>
+                  </div>
+                </div>
+                <div style="background:#E9F9EF;border:1px solid #B7E6C9;border-radius:16px;padding:20px">
+                  <div style="display:flex;align-items:center;gap:9px"><span style="font-size:20px">✆</span><h3 style="font-size:15px;color:#0B7A55">WhatsApp de compras</h3></div>
+                  <p style="font-size:13px;color:#3B7A5C;margin-top:8px;line-height:1.5">Los socios te contactarán a este número desde cada producto:</p>
+                  <div style="font-family:'Archivo';font-weight:800;font-size:19px;color:#0B7A55;margin-top:8px">{{ profWaPreview }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PUBLICAR ARTÍCULO ============ -->
+    <sc-if value="{{ isPublicar }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:980px;margin:0 auto;padding:28px 28px 72px">
+        <a onClick="{{ goConcesionario }}" style="cursor:pointer;font-size:14px;color:#6E646A;font-weight:600">← Volver al panel</a>
+        <h1 style="font-size:32px;margin-top:14px">{{ pubTitle }}</h1>
+        <p style="color:#6E646A;font-size:15px;margin-top:6px">{{ pubSubtitle }}</p>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px;margin-top:28px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+              <h3 style="font-size:17px;margin-bottom:16px">Información del producto</h3>
+              <label style="display:block;margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:#44414A">Nombre del artículo</span><input value="{{ form.name }}" onChange="{{ setFormName }}" placeholder="Ej: Aceite Motul 5W30 sintético 4L" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Categoría</span><select value="{{ form.cat }}" onChange="{{ setFormCat }}" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none;background:#fff"><option>Accesorios</option><option>Repuestos</option><option>Neumáticos</option><option>Lubricantes</option><option>Motos</option><option>Audio</option><option>Aire libre</option><option>Indumentaria</option></select></label>
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Marca</span><input value="{{ form.brand }}" onChange="{{ setFormBrand }}" placeholder="Ej: Motul" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              </div>
+              <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Descripción</span><textarea value="{{ form.desc }}" onChange="{{ setFormDesc }}" placeholder="Describí el producto, su estado y características…" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none;min-height:96px;resize:vertical;font-family:'Public Sans'" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></textarea></label>
+            </div>
+            <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+              <h3 style="font-size:17px;margin-bottom:16px">Precio y stock</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Precio público</span><input value="{{ form.list }}" onChange="{{ setFormList }}" placeholder="$ 0" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#C8102E">Precio socio ACA</span><input value="{{ form.socio }}" onChange="{{ setFormSocio }}" placeholder="$ 0" style="width:100%;margin-top:6px;padding:12px 14px;border:1.5px solid #C8102E;border-radius:10px;font-size:15px;outline:none"></label>
+                <label style="display:block"><span style="font-size:13px;font-weight:600;color:#44414A">Stock</span><input value="{{ form.stock }}" onChange="{{ setFormStock }}" placeholder="0" style="width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;font-size:15px;outline:none" style-focus="border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22"></label>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:24px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <h3 style="font-size:17px">Fotos del artículo</h3>
+                <span style="font-size:12.5px;color:#918A8E;font-weight:600">{{ photoCountLabel }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+                <sc-for list="{{ formPhotos }}" as="ph" hint-placeholder-count="2">
+                  <div style="position:relative;aspect-ratio:1;border-radius:12px;background:#F1F1F3;border:1px solid #E2E2E5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+                    <span style="font-size:20px">🖼</span>
+                    <span style="font-size:11px;color:#918A8E;font-weight:600">Foto {{ ph.n }}</span>
+                    <button onClick="{{ ph.remove }}" title="Quitar" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:none;background:#1C1B1F;color:#fff;cursor:pointer;font-size:13px;line-height:1">×</button>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ canAddPhoto }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ addPhoto }}" style="aspect-ratio:1;border-radius:12px;border:2px dashed #ECC9CE;background:#FAFAFB;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#C8102E">
+                    <span style="font-size:24px;font-weight:300">＋</span>
+                    <span style="font-size:11.5px;font-weight:700">Agregar</span>
+                  </button>
+                </sc-if>
+              </div>
+              <div style="font-size:12.5px;color:#918A8E;margin-top:12px">Podés arrastrar tus imágenes o tocar “Agregar”. JPG o PNG · hasta 8 fotos.</div>
+            </div>
+          </div>
+          <div style="position:sticky;top:150px;display:flex;flex-direction:column;gap:16px">
+            <div style="background:#fff;border:1px solid #E2E2E5;border-radius:16px;padding:22px">
+              <h3 style="font-size:16px;margin-bottom:8px">Vista previa</h3>
+              <div style="border:1px solid #E2E2E5;border-radius:14px;overflow:hidden;margin-top:8px">
+                <div style="height:120px;background:#F1F1F3;display:flex;align-items:center;justify-content:center;gap:6px">
+                  <sc-if value="{{ pvHasPhotos }}" hint-placeholder-val="{{ false }}"><span style="font-size:26px">🖼</span></sc-if>
+                  <sc-if value="{{ pvNoPhotos }}" hint-placeholder-val="{{ true }}"><span style="font-family:ui-monospace,monospace;font-size:11px;color:#ADA6AA">[ agregá una foto ]</span></sc-if>
+                </div>
+                <div style="padding:14px"><div style="font-size:11.5px;font-weight:700;color:#918A8E">{{ acctName }} · {{ pvBrand }}</div><div style="font-weight:600;font-size:14px;margin-top:4px">{{ pvName }}</div><div style="font-family:'Archivo';font-weight:800;font-size:19px;color:#C8102E;margin-top:8px">{{ pvPrice }}</div></div>
+              </div>
+            </div>
+            <button onClick="{{ publishArticle }}" style="border:none;cursor:pointer;padding:15px;border-radius:12px;background:#C8102E;color:#fff;font-weight:700;font-size:15.5px">{{ pubCta }}</button>
+            <button onClick="{{ saveDraft }}" style="border:1px solid #D6D6DA;background:#fff;cursor:pointer;padding:14px;border-radius:12px;color:#44414A;font-weight:700;font-size:14.5px">Guardar borrador</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ BUSCADOR EXPOACA (MAPA) ============ -->
+    <sc-if value="{{ isBuscador }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="background:linear-gradient(115deg,#1C1B1F,#2A2629);color:#fff;padding:40px 28px 34px">
+          <div style="max-width:1280px;margin:0 auto">
+            <a onClick="{{ goHome }}" style="cursor:pointer;font-size:14px;color:#B3ABAE;font-weight:600">← Volver al inicio</a>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+              <span style="width:46px;height:46px;border-radius:12px;background:#C8102E;display:flex;align-items:center;justify-content:center;font-size:22px">📍</span>
+              <div><h1 style="font-size:34px;color:#fff">Buscá un ExpoACA cercano</h1><p style="color:#B3ABAE;font-size:15px;margin-top:2px">Elegí un local en el mapa o en la lista y llegá con Google Maps</p></div>
+            </div>
+          </div>
+        </div>
+        <div style="max-width:1280px;margin:0 auto;padding:24px 28px 72px;display:grid;grid-template-columns:390px 1fr;gap:24px;align-items:start">
+          <!-- List -->
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E2E2E5;border-radius:12px;padding:11px 14px" style-focus-within="border-color:#C8102E">
+              <span style="color:#918A8E">⌕</span>
+              <input onInput="{{ onExpoSearch }}" placeholder="Buscar por ciudad o provincia…" style="flex:1;background:transparent;border:none;outline:none;font-size:14.5px;color:#1C1B1F">
+            </div>
+            <div style="font-size:12.5px;color:#918A8E;font-weight:600;margin-top:10px">{{ resultLabel }}</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;max-height:540px;overflow-y:auto" class="acaScroll">
+              <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:34px 16px;color:#6E646A"><div style="font-size:30px">🔍</div><div style="font-weight:700;font-size:15px;margin-top:8px;color:#1C1B1F">Sin resultados</div><div style="font-size:13px;margin-top:4px">Probá con otra ciudad o provincia.</div></div>
+              </sc-if>
+              <sc-for list="{{ expoList }}" as="e" hint-placeholder-count="6">
+                <div onClick="{{ e.onClick }}" style="{{ e.cardStyle }}">
+                  <span style="{{ e.pinStyle }}"></span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:15.5px">{{ e.name }}</div>
+                    <div style="font-size:13px;color:#6E646A;margin-top:3px">{{ e.addr }}</div>
+                    <div style="font-size:12.5px;color:#918A8E;margin-top:5px">🕒 {{ e.hours }} · {{ e.prov }}</div>
+                    <a href="{{ e.mapsUrl }}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;cursor:pointer;border:1px solid #D6D6DA;background:#fff;color:#C8102E;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:9px">Cómo llegar →</a>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <!-- Map -->
+          <div style="position:sticky;top:150px;background:#fff;border:1px solid #E2E2E5;border-radius:18px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px;border-bottom:1px solid #ECECEE;flex-wrap:wrap">
+              <div><div style="font-weight:800;font-size:17px;font-family:'Archivo'">{{ selName }}</div><div style="font-size:13px;color:#6E646A;margin-top:2px">{{ selAddr }} · {{ selHours }}</div></div>
+              <a href="{{ selMapsUrl }}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;border:none;background:#C8102E;color:#fff;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Abrir en Google Maps →</a>
+            </div>
+            <iframe src="{{ mapUrl }}" style="width:100%;height:520px;border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa ExpoACA"></iframe>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer style="background:#1C1B1F;color:#B3ABAE">
+    <div style="max-width:1280px;margin:0 auto;padding:52px 28px 36px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px">
+          <span style="width:38px;height:38px;border-radius:10px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900;font-size:16px">EA</span>
+          <span style="font-family:'Archivo';font-weight:800;font-size:16px;color:#fff">ExpoACA</span>
+        </div>
+        <p style="font-size:14px;line-height:1.6;max-width:280px">El marketplace del Automóvil Club Argentino. Todo para tu auto, moto y vida al aire libre, con precio de socio.</p>
+      </div>
+      <div>
+        <h4 style="color:#fff;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Comprar</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <a onClick="{{ goCatalogo }}" style="cursor:pointer">Catálogo</a>
+          <a onClick="{{ goCatalogo }}" style="cursor:pointer">Ofertas socio</a>
+          <a onClick="{{ goCarrito }}" style="cursor:pointer">Mi carrito</a>
+        </div>
+      </div>
+      <div>
+        <h4 style="color:#fff;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Vender</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <a onClick="{{ goConcLogin }}" style="cursor:pointer">Panel de concesionario</a>
+          <a onClick="{{ goConcAlta }}" style="cursor:pointer">Quiero ser concesionario</a>
+          <a onClick="{{ goPublicar }}" style="cursor:pointer">Publicar un artículo</a>
+        </div>
+      </div>
+      <div>
+        <h4 style="color:#fff;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">ACA</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <a onClick="{{ goRegistro }}" style="cursor:pointer">Asociarme</a>
+          <a style="cursor:pointer">Beneficios socio</a>
+          <a onClick="{{ goBuscador }}" style="cursor:pointer">Buscar un ExpoACA</a>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #332F33">
+      <div style="max-width:1280px;margin:0 auto;padding:18px 28px;display:flex;justify-content:space-between;font-size:12.5px;color:#6E646A">
+        <span>© 2026 Automóvil Club Argentino · ExpoACA Marketplace</span>
+        <span>Términos · Privacidad · Defensa al consumidor</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = (() => {
+    const base = { screen: 'home', socio: true, cart: {}, authTab: 'login', dealSlide: 0, prodSlide: 0, dealerDeals: { p2: true, p5: true, p10: false, p1: true, p6: false, p4: true, p8: true, p12: false }, mapSel: 0, expoQuery: '', dealerAuth: false, dealerId: 'ap', dealerTab: 'resumen',
+      stock: { p1: 34, p2: 120, p4: 8, p5: 210, p6: 0, p8: 15, p10: 64, p12: 22 },
+      orderStatus: { '#10428': 1, '#10427': 0, '#10425': 2, '#10421': 3, '#20515': 0, '#20510': 1, '#20501': 2, '#30822': 2, '#30818': 0, '#30815': 3 }, paused: {}, removed: {}, toast: '', edits: {}, customProducts: [], form: null, editingId: null, profiles: {} };
+    try {
+      const saved = JSON.parse(localStorage.getItem('expoaca_dealer') || '{}');
+      if (saved.stock) base.stock = { ...base.stock, ...saved.stock };
+      if (saved.orderStatus) base.orderStatus = { ...base.orderStatus, ...saved.orderStatus };
+      if (saved.dealerDeals) base.dealerDeals = { ...base.dealerDeals, ...saved.dealerDeals };
+      if (saved.paused) base.paused = { ...saved.paused };
+      if (saved.removed) base.removed = { ...saved.removed };
+      if (saved.edits) base.edits = { ...saved.edits };
+      if (Array.isArray(saved.customProducts)) base.customProducts = saved.customProducts;
+      if (saved.profiles) base.profiles = { ...saved.profiles };
+    } catch (e) {}
+    return base;
+  })();
+
+  persist() {
+    try {
+      localStorage.setItem('expoaca_dealer', JSON.stringify({ stock: this.state.stock, orderStatus: this.state.orderStatus, dealerDeals: this.state.dealerDeals, paused: this.state.paused, removed: this.state.removed, edits: this.state.edits, customProducts: this.state.customProducts, profiles: this.state.profiles }));
+    } catch (e) {}
+  }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._toast);
+    this._toast = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+  togglePause(id, name) { return () => this.setState(s => { const paused = { ...s.paused, [id]: !s.paused[id] }; return { paused }; }, () => { this.persist(); this.showToast(this.state.paused[id] ? ('⏸ “' + name + '” pausado — oculto del marketplace') : ('▶ “' + name + '” reactivado')); }); }
+  removeProduct(id, name) { return () => this.setState(s => ({ removed: { ...s.removed, [id]: true } }), () => { this.persist(); this.showToast('🗑 “' + name + '” eliminado del catálogo'); }); }
+  restoreProduct(id) { return () => this.setState(s => { const removed = { ...s.removed }; delete removed[id]; return { removed }; }, () => this.persist()); }
+
+  blankForm() { return { name:'', brand:'', cat:'Accesorios', desc:'', list:'', socio:'', stock:'', photos:[] }; }
+  openCreate = () => { this.setState({ form: this.blankForm(), editingId: null, screen: 'publicar' }); try { window.scrollTo({ top: 0 }); } catch(e){} };
+  openEdit(id) {
+    return () => {
+      const data = this.data(); const p = data.find(x => x.id === id) || {};
+      const st = this.state.stock;
+      const form = { name:p.name||'', brand:p.brand||'', cat:p.cat||'Accesorios', desc:p.desc||'', list:String(p.list||''), socio:String(p.socio||''), stock:String(st[id] ?? (p.stock ?? '')), photos: this.photosOf(p).slice() };
+      this.setState({ form, editingId: id, screen: 'publicar' });
+      try { window.scrollTo({ top: 0 }); } catch(e){}
+    };
+  }
+  setForm(field) { return (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [field]: v } })); }; }
+  addPhoto = () => this.setState(s => { const photos = (s.form.photos || []).slice(); if (photos.length >= 8) return {}; photos.push({ id: 'ph' + Date.now() }); return { form: { ...s.form, photos } }; });
+  removePhoto(i) { return () => this.setState(s => { const photos = (s.form.photos || []).slice(); photos.splice(i, 1); return { form: { ...s.form, photos } }; }); }
+
+  publishArticle = () => {
+    const f = this.state.form || this.blankForm();
+    const list = parseInt(String(f.list).replace(/\D/g, ''), 10) || 0;
+    const socio = parseInt(String(f.socio).replace(/\D/g, ''), 10) || 0;
+    const stk = parseInt(String(f.stock).replace(/\D/g, ''), 10) || 0;
+    if (this.state.editingId) {
+      const id = this.state.editingId;
+      this.setState(s => ({
+        edits: { ...s.edits, [id]: { name:f.name, brand:f.brand, cat:f.cat, desc:f.desc, list, socio, photos:f.photos } },
+        stock: { ...s.stock, [id]: stk },
+        screen: 'concesionario', dealerTab: 'productos', form: null, editingId: null,
+      }), () => { this.persist(); this.showToast('✅ Cambios guardados — actualizado en el marketplace'); });
+    } else {
+      const id = 'c' + Date.now();
+      const np = { id, name:f.name||'Nuevo artículo', brand:f.brand||'—', cat:f.cat, desc:f.desc, dealer: this._acctName || 'AutoParts Pro', list, socio, rating:'—', sold:'Nuevo', tag:'Nuevo', photos:f.photos, dealerOwner: this.state.dealerId };
+      this.setState(s => ({
+        customProducts: [...s.customProducts, np],
+        stock: { ...s.stock, [id]: stk },
+        screen: 'concesionario', dealerTab: 'productos', form: null, editingId: null,
+      }), () => { this.persist(); this.showToast('✅ Artículo publicado — ya visible en el marketplace'); });
+    }
+    try { window.scrollTo({ top: 0 }); } catch(e){}
+  };
+  saveDraft = () => { this.showToast('💾 Borrador guardado — podés retomarlo cuando quieras'); };
+  setProfile(field) { return (e) => { const v = e.target.value; const name = this._acctName || 'AutoParts Pro'; this.setState(s => { const cur = (s.profiles[name] || {}); return { profiles: { ...s.profiles, [name]: { ...cur, [field]: v } } }; }); }; }
+  saveProfile = () => { this.persist(); this.showToast('✅ Perfil actualizado — tu WhatsApp y datos ya están activos'); };
+  submitAlta = () => { this.setState({ screen: 'concLogin' }); try { window.scrollTo({ top: 0 }); } catch(e){} this.showToast('📨 Solicitud enviada — ACA se contactará para darte de alta'); };
+
+  doDealerLogin = () => { this.setState({ dealerAuth: true, screen: 'concesionario', dealerTab: 'resumen' }); try { window.scrollTo({ top: 0 }); } catch(e){} };
+  dealerLogout = () => { this.setState({ dealerAuth: false, screen: 'concLogin' }); try { window.scrollTo({ top: 0 }); } catch(e){} };
+  setDealerAccount = (e) => this.setState({ dealerId: e.target.value });
+  setDealerTab(tab) { return () => this.setState({ dealerTab: tab }); }
+  tabStyle(tab) {
+    const active = this.state.dealerTab === tab;
+    return { display:'flex', alignItems:'center', gap:'11px', padding:'11px 12px', borderRadius:'10px', fontSize:'14.5px', cursor:'pointer', border:'none', width:'100%', textAlign:'left', fontFamily:"'Public Sans'", background: active ? '#ffffff14' : 'transparent', color: active ? '#fff' : '#B3ABAE', fontWeight: active ? 700 : 500 };
+  }
+  bumpStock(id, d) { return () => this.setState(s => ({ stock: { ...s.stock, [id]: Math.max(0, (s.stock[id] ?? 0) + d) } }), () => this.persist()); }
+  advanceOrder(id) { return () => this.setState(s => ({ orderStatus: { ...s.orderStatus, [id]: Math.min(3, (s.orderStatus[id] ?? 0) + 1) } }), () => this.persist()); }
+
+  onExpoSearch = (e) => this.setState({ expoQuery: e.target.value });
+  norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+
+  componentDidMount() {
+    this._d = setInterval(() => this.setState(s => ({ dealSlide: (s.dealSlide + 1) % 3 })), 4800);
+    this._p = setInterval(() => this.setState(s => ({ prodSlide: (s.prodSlide + 1) % 3 })), 3600);
+  }
+  componentWillUnmount() { clearInterval(this._d); clearInterval(this._p); }
+
+  setDeal(i) { return () => this.setState({ dealSlide: i }); }
+  setProd(i) { return () => this.setState({ prodSlide: i }); }
+  prodNext = () => this.setState(s => ({ prodSlide: (s.prodSlide + 1) % 3 }));
+  prodPrev = () => this.setState(s => ({ prodSlide: (s.prodSlide + 2) % 3 }));
+  toggleDeal(id) { return () => this.setState(s => ({ dealerDeals: { ...s.dealerDeals, [id]: !s.dealerDeals[id] } }), () => this.persist()); }
+
+  go(screen) { return () => { this.setState({ screen }); try { window.scrollTo({ top: 0 }); } catch(e){} }; }
+  openUrl(url) { return () => { try { window.open(url, '_blank', 'noopener'); } catch(e){} }; }
+  selectExpo(i) { return () => this.setState({ mapSel: i }); }
+  viewProduct(id) { return () => { this.setState({ screen: 'producto', pdpId: id }); try { window.scrollTo({ top: 0 }); } catch(e){} }; }
+  toggleSocio = () => this.setState(s => ({ socio: !s.socio }));
+  addCart(id) { return () => this.setState(s => ({ cart: { ...s.cart, [id]: (s.cart[id] || 0) + 1 } })); }
+  incCart(id) { return () => this.setState(s => ({ cart: { ...s.cart, [id]: (s.cart[id] || 0) + 1 } })); }
+  decCart(id) { return () => this.setState(s => { const q = Math.max(0, (s.cart[id] || 0) - 1); const c = { ...s.cart }; if (q === 0) delete c[id]; else c[id] = q; return { cart: c }; }); }
+  removeCart(id) { return () => this.setState(s => { const c = { ...s.cart }; delete c[id]; return { cart: c }; }); }
+  setAuth(tab) { return () => this.setState({ authTab: tab }); }
+
+  fmt(n) { return '$ ' + Math.round(n).toLocaleString('es-AR'); }
+
+  data() {
+    const products = [
+      { id:'p1', name:'Cubierta Pirelli Scorpion 215/65 R16', cat:'Neumáticos', brand:'Pirelli', dealer:'NeumaTech', list:142000, socio:118800, rating:'4.8', sold:'+320 vendidos', tag:'Más vendido' },
+      { id:'p2', name:'Aceite Motul 5W30 sintético 4L', cat:'Lubricantes', brand:'Motul', dealer:'AutoParts Pro', list:38500, socio:30800, rating:'4.9', sold:'+540 vendidos', tag:'' },
+      { id:'p3', name:'Casco moto integral LS2 Rapid', cat:'Motos', brand:'LS2', dealer:'Camino Real', list:96000, socio:81600, rating:'4.7', sold:'+90 vendidos', tag:'Oferta' },
+      { id:'p4', name:'Carpa 4 personas Doite Tornado', cat:'Aire libre', brand:'Doite', dealer:'Patagonia Outdoor', list:210000, socio:168000, rating:'4.6', sold:'+45 vendidos', tag:'-20%' },
+      { id:'p5', name:'Kit de luces LED H4 6000K', cat:'Accesorios', brand:'Philips', dealer:'AutoParts Pro', list:24900, socio:19920, rating:'4.5', sold:'+800 vendidos', tag:'' },
+      { id:'p6', name:'Batería Moura 12x65 M22ED', cat:'Repuestos', brand:'Moura', dealer:'NeumaTech', list:88000, socio:74800, rating:'4.8', sold:'+210 vendidos', tag:'' },
+      { id:'p7', name:'Estéreo Pioneer Android Auto', cat:'Audio', brand:'Pioneer', dealer:'AudioCar', list:178000, socio:151300, rating:'4.7', sold:'+60 vendidos', tag:'Nuevo' },
+      { id:'p8', name:'Conservadora Coleman 48L', cat:'Aire libre', brand:'Coleman', dealer:'Patagonia Outdoor', list:95000, socio:76000, rating:'4.6', sold:'+120 vendidos', tag:'-20%' },
+      { id:'p9', name:'Kit de arrastre DID + piñón', cat:'Motos', brand:'DID', dealer:'Camino Real', list:64000, socio:54400, rating:'4.8', sold:'+75 vendidos', tag:'' },
+      { id:'p10', name:'Limpiaparabrisas Bosch Aerotwin', cat:'Accesorios', brand:'Bosch', dealer:'AutoParts Pro', list:21500, socio:17200, rating:'4.5', sold:'+430 vendidos', tag:'' },
+      { id:'p11', name:'GPS Garmin Drive 52', cat:'Audio', brand:'Garmin', dealer:'AudioCar', list:165000, socio:140250, rating:'4.6', sold:'+30 vendidos', tag:'' },
+      { id:'p12', name:'Bolsa de dormir térmica -5°C', cat:'Aire libre', brand:'Doite', dealer:'Patagonia Outdoor', list:72000, socio:57600, rating:'4.7', sold:'+85 vendidos', tag:'' },
+    ];
+    // aplicar ediciones del concesionario + productos nuevos publicados
+    const edits = this.state.edits || {};
+    let merged = products.map(p => edits[p.id] ? { ...p, ...edits[p.id] } : p);
+    (this.state.customProducts || []).forEach(cp => { merged.push({ ...cp }); });
+    return merged;
+  }
+
+  photosOf(p) {
+    const e = (this.state.edits || {})[p.id];
+    if (e && Array.isArray(e.photos)) return e.photos;
+    if (Array.isArray(p.photos)) return p.photos;
+    return [{ id: 'ph1' }];
+  }
+
+  // Perfiles de ExpoACA (editables) — fuente del WhatsApp real de compra
+  defaultProfiles() {
+    return {
+      'AutoParts Pro':     { razon:'AutoParts Pro S.A.', expo:'ExpoACA Palermo',   tel:'+54 9 11 5555-1001', email:'ventas@autopartspro.com.ar',  dir:'Av. del Libertador 1850, CABA',   horario:'Lun a Sáb 8–20h', rubro:'Repuestos y accesorios', cuit:'30-71234567-8', desc:'Repuestos y accesorios originales con garantía oficial.', mapLink:'https://www.google.com/maps?q=-34.5711,-58.4229&z=16', tone:'#C8102E', initial:'AP', factor:1.00 },
+      'NeumaTech':         { razon:'NeumaTech SRL',      expo:'ExpoACA Liniers',    tel:'+54 9 11 5555-1002', email:'contacto@neumatech.com.ar',   dir:'Av. Rivadavia 11500, CABA',        horario:'Lun a Sáb 8–20h', rubro:'Neumáticos y baterías', cuit:'30-70888111-2', desc:'Neumáticos y baterías de todas las marcas.', mapLink:'https://www.google.com/maps?q=-34.6437,-58.5261&z=16', tone:'#2A2629', initial:'NT', factor:0.94 },
+      'Patagonia Outdoor': { razon:'Patagonia Outdoor SA',expo:'ExpoACA Bariloche', tel:'+54 9 294 555-1003', email:'hola@patagoniaoutdoor.com.ar',  dir:'Av. Bustillo 4500, Bariloche',     horario:'Lun a Sáb 9–19h', rubro:'Camping y aire libre', cuit:'30-71555999-0', desc:'Todo para tus salidas y camping.', mapLink:'https://www.google.com/maps?q=-41.1335,-71.3103&z=16', tone:'#0E8F6E', initial:'PO', factor:1.06 },
+      'Camino Real':       { razon:'Camino Real SRL',    expo:'ExpoACA Córdoba',    tel:'+54 9 351 555-1004', email:'ventas@caminoreal.com.ar',    dir:'Av. Colón 2200, Córdoba',          horario:'Lun a Sáb 8–20h', rubro:'Motos e indumentaria', cuit:'30-70444222-5', desc:'Motos, indumentaria y accesorios.', mapLink:'https://www.google.com/maps?q=-31.4135,-64.1811&z=16', tone:'#B0631A', initial:'CR', factor:0.98 },
+      'AudioCar':          { razon:'AudioCar SA',        expo:'ExpoACA Caballito',  tel:'+54 9 11 5555-1005', email:'info@audiocar.com.ar',        dir:'Av. Acoyte 700, CABA',             horario:'Lun a Sáb 9–19h', rubro:'Audio y tecnología', cuit:'30-71777333-1', desc:'Audio, GPS y tecnología para tu auto.', mapLink:'https://www.google.com/maps?q=-34.6187,-58.4426&z=16', tone:'#5B3FB0', initial:'AC', factor:1.03 },
+    };
+  }
+  profilesMerged() {
+    const d = this.defaultProfiles();
+    const saved = this.state.profiles || {};
+    const out = {};
+    Object.keys(d).forEach(name => { out[name] = { ...d[name], ...(saved[name] || {}) }; });
+    return out;
+  }
+  // Nombre visible del expo en todo el portal (usa el nombre comercial del perfil)
+  dName(key) { const p = this.profilesMerged()[key]; return (p && p.razon) ? p.razon : key; }
+  waDigits(tel) { return (tel || '').replace(/\D/g, ''); }
+  // Extrae lat/lng de un link de Google Maps (q=lat,lng  |  @lat,lng  |  !3dlat!4dlng)
+  parseCoords(link) {
+    const l = (link || '');
+    let m = l.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/) || l.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || l.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || l.match(/(-?\d{1,2}\.\d{3,}),(-?\d{1,3}\.\d{3,})/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    return null;
+  }
+  // Convierte un link de Google Maps en uno embebible para el iframe
+  toEmbed(link, fallbackQuery) {
+    const l = (link || '').trim();
+    if (l && /google\.[^/]+\/maps/.test(l) && !/goo\.gl|maps\.app/.test(l)) {
+      return l + (l.includes('output=embed') ? '' : (l.includes('?') ? '&' : '?') + 'output=embed');
+    }
+    return 'https://www.google.com/maps?q=' + encodeURIComponent(fallbackQuery) + '&z=15&output=embed';
+  }
+
+  // Directorio de ExpoACA (con WhatsApp derivado del perfil) para compra directa y comparación
+  dealersInfo() {
+    const prof = this.profilesMerged();
+    const out = {};
+    Object.keys(prof).forEach(name => {
+      const p = prof[name];
+      out[name] = { wa: this.waDigits(p.tel), loc: p.expo, rating: p.rating || '4.7', tone: p.tone, initial: p.initial, factor: p.factor };
+    });
+    return out;
+  }
+  waLink(dealerName, productName, priceLabel) {
+    const info = this.dealersInfo()[dealerName] || {};
+    const num = (info.wa || '5491155550000');
+    const msg = 'Hola ' + dealerName + '! Soy socio ACA y me interesa comprar por ExpoACA: ' + productName + ' (' + priceLabel + '). ¿Está disponible?';
+    return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+  }
+  buyWhatsApp(dealerName, productName, priceLabel) {
+    return () => { try { window.open(this.waLink(dealerName, productName, priceLabel), '_blank', 'noopener'); } catch(e){} };
+  }
+  // Ofertas del mismo artículo en distintos ExpoACA (comparador) — sólo con stock
+  compareOffers(product) {
+    const socio = this.state.socio;
+    const info = this.dealersInfo();
+    const stockMap = this.state.stock;
+    const baseSocio = product.socio, baseList = product.list;
+    const others = Object.keys(info).filter(n => n !== product.dealer).slice(0, 4);
+    const names = [product.dealer, ...others];
+    // stock por expo: el dueño usa el stock real; los demás, un valor demo estable (uno sin stock)
+    const synthStock = { 'AutoParts Pro':12, 'NeumaTech':7, 'Patagonia Outdoor':0, 'Camino Real':5, 'AudioCar':9 };
+    let offers = names.map(name => {
+      const f = (info[name] || {}).factor ?? 1;
+      const oList = Math.round(baseList * f / 100) * 100;
+      const oSocio = Math.round(baseSocio * f / 100) * 100;
+      const price = socio ? oSocio : oList;
+      const stk = name === product.dealer ? (stockMap[product.id] ?? 10) : (synthStock[name] ?? 6);
+      return { name, loc:(info[name]||{}).loc || name, rating:(info[name]||{}).rating || '—',
+        tone:(info[name]||{}).tone || '#C8102E', initial:(info[name]||{}).initial || '—',
+        displayName: this.dName(name),
+        priceLabel:this.fmt(price), listLabel:this.fmt(oList), price, showOld:socio, stock:stk,
+        isCurrent: name === product.dealer };
+    }).filter(o => o.stock > 0);
+    offers.sort((a, b) => a.price - b.price);
+    if (!offers.length) return [];
+    const best = offers[0].price;
+    return offers.map((o) => ({ ...o,
+      best: o.price === best,
+      diffLabel: o.price === best ? 'Mejor precio' : ('+' + this.fmt(o.price - best)),
+      buy: this.buyWhatsApp(o.name, product.name, o.priceLabel),
+      badgeBg: o.price === best ? '#E3F6EE' : '#ECECEE',
+      badgeColor: o.price === best ? '#0B7A55' : '#918A8E',
+      rowBorder: o.isCurrent ? '#C8102E' : '#E2E2E5',
+      rowBg: o.isCurrent ? '#FEF6F7' : '#fff' }));
+  }
+
+  productView(p) {
+    const socio = this.state.socio;
+    const st = this.state.stock;
+    const hasStockEntry = Object.prototype.hasOwnProperty.call(st, p.id);
+    const soldOut = hasStockEntry && st[p.id] === 0;
+    const paused = (this.state.paused || {})[p.id];
+    return {
+      ...p,
+      dealerName: this.dName(p.dealer),
+      priceMain: this.fmt(socio ? p.socio : p.list),
+      priceOld: this.fmt(p.list),
+      showOld: socio && !soldOut,
+      hasTag: !!p.tag && !soldOut,
+      soldOut, paused,
+      unavailable: soldOut || paused,
+      ctaLabel: soldOut ? 'Sin stock' : 'Agregar al carrito',
+      ctaBg: soldOut ? '#ECECEE' : '#C8102E',
+      ctaColor: soldOut ? '#918A8E' : '#fff',
+      ctaBorder: soldOut ? '#E2E2E5' : '#C8102E',
+      ctaCursor: soldOut ? 'not-allowed' : 'pointer',
+      disc: Math.round((1 - p.socio / p.list) * 100) + '%',
+      view: this.viewProduct(p.id),
+      add: soldOut ? (() => {}) : this.addCart(p.id),
+    };
+  }
+
+  renderVals() {
+    const screen = this.state.screen;
+    const products = this.data();
+    const pv = products.map(p => this.productView(p));
+    const byId = {}; products.forEach(p => byId[p.id] = p);
+
+    const cart = this.state.cart;
+    const cartIds = Object.keys(cart).filter(id => cart[id] > 0);
+    const cartCount = cartIds.reduce((a, id) => a + cart[id], 0);
+    const socio = this.state.socio;
+    const cartView = cartIds.map(id => {
+      const p = byId[id]; const qty = cart[id];
+      const unit = socio ? p.socio : p.list;
+      return { ...p, qty, unitLabel: this.fmt(unit), lineLabel: this.fmt(unit * qty),
+        inc: this.incCart(id), dec: this.decCart(id), remove: this.removeCart(id) };
+    });
+    const subtotalList = cartIds.reduce((a, id) => a + byId[id].list * cart[id], 0);
+    const subtotalSocio = cartIds.reduce((a, id) => a + byId[id].socio * cart[id], 0);
+    const subtotal = socio ? subtotalSocio : subtotalList;
+    const ahorro = subtotalList - subtotalSocio;
+    const envio = subtotal > 0 && subtotal < 80000 ? 4500 : 0;
+
+    const categories = [
+      { name:'Accesorios para auto', count:'2.340', tone:'#C8102E', tag:'A' },
+      { name:'Repuestos y mantenimiento', count:'1.890', tone:'#2A2629', tag:'R' },
+      { name:'Neumáticos', count:'640', tone:'#C8102E', tag:'N' },
+      { name:'Lubricantes y aceites', count:'420', tone:'#0E8F6E', tag:'L' },
+      { name:'Motos', count:'1.120', tone:'#B0631A', tag:'M' },
+      { name:'Audio y tecnología', count:'780', tone:'#8E0C20', tag:'T' },
+      { name:'Vida al aire libre', count:'960', tone:'#0E8F6E', tag:'C' },
+      { name:'Indumentaria y seguridad', count:'510', tone:'#C8102E', tag:'S' },
+    ];
+    const heroTiles = [
+      { name:'Auto', count:'4.230', tone:'#C8102E', tag:'A' },
+      { name:'Moto', count:'1.120', tone:'#B0631A', tag:'M' },
+      { name:'Aire libre', count:'960', tone:'#0E8F6E', tag:'C' },
+      { name:'Tecnología', count:'780', tone:'#8E0C20', tag:'T' },
+    ];
+    const navCats = ['Accesorios','Repuestos','Neumáticos','Lubricantes','Motos','Audio','Aire libre','Indumentaria'];
+
+    const dealers = [
+      { name:this.dName('AutoParts Pro'), cat:'Repuestos · Accesorios', tone:'#C8102E', initial:'AP', items:'320 productos', rating:'4.8', loc:'Estación ACA Palermo' },
+      { name:this.dName('NeumaTech'), cat:'Neumáticos · Baterías', tone:'#2A2629', initial:'NT', items:'180 productos', rating:'4.7', loc:'Estación ACA Liniers' },
+      { name:this.dName('Patagonia Outdoor'), cat:'Camping · Náutica', tone:'#0E8F6E', initial:'PO', items:'240 productos', rating:'4.9', loc:'Estación ACA Bariloche' },
+      { name:this.dName('Camino Real'), cat:'Motos · Indumentaria', tone:'#B0631A', initial:'CR', items:'150 productos', rating:'4.6', loc:'Estación ACA Córdoba' },
+    ];
+
+    const pdpId = this.state.pdpId && byId[this.state.pdpId] ? this.state.pdpId : 'p1';
+    this._pdpId = pdpId;
+    const pdp = this.productView(byId[pdpId]);
+    const related = [pv[5], pv[9], pv[4]].filter(r => r.id !== pdpId);
+
+    // ---- Datos por concesionario (scoped al usuario logueado) ----
+    const dealerAccounts = {
+      ap: { name:'AutoParts Pro', initial:'AP', rubro:'Repuestos y accesorios', prods:['p2','p5','p10'],
+        kpiBase:{ ventas:'$ 8,4M', ventasD:'↑ +18% vs. mes anterior', pedidos:'1.284', pedidosD:'↑ +124 esta semana', ticket:'$ 6.540', ticketD:'↑ +4,2%' },
+        bars:[38,50,42,60,68,80,90,100],
+        top:[ {id:'p2',name:'Aceite Motul 5W30 4L',units:'540 u.',pct:100,tone:'#C8102E'}, {id:'p5',name:'Kit de luces LED H4',units:'800 u.',pct:78,tone:'#D98792'}, {id:'p10',name:'Limpiaparabrisas Bosch',units:'430 u.',pct:45,tone:'#B0631A'} ],
+        orders:[ {id:'#10428',cliente:'Lucía Fernández',tipo:'Socio ACA',items:'2 art.',total:'$ 49.720'}, {id:'#10427',cliente:'Diego Romero',tipo:'Socio ACA',items:'1 art.',total:'$ 30.800'}, {id:'#10425',cliente:'Sofía Castro',tipo:'Cliente',items:'3 art.',total:'$ 88.400'}, {id:'#10421',cliente:'Martín Díaz',tipo:'Socio ACA',items:'1 art.',total:'$ 17.200'} ] },
+      nt: { name:'NeumaTech', initial:'NT', rubro:'Neumáticos y baterías', prods:['p1','p6'],
+        kpiBase:{ ventas:'$ 5,1M', ventasD:'↑ +9% vs. mes anterior', pedidos:'642', pedidosD:'↑ +38 esta semana', ticket:'$ 21.400', ticketD:'↑ +6,1%' },
+        bars:[44,52,48,58,66,74,86,100],
+        top:[ {id:'p1',name:'Cubierta Pirelli Scorpion',units:'320 u.',pct:100,tone:'#C8102E'}, {id:'p6',name:'Batería Moura 12x65',units:'210 u.',pct:72,tone:'#2A2629'} ],
+        orders:[ {id:'#20515',cliente:'Transporte Sur SRL',tipo:'Cliente',items:'4 art.',total:'$ 568.000'}, {id:'#20510',cliente:'Javier Paz',tipo:'Socio ACA',items:'1 art.',total:'$ 74.800'}, {id:'#20501',cliente:'Rent-a-Car BA',tipo:'Cliente',items:'6 art.',total:'$ 852.000'} ] },
+      po: { name:'Patagonia Outdoor', initial:'PO', rubro:'Camping y aire libre', prods:['p4','p8','p12'],
+        kpiBase:{ ventas:'$ 6,7M', ventasD:'↑ +22% vs. mes anterior', pedidos:'510', pedidosD:'↑ +61 esta semana', ticket:'$ 13.100', ticketD:'↑ +8,4%' },
+        bars:[30,46,40,54,62,70,84,100],
+        top:[ {id:'p4',name:'Carpa Doite Tornado',units:'180 u.',pct:100,tone:'#0E8F6E'}, {id:'p8',name:'Conservadora Coleman 48L',units:'120 u.',pct:66,tone:'#B0631A'}, {id:'p12',name:'Bolsa de dormir térmica',units:'85 u.',pct:48,tone:'#C8102E'} ] ,
+        orders:[ {id:'#30822',cliente:'Camping Los Alerces',tipo:'Cliente',items:'5 art.',total:'$ 340.000'}, {id:'#30818',cliente:'Ana Torres',tipo:'Socio ACA',items:'2 art.',total:'$ 133.600'}, {id:'#30815',cliente:'Escuela N°12',tipo:'Cliente',items:'8 art.',total:'$ 456.000'} ] },
+    };
+    const acctOptions = [ {id:'ap',name:this.dName('AutoParts Pro')}, {id:'nt',name:this.dName('NeumaTech')}, {id:'po',name:this.dName('Patagonia Outdoor')} ];
+    const did = dealerAccounts[this.state.dealerId] ? this.state.dealerId : 'ap';
+    const acct = dealerAccounts[did];
+    this._acctName = acct.name;
+    const stock = this.state.stock;
+    const orderStatuses = [
+      { label:'Pagado', color:'#0E8F6E', bg:'#E3F6EE' },
+      { label:'A preparar', color:'#B0631A', bg:'#FBEFE2' },
+      { label:'Enviado', color:'#3B5BA5', bg:'#E7ECF7' },
+      { label:'Entregado', color:'#6E646A', bg:'#ECECEE' },
+    ];
+
+    // productos del dealer (con stock editable, pausa y eliminación) — incluye publicados nuevos
+    const paused = this.state.paused; const removed = this.state.removed;
+    const customIds = (this.state.customProducts || []).filter(cp => (cp.dealerOwner || 'ap') === did).map(cp => cp.id);
+    const dealerProdIds = acct.prods.concat(customIds);
+    const dealerCatalog = dealerProdIds.filter(id => !removed[id]).map(id => {
+      const p = byId[id]; const s = stock[id] ?? 0;
+      const isPaused = !!paused[id];
+      const st = isPaused ? { label:'Pausado', color:'#6E646A', bg:'#ECECEE' }
+        : (s === 0 ? { label:'Sin stock', color:'#C8102E', bg:'#FBE9EC' }
+        : (s < 15 ? { label:'Poco stock', color:'#B0631A', bg:'#FBEFE2' }
+        : { label:'En stock', color:'#0E8F6E', bg:'#E3F6EE' }));
+      return { id, name:p.name, cat:p.cat, brand:p.brand, priceLabel:this.fmt(p.socio), listLabel:this.fmt(p.list), stock:s,
+        statusLabel:st.label, statusColor:st.color, statusBg:st.bg, isPaused,
+        pauseLabel: isPaused ? 'Reactivar' : 'Pausar',
+        rowOpacity: isPaused ? 0.55 : 1,
+        dec:this.bumpStock(id,-1), inc:this.bumpStock(id,1),
+        edit:this.openEdit(id), pause:this.togglePause(id, p.name), remove:this.removeProduct(id, p.name) };
+    });
+    const sinStock = dealerCatalog.filter(p => p.stock === 0 && !p.isPaused).length;
+    const bajoStock = dealerCatalog.filter(p => p.stock > 0 && p.stock < 15).length;
+    // alertas de stock para el panel
+    const stockAlerts = dealerCatalog
+      .filter(p => (p.stock === 0 || p.stock < 15) && !p.isPaused)
+      .map(p => ({ name:p.name, stock:p.stock,
+        msg: p.stock === 0 ? 'Sin stock — oculto del marketplace' : ('Quedan sólo ' + p.stock + ' unidades'),
+        icon: p.stock === 0 ? '⛔' : '⚠️',
+        color: p.stock === 0 ? '#C8102E' : '#B0631A',
+        bg: p.stock === 0 ? '#FBE9EC' : '#FBEFE2',
+        fix: this.setDealerTab('productos') }));
+    const hasAlerts = stockAlerts.length > 0;
+    const removedList = acct.prods.filter(id => removed[id]).map(id => ({ id, name: byId[id].name, restore: this.restoreProduct(id) }));
+    const hasRemoved = removedList.length > 0;
+
+    // KPIs del dealer
+    const kb = acct.kpiBase;
+    const dealerKpis = [
+      { n:kb.ventas, label:'Ventas del mes', delta:kb.ventasD, deltaColor:'#0E8F6E' },
+      { n:kb.pedidos, label:'Pedidos del mes', delta:kb.pedidosD, deltaColor:'#0E8F6E' },
+      { n:kb.ticket, label:'Ticket promedio', delta:kb.ticketD, deltaColor:'#0E8F6E' },
+      { n:String(acct.prods.length), label:'Productos publicados', delta: sinStock > 0 ? (sinStock + ' sin stock') : 'Todo con stock', deltaColor: sinStock > 0 ? '#B0631A' : '#0E8F6E' },
+    ];
+    const dealerBars = acct.bars.map((h, i) => ({ h: h + '%', tone: i >= 6 ? '#C8102E' : (i >= 3 ? '#D98792' : '#ECC9CE') }));
+    const dealerTop = acct.top;
+
+    // pedidos del dealer (con estado de envío editable)
+    const dealerOrders = acct.orders.map(o => {
+      const idx = this.state.orderStatus[o.id] ?? 0;
+      const st = orderStatuses[idx];
+      const canAdvance = idx < orderStatuses.length - 1;
+      return { ...o, estado:st.label, color:st.color, bg:st.bg,
+        advance:this.advanceOrder(o.id), canAdvance,
+        advanceLabel: canAdvance ? ('Marcar ' + orderStatuses[idx + 1].label) : 'Entregado ✓',
+        steps: orderStatuses.map((s, i) => ({ label:s.label, dotBg: i <= idx ? s.color : '#D6D6DA', txt: i <= idx ? '#44414A' : '#B3ABAE' })) };
+    });
+
+    // ---- Ofertas del día (hero slider) ----
+    const dealDefs = [
+      { id:'p4', kicker:'OFERTA DEL DÍA', name:'Carpa 4 personas Doite Tornado', sub:'Equipá tu próxima aventura al aire libre', tone:'#C8102E', tone2:'#8E0C20' },
+      { id:'p3', kicker:'SÓLO POR HOY', name:'Casco moto integral LS2 Rapid', sub:'Seguridad y diseño para la ruta', tone:'#2A2629', tone2:'#141316' },
+      { id:'p8', kicker:'LIQUIDACIÓN', name:'Conservadora Coleman 48L', sub:'Mantené todo frío en tus salidas', tone:'#B0631A', tone2:'#7A4310' },
+    ];
+    const dealSlides = dealDefs.map(d => {
+      const p = byId[d.id];
+      return { ...d, priceMain: this.fmt(p.socio), priceOld: this.fmt(p.list),
+        disc: Math.round((1 - p.socio / p.list) * 100) + '%',
+        panelStyle: { background: 'linear-gradient(115deg,' + d.tone + ' 0%,' + d.tone2 + ' 100%)', borderRadius:'20px', padding:'40px 46px', color:'#fff', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'28px', position:'relative', overflow:'hidden', minHeight:'260px' },
+        cat: p.cat, view: this.go('producto'), add: this.addCart(d.id) };
+    });
+    const dealTrackStyle = { display:'flex', transform:'translateX(-' + (this.state.dealSlide * 100) + '%)', transition:'transform .6s cubic-bezier(.4,0,.2,1)' };
+    const dealDots = dealSlides.map((d, i) => ({
+      onClick: this.setDeal(i),
+      style: { width: i === this.state.dealSlide ? '26px' : '9px', height:'9px', borderRadius:'100px', border:'none', cursor:'pointer', background: i === this.state.dealSlide ? '#fff' : 'rgba(255,255,255,.45)', transition:'all .3s', padding:0 },
+    }));
+
+    // ---- Carrusel automático de productos ----
+    const chunk = (arr, n) => { const r = []; for (let i = 0; i < arr.length; i += n) r.push(arr.slice(i, i + n)); return r; };
+    const prodPages = chunk(pv, 4).slice(0, 3).map((items, i) => ({ items, key: 'pg' + i }));
+    const prodTrackStyle = { display:'flex', transform:'translateX(-' + (this.state.prodSlide * 100) + '%)', transition:'transform .55s cubic-bezier(.4,0,.2,1)' };
+    const prodDots = prodPages.map((p, i) => ({
+      onClick: this.setProd(i),
+      style: { width: i === this.state.prodSlide ? '26px' : '9px', height:'9px', borderRadius:'100px', border:'none', cursor:'pointer', background: i === this.state.prodSlide ? '#C8102E' : '#D6D6DA', transition:'all .3s', padding:0 },
+    }));
+
+    // ---- Gestión de ofertas del concesionario ----
+    const dd = this.state.dealerDeals;
+    const dealerProducts = acct.prods.map(id => byId[id]).map(p => {
+      const active = !!dd[p.id];
+      const disc = Math.round((1 - p.socio / p.list) * 100);
+      return { ...p, active, listLabel: this.fmt(p.list), socioLabel: this.fmt(p.socio), discLabel: '-' + disc + '%',
+        toggle: this.toggleDeal(p.id),
+        rowBg: active ? '#FBE9EC' : '#fff',
+        rowBorder: active ? '#F2B8C1' : '#E2E2E5',
+        switchBg: active ? '#C8102E' : '#D6D6DA',
+        knobStyle: { width:'20px', height:'20px', borderRadius:'50%', background:'#fff', position:'absolute', top:'3px', left: active ? '23px' : '3px', transition:'left .2s', boxShadow:'0 1px 3px rgba(0,0,0,.3)' },
+        statusLabel: active ? 'En oferta del día' : 'Sin oferta',
+        statusColor: active ? '#0E8F6E' : '#918A8E' };
+    });
+    const dealerDealCount = acct.prods.filter(id => dd[id]).length;
+
+    // ---- Buscador de ExpoACA (mapa) — construido desde los perfiles de los concesionarios ----
+    const pm = this.profilesMerged();
+    const cityOf = (dir) => { const parts = (dir || '').split(','); return (parts[parts.length - 1] || '').trim() || 'Argentina'; };
+    const expoDefs = Object.keys(pm).map(name => {
+      const p = pm[name];
+      const c = this.parseCoords(p.mapLink) || { lat: -34.61, lng: -58.42 };
+      const title = p.razon || p.expo || name;
+      return { name: title, sede: p.expo || '', dealer: name, prov: cityOf(p.dir), addr: p.dir || '',
+        lat: c.lat, lng: c.lng, hours: p.horario || 'Lun a Sáb 8–20h', tone: p.tone || '#C8102E',
+        rating: p.rating || '4.7', tel: p.tel || '', mapLink: p.mapLink || '', initial: p.initial || '',
+        query: [p.razon, p.dir].filter(Boolean).join(' ') };
+    });
+    const rawSel = Math.min(this.state.mapSel, expoDefs.length - 1);
+    const q = this.norm(this.state.expoQuery);
+    const filtered = expoDefs
+      .map((e, i) => ({ e, i }))
+      .filter(({ e }) => !q || this.norm(e.name + ' ' + e.prov + ' ' + e.addr).includes(q));
+    // display selection: keep current if still in results, else jump to first match
+    const inResults = filtered.some(m => m.i === rawSel);
+    const mapSel = inResults ? rawSel : (filtered.length ? filtered[0].i : rawSel);
+    const expoList = filtered.map(({ e, i }) => {
+      const active = i === mapSel;
+      const gmaps = e.mapLink && /^https?:/.test(e.mapLink) ? e.mapLink : ('https://www.google.com/maps/search/?api=1&query=' + e.lat + ',' + e.lng);
+      return { ...e, active, hasCustomPin: !!e.mapLink,
+        onClick: this.selectExpo(i),
+        mapsUrl: gmaps,
+        cardStyle: { display:'flex', gap:'13px', alignItems:'flex-start', padding:'15px 16px', borderRadius:'13px', cursor:'pointer', border:'1px solid ' + (active ? e.tone : '#E2E2E5'), background: active ? '#FBE9EC' : '#fff', transition:'all .15s' },
+        pinStyle: { width:'34px', height:'34px', borderRadius:'50% 50% 50% 2px', transform:'rotate(45deg)', background: e.tone, flex:'none', boxShadow: active ? '0 6px 16px -4px ' + e.tone : 'none' } };
+    });
+    const resultCount = filtered.length;
+    const noResults = resultCount === 0;
+    const sel = expoDefs[mapSel];
+    const mapUrl = this.toEmbed(sel.mapLink, sel.query || (sel.name + ' ' + sel.addr));
+    const selGmaps = sel.mapLink && /^https?:/.test(sel.mapLink) ? sel.mapLink : ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(sel.query || sel.name));
+    // pins positioned over a stylized Argentina map (approx normalized coords)
+    const mapPins = expoDefs.map((e, i) => {
+      const x = ((e.lng + 73) / 20) * 100;     // -73..-53 lng -> 0..100
+      const y = ((e.lat + 55) / 34) * 100;      // -55..-21 lat -> 0..100 (inverted below)
+      return { onClick: this.selectExpo(i), active: i === mapSel, tone: e.tone, name: e.name,
+        style: { position:'absolute', left: x.toFixed(1) + '%', top: (100 - y).toFixed(1) + '%', transform:'translate(-50%,-100%)', cursor:'pointer', zIndex: i === mapSel ? 5 : 2 },
+        dotStyle: { width: i === mapSel ? '22px' : '15px', height: i === mapSel ? '22px' : '15px', borderRadius:'50% 50% 50% 2px', transform:'rotate(45deg)', background: e.tone, border:'2px solid #fff', boxShadow:'0 3px 8px rgba(0,0,0,.35)', transition:'all .2s' } };
+    });
+
+    return {
+      expoList, mapUrl, selName: sel.name, selAddr: sel.addr, selHours: sel.hours, selProv: sel.prov,
+      selMapsUrl: selGmaps, mapPins, onExpoSearch: this.onExpoSearch,
+      resultCount, noResults, hasResults: !noResults,
+      resultLabel: resultCount + (resultCount === 1 ? ' local encontrado' : ' locales encontrados'),
+      goBuscador: this.go('buscador'),
+      isBuscador: screen === 'buscador',
+      dealSlides, dealTrackStyle, dealDots,
+      prodPages, prodTrackStyle, prodDots, prodNext: this.prodNext, prodPrev: this.prodPrev,
+      dealerProducts, dealerDealCount,
+      dealerBars, dealerCatalog, dealerOrders, dealerKpis, dealerTop,
+      stockAlerts, hasAlerts, sinStock, bajoStock, removedList, hasRemoved,
+      alertCount: stockAlerts.length,
+      toast: this.state.toast, hasToast: !!this.state.toast,
+      publishArticle: this.publishArticle, saveDraft: this.saveDraft, submitAlta: this.submitAlta,
+      openCreate: this.openCreate,
+      form: this.state.form || this.blankForm(),
+      isEditing: !!this.state.editingId,
+      pubTitle: this.state.editingId ? 'Editar artículo' : 'Publicar un artículo',
+      pubSubtitle: this.state.editingId ? 'Modificá los datos, precio y fotos del artículo. Los cambios se ven al instante en el marketplace.' : 'Completá los datos del producto. Lo verán todos los socios y clientes del marketplace.',
+      pubCta: this.state.editingId ? 'Guardar cambios' : 'Publicar artículo',
+      setFormName: this.setForm('name'), setFormBrand: this.setForm('brand'), setFormCat: this.setForm('cat'),
+      setFormDesc: this.setForm('desc'), setFormList: this.setForm('list'), setFormSocio: this.setForm('socio'), setFormStock: this.setForm('stock'),
+      formPhotos: (this.state.form || this.blankForm()).photos.map((ph, i) => ({ id: ph.id, n: i + 1, remove: this.removePhoto(i) })),
+      canAddPhoto: (this.state.form || this.blankForm()).photos.length < 8,
+      addPhoto: this.addPhoto,
+      pvName: (this.state.form || {}).name || 'Nombre del artículo…',
+      pvBrand: (this.state.form || {}).brand || '—',
+      pvPrice: this.state.form && this.state.form.socio ? ('$ ' + Number(String(this.state.form.socio).replace(/\D/g,'')).toLocaleString('es-AR')) : '$ 0',
+      pvHasPhotos: ((this.state.form || this.blankForm()).photos.length > 0),
+      pvNoPhotos: ((this.state.form || this.blankForm()).photos.length === 0),
+      photoCountLabel: (this.state.form || this.blankForm()).photos.length + ' / 8 fotos',
+      acctName: this.dName(acct.name), acctInitial: acct.initial, acctRubro: (this.profilesMerged()[acct.name] || {}).rubro || acct.rubro,
+      acctOptions, dealerId: did, setDealerAccount: this.setDealerAccount,
+      dealerTab: this.state.dealerTab,
+      tabResumen: this.state.dealerTab === 'resumen',
+      tabProductos: this.state.dealerTab === 'productos',
+      tabPedidos: this.state.dealerTab === 'pedidos',
+      goResumen: this.setDealerTab('resumen'),
+      goProductos: this.setDealerTab('productos'),
+      goPedidos: this.setDealerTab('pedidos'),
+      navResumenStyle: this.tabStyle('resumen'),
+      navProductosStyle: this.tabStyle('productos'),
+      navPedidosStyle: this.tabStyle('pedidos'),
+      navPerfilStyle: this.tabStyle('perfil'),
+      goPerfil: this.setDealerTab('perfil'),
+      tabPerfil: this.state.dealerTab === 'perfil',
+      prof: this.profilesMerged()[acct.name] || {},
+      setPName: this.setProfile('razon'), setPExpo: this.setProfile('expo'),
+      setPTel: this.setProfile('tel'), setPEmail: this.setProfile('email'),
+      setPDir: this.setProfile('dir'), setPHorario: this.setProfile('horario'),
+      setPRubro: this.setProfile('rubro'), setPCuit: this.setProfile('cuit'),
+      setPDesc: this.setProfile('desc'), setPMapLink: this.setProfile('mapLink'), saveProfile: this.saveProfile,
+      profWaPreview: '+' + this.waDigits((this.profilesMerged()[acct.name] || {}).tel),
+      isHome: screen === 'home',
+      isCatalogo: screen === 'catalogo',
+      isProducto: screen === 'producto',
+      isCarrito: screen === 'carrito',
+      isRegistro: screen === 'registro',
+      isConcesionario: screen === 'concesionario' && this.state.dealerAuth,
+      isConcLogin: screen === 'concLogin' || ((screen === 'concesionario' || screen === 'publicar') && !this.state.dealerAuth),
+      isConcAlta: screen === 'concAlta',
+      isPublicar: screen === 'publicar' && this.state.dealerAuth,
+      productsAll: pv.filter(p => !p.paused && !(this.state.removed || {})[p.id]),
+      productCount: products.length,
+      pdp, related,
+      pdpCompare: this.compareOffers(byId[pdpId]),
+      pdpBuy: this.buyWhatsApp(pdp.dealer, pdp.name, pdp.priceMain),
+      pdpWaLabel: 'Comprar por WhatsApp',
+      cartView, hasCartItems: cartIds.length > 0, cartEmpty: cartIds.length === 0,
+      subtotalLabel: this.fmt(subtotal),
+      ahorroLabel: this.fmt(ahorro),
+      showAhorro: socio && ahorro > 0,
+      envioLabel: envio === 0 ? 'Gratis' : this.fmt(envio),
+      totalLabel: this.fmt(subtotal + envio),
+      dealerKpis, dealerTop, dealerOrders,
+      authReg: this.state.authTab === 'registro',
+      authLogin: this.state.authTab === 'login',
+      authTitle: this.state.authTab === 'registro' ? 'Creá tu cuenta' : 'Ingresá a tu cuenta',
+      authSub: this.state.authTab === 'registro' ? 'Comprá con precio de socio y seguí tus pedidos.' : 'Accedé a tus pedidos, favoritos y precio socio.',
+      authCta: this.state.authTab === 'registro' ? 'Crear cuenta' : 'Ingresar',
+      setReg: this.setAuth('registro'), setLogin: this.setAuth('login'),
+      regTabBg: this.state.authTab === 'registro' ? '#fff' : 'transparent',
+      regTabColor: this.state.authTab === 'registro' ? '#1C1B1F' : '#6E646A',
+      regTabSh: this.state.authTab === 'registro' ? '0 2px 8px -2px rgba(11,27,51,.2)' : 'none',
+      logTabBg: this.state.authTab === 'login' ? '#fff' : 'transparent',
+      logTabColor: this.state.authTab === 'login' ? '#1C1B1F' : '#6E646A',
+      logTabSh: this.state.authTab === 'login' ? '0 2px 8px -2px rgba(11,27,51,.2)' : 'none',
+      socio,
+      socioLabel: socio ? 'Precios socio ACA activados' : 'Mostrando precio público',
+      socioBtnBg: socio ? '#13351f' : 'transparent',
+      socioBtnColor: socio ? '#34D17A' : '#B3ABAE',
+      socioDot: socio ? '#34D17A' : '#6E646A',
+      hasCart: cartCount > 0,
+      cartCount,
+      categories, heroTiles, navCats, dealers,
+      ofertas: pv.filter(p => p.list - p.socio >= p.list * 0.18).slice(0, 4),
+      masVendidos: [pv[4], pv[1], pv[9], pv[0]],
+      goHome: this.go('home'),
+      goCatalogo: this.go('catalogo'),
+      goProducto: this.go('producto'),
+      goCarrito: this.go('carrito'),
+      goRegistro: this.go('registro'),
+      goConcesionario: this.go('concesionario'),
+      goConcLogin: this.go('concLogin'),
+      goConcAlta: this.go('concAlta'),
+      doDealerLogin: this.doDealerLogin,
+      dealerLogout: this.dealerLogout,
+      goPublicar: this.go('publicar'),
+    };
+  }
+}
+</script>
+</body>
+</html>

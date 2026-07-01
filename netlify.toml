@@ -1,0 +1,17 @@
+# Configuración de Netlify para el Portal EXPO ACA
+# Publica los archivos estáticos del portal.
+
+[build]
+  publish = "."
+
+# Redirige todo a la app (single-page) — dejalo si usás rutas del lado del cliente.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
