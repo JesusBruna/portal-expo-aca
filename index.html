@@ -95,6 +95,7 @@ function renderNav(){
   h += `<button class="btn btn-ghost" onclick="go('inicio')">Inicio</button>`;
   h += `<button class="btn btn-ghost" onclick="go('catalogo')">Catálogo</button>`;
   h += `<button class="btn btn-ghost" onclick="go('buscador')">Buscar ExpoACA</button>`;
+  if(!(me && (me.role==='dealer'||me.role==='admin'))) h += `<button class="btn btn-ghost" onclick="go('concesionarios')">Concesionarios</button>`;
   if(session && me){
     if(me.role==='admin')  h += `<button class="btn btn-ghost" onclick="go('admin')">Admin</button>`;
     if(me.role==='dealer') h += `<button class="btn btn-ghost" onclick="go('panel')">Mi panel</button>`;
@@ -111,7 +112,7 @@ async function go(route){
   location.hash = route;
   const [name, arg] = route.split(':');
   const v = $('view');
-  const pub = (name==='inicio' || name==='catalogo' || name==='producto' || name==='buscador');
+  const pub = (name==='inicio' || name==='catalogo' || name==='producto' || name==='buscador' || name==='concesionarios' || name==='solicitud');
   if(!pub && !configured()){ v.innerHTML = setupNotice(); return; }
   v.innerHTML = '<div class="spin"></div>';
   try {
@@ -119,6 +120,8 @@ async function go(route){
     else if(name==='catalogo') await viewCatalogo(v);
     else if(name==='producto') await viewProducto(v, arg);
     else if(name==='buscador') await viewBuscador(v);
+    else if(name==='concesionarios') viewConcesionarios(v);
+    else if(name==='solicitud') viewSolicitud(v);
     else if(name==='login')    viewLogin(v);
     else if(name==='panel')    await viewPanel(v);
     else if(name==='admin')    await viewAdmin(v);
@@ -333,6 +336,59 @@ function selExpo(i){
   $('mapFrame').src = `https://www.google.com/maps?q=${c.lat},${c.lng}&z=15&output=embed`;
 }
 
+// ---------- Concesionarios (landing) ----------
+function viewConcesionarios(v){
+  const benefit=(t,d)=>`<div style="display:flex;gap:12px;align-items:flex-start"><span style="width:30px;height:30px;border-radius:8px;background:#ffffff26;display:flex;align-items:center;justify-content:center;color:#E6A100;font-weight:800;flex:none">✓</span><div><div style="font-weight:700;font-size:15px">${t}</div><div style="font-size:13.5px;color:#ffffffcc;margin-top:2px">${d}</div></div></div>`;
+  v.innerHTML=`
+    <div class="grid" style="grid-template-columns:1.1fr .9fr;align-items:stretch;gap:0;border-radius:20px;overflow:hidden;border:1px solid #E2E2E5">
+      <div style="background:linear-gradient(120deg,#1C1B1F,#2A2629);color:#fff;padding:44px 42px;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:48px 48px"></div>
+        <div style="position:relative">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;background:#ffffff1f;border:1px solid #ffffff33;padding:6px 13px;border-radius:100px">🔒 ACCESO EXCLUSIVO</span>
+          <h1 style="font-size:36px;line-height:1.05;margin-top:16px">Portal de Concesionarios</h1>
+          <p style="font-size:15.5px;color:#ffffffcc;margin-top:12px;max-width:420px;line-height:1.55">Espacio privado para los comercios adheridos a ExpoACA. Gestioná tu catálogo, stock, pedidos, ofertas del día y KPIs de venta desde un solo lugar.</p>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:26px;max-width:420px">
+            ${benefit('Publicá y administrá tu catálogo','Alta, edición, fotos, precios y stock en vivo.')}
+            ${benefit('Ofertas del día','Elegí qué productos destacar en el marketplace.')}
+            ${benefit('Pedidos y ventas','Seguí tus pedidos por estado y tus KPIs.')}
+            ${benefit('Clientes socios ACA','Llegá a miles de socios de todo el país.')}
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;padding:44px 40px;display:flex;flex-direction:column;justify-content:center">
+        <h2 style="font-size:24px">Ingresá a tu portal</h2>
+        <p style="color:#6E646A;font-size:14px;margin-top:6px">Usá el usuario que te asignó ACA.</p>
+        <button class="btn btn-red" style="margin-top:18px" onclick="go('login')">Ingresar a mi portal →</button>
+        <div style="display:flex;align-items:center;gap:12px;margin:22px 0"><span style="flex:1;height:1px;background:#ECECEE"></span><span style="font-size:12.5px;color:#918A8E">¿todavía no sos parte?</span><span style="flex:1;height:1px;background:#ECECEE"></span></div>
+        <button class="btn" style="border:1.5px solid #1C1B1F;background:#fff;color:#1C1B1F" onclick="go('solicitud')">Quiero ser concesionario</button>
+      </div>
+    </div>`;
+}
+function viewSolicitud(v){
+  const f=(id,lbl,ph='')=>`<div style="margin-bottom:12px"><label class="lbl">${lbl}</label><input id="${id}" class="fld" placeholder="${ph}"></div>`;
+  v.innerHTML=`
+    <a onclick="go('concesionarios')" style="cursor:pointer;color:#6E646A;font-size:14px;font-weight:600">← Volver</a>
+    <div class="card" style="max-width:640px;margin:14px auto 0;padding:28px">
+      <span style="font-family:'Archivo';font-weight:800;font-size:13px;color:#C8102E;letter-spacing:.06em;text-transform:uppercase">Sumate a la red</span>
+      <h1 style="font-size:28px;margin-top:6px">Quiero ser concesionario</h1>
+      <p style="color:#6E646A;font-size:14px;margin-top:8px;margin-bottom:18px">Completá tus datos y el equipo de ExpoACA se contactará para darte de alta.</p>
+      ${f('sRazon','Razón social / nombre comercial','Ej: AutoParts Pro S.A.')}
+      <div class="grid" style="grid-template-columns:1fr 1fr">${f('sCuit','CUIT','30-00000000-0')}${f('sRubro','Rubro principal','Repuestos, neumáticos…')}</div>
+      ${f('sSede','Estación / sede ACA asociada','Ej: Estación ACA Palermo')}
+      <div class="grid" style="grid-template-columns:1fr 1fr">${f('sContacto','Nombre de contacto','Responsable')}${f('sTel','Teléfono / WhatsApp','+54 9 11 0000-0000')}</div>
+      ${f('sEmail','Email','ventas@tucomercio.com')}
+      <button class="btn btn-red" style="margin-top:8px" onclick="enviarSolicitud()">Enviar solicitud</button>
+    </div>`;
+}
+async function enviarSolicitud(){
+  const rec={ razon:$('sRazon').value.trim(), cuit:$('sCuit').value.trim(), rubro:$('sRubro').value.trim(),
+    sede:$('sSede').value.trim(), contacto:$('sContacto').value.trim(), tel:$('sTel').value.trim(), email:$('sEmail').value.trim() };
+  if(!rec.razon||!rec.email){ toast('Completá al menos razón social y email'); return; }
+  const { error }=await sb.from('dealer_applications').insert(rec);
+  if(error){ toast(error.message); return; }
+  toast('✅ ¡Solicitud enviada! Te vamos a contactar.'); go('concesionarios');
+}
+
 // ---------- Login / registro ----------
 function viewLogin(v){
   v.innerHTML = `
@@ -382,7 +438,7 @@ async function viewPanel(v){
     sb.from('orders').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false})
   ]);
   window._cats = cats||[];
-  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], tab: (window._panel&&window._panel.tab)||'productos' };
+  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], tab: (window._panel&&window._panel.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
       <div style="display:flex;align-items:center;gap:12px">
@@ -393,6 +449,7 @@ async function viewPanel(v){
       <button class="btn btn-red" onclick="newProduct()">+ Nuevo artículo</button>
     </div>
     <div style="display:flex;gap:6px;background:#fff;border:1px solid #E2E2E5;border-radius:12px;padding:5px;width:fit-content;margin-bottom:20px">
+      <button id="ptab-resumen" class="btn" onclick="panelTab('resumen')">Resumen</button>
       <button id="ptab-productos" class="btn" onclick="panelTab('productos')">Productos y stock</button>
       <button id="ptab-pedidos" class="btn" onclick="panelTab('pedidos')">Pedidos</button>
       <button id="ptab-perfil" class="btn" onclick="panelTab('perfil')">Perfil del expo</button>
@@ -404,11 +461,31 @@ async function viewPanel(v){
 
 function panelTab(tab){
   window._panel.tab = tab;
-  ['productos','pedidos','perfil'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
+  ['resumen','productos','pedidos','perfil'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
   const body=$('ptab-body');
-  if(tab==='productos') body.innerHTML = panelProductos();
+  if(tab==='resumen') body.innerHTML = panelResumen();
+  else if(tab==='productos') body.innerHTML = panelProductos();
   else if(tab==='pedidos') body.innerHTML = panelPedidos();
   else body.innerHTML = panelPerfil();
+}
+function panelResumen(){
+  const P=window._panel; const prods=P.prods, orders=P.orders;
+  const ventas = orders.filter(o=>o.status!=='cancelado').reduce((a,o)=>a+(o.total||0),0);
+  const pend = orders.filter(o=>o.status==='pagado'||o.status==='a_preparar').length;
+  const sinStock = prods.filter(p=>p.stock===0).length;
+  const kpi=(n,l,c)=>`<div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">${l}</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px">${n}</div>${c?`<div style="font-size:12.5px;font-weight:700;margin-top:6px;color:${c.col}">${c.txt}</div>`:''}</div>`;
+  // mini gráfico: pedidos por estado
+  const byStatus=ORDER_FLOW.map(s=>orders.filter(o=>o.status===s).length);
+  const maxB=Math.max(1,...byStatus);
+  const bars=ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:150px"><div style="height:${Math.round(byStatus[i]/maxB*100)}%;background:${ORDER_COLOR[s].c};border-radius:7px 7px 0 0;min-height:3px"></div></div><span style="font-size:11.5px;color:#6E646A;font-weight:600">${ORDER_LABEL[s]}</span><b style="font-size:13px">${byStatus[i]}</b></div>`).join('');
+  const low=prods.filter(p=>p.stock<15).slice(0,6).map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:14px"><span>${esc(p.name)}</span><b style="color:${p.stock===0?'#C8102E':'#B0631A'}">${p.stock} u.</b></div>`).join('');
+  return `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
+      ${kpi(money(ventas),'Ventas registradas')}${kpi(orders.length,'Pedidos totales')}${kpi(pend,'Pedidos a preparar',{col:'#B0631A',txt:'requieren acción'})}${kpi(prods.length,'Productos publicados',sinStock?{col:'#C8102E',txt:sinStock+' sin stock'}:{col:'#0B7A55',txt:'todo con stock'})}
+    </div>
+    <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start">
+      <div class="card" style="padding:22px"><h3 style="font-size:18px;margin-bottom:6px">Pedidos por estado</h3><div style="display:flex;gap:14px;margin-top:16px">${bars}</div></div>
+      <div class="card" style="padding:22px"><h3 style="font-size:18px;margin-bottom:10px">Stock bajo</h3>${low||'<p style="color:#6E646A;font-size:14px">Todo con buen stock 👌</p>'}</div>
+    </div>`;
 }
 
 function panelProductos(){
@@ -577,13 +654,14 @@ async function delProduct(id, name){ if(!confirm('¿Eliminar "'+name+'"?'))retur
 // ---------- Admin (dueño) ----------
 async function viewAdmin(v){
   if(!me || me.role!=='admin'){ v.innerHTML='<div class="card" style="padding:24px">Sección exclusiva del administrador.</div>'; return; }
-  const [{data:dealers},{data:users},{data:products},{data:orders}] = await Promise.all([
+  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps}] = await Promise.all([
     sb.from('dealers').select('*').order('razon'),
     sb.from('app_users').select('*, dealers(razon)').order('created_at',{ascending:false}),
     sb.from('products').select('id,dealer_id'),
-    sb.from('orders').select('*, dealers(razon)').order('created_at',{ascending:false}).limit(10)
+    sb.from('orders').select('*, dealers(razon)').order('created_at',{ascending:false}).limit(10),
+    sb.from('dealer_applications').select('*').order('created_at',{ascending:false})
   ]);
-  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], tab:(window._admin&&window._admin.tab)||'resumen' };
+  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], tab:(window._admin&&window._admin.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
       <div><h1 style="font-size:26px">Panel de administración 👑</h1>
@@ -593,6 +671,7 @@ async function viewAdmin(v){
       <button id="atab-resumen" class="btn" onclick="adminTab('resumen')">Resumen</button>
       <button id="atab-expos" class="btn" onclick="adminTab('expos')">Expos / Concesionarios</button>
       <button id="atab-usuarios" class="btn" onclick="adminTab('usuarios')">Usuarios y roles</button>
+      <button id="atab-solicitudes" class="btn" onclick="adminTab('solicitudes')">Solicitudes${(window._admin&&window._admin.apps.filter(a=>a.estado==='nueva').length)?` <span style="background:#C8102E;color:#fff;border-radius:100px;padding:1px 7px;font-size:11px;margin-left:4px">${window._admin.apps.filter(a=>a.estado==='nueva').length}</span>`:''}</button>
     </div>
     <div id="atab-body"></div>
     <div id="modal"></div>`;
@@ -600,11 +679,40 @@ async function viewAdmin(v){
 }
 function adminTab(tab){
   window._admin.tab = tab;
-  ['resumen','expos','usuarios'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
+  ['resumen','expos','usuarios','solicitudes'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
   const body=$('atab-body');
   if(tab==='resumen') body.innerHTML = adminResumen();
   else if(tab==='expos') body.innerHTML = adminExpos();
-  else body.innerHTML = adminUsuarios();
+  else if(tab==='usuarios') body.innerHTML = adminUsuarios();
+  else body.innerHTML = adminSolicitudes();
+}
+function adminSolicitudes(){
+  const apps=window._admin.apps;
+  if(!apps.length) return '<div class="card" style="padding:30px;text-align:center;color:#6E646A">No hay solicitudes por ahora.</div>';
+  const badge={nueva:{t:'Nueva',c:'#C8102E',b:'#FBE9EC'},aprobada:{t:'Aprobada',c:'#0B7A55',b:'#E3F6EE'},rechazada:{t:'Rechazada',c:'#6E646A',b:'#ECECEE'}};
+  return '<div style="display:flex;flex-direction:column;gap:12px">'+apps.map(a=>{
+    const bg=badge[a.estado]||badge.nueva;
+    return `<div class="card" style="padding:18px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><div style="display:flex;align-items:center;gap:10px"><b style="font-size:16px">${esc(a.razon)}</b><span class="tag" style="background:${bg.b};color:${bg.c}">${bg.t}</span></div>
+        <div style="font-size:13px;color:#6E646A;margin-top:4px">${esc(a.rubro||'')} · ${esc(a.sede||'')} · CUIT ${esc(a.cuit||'—')}</div>
+        <div style="font-size:13px;color:#918A8E;margin-top:2px">${esc(a.contacto||'')} · ${esc(a.tel||'')} · ${esc(a.email||'')}</div></div>
+        ${a.estado==='nueva'?`<div style="display:flex;gap:8px"><button class="btn btn-red" style="padding:9px 16px" onclick='aprobarSolicitud(${JSON.stringify(a).replace(/'/g,"&#39;")})'>Aprobar y crear expo</button><button class="btn btn-ghost" style="padding:9px 16px" onclick="rechazarSolicitud('${a.id}')">Rechazar</button></div>`:''}
+      </div></div>`;
+  }).join('')+'</div>';
+}
+async function aprobarSolicitud(a){
+  const rec={ razon:a.razon, sede:a.sede, rubro:a.rubro, cuit:a.cuit, tel:a.tel, email:a.email, active:true, initial:(a.razon&&a.razon[0]||'E').toUpperCase() };
+  const { error:e1 }=await sb.from('dealers').insert(rec);
+  if(e1){ toast('Error creando expo: '+e1.message); return; }
+  const { error:e2 }=await sb.from('dealer_applications').update({estado:'aprobada'}).eq('id',a.id);
+  if(e2){ toast(e2.message); return; }
+  toast('✅ Expo creado. Asignale un usuario en "Usuarios y roles".'); go('admin');
+}
+async function rechazarSolicitud(id){
+  const { error }=await sb.from('dealer_applications').update({estado:'rechazada'}).eq('id',id);
+  if(error){ toast(error.message); return; }
+  toast('Solicitud rechazada'); go('admin');
 }
 function adminResumen(){
   const A=window._admin;
