@@ -11,7 +11,7 @@
 <script src="config.js"></script>
 <style>
   *{box-sizing:border-box}
-  body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:#ECECEE;color:#1C1B1F;-webkit-font-smoothing:antialiased}
+  body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:radial-gradient(120% 100% at 15% 0%,#F4EDEE 0%,#ECECEE 45%,#E7E6E9 100%);color:#1C1B1F;-webkit-font-smoothing:antialiased}
   h1,h2,h3,h4{font-family:'Archivo',system-ui,sans-serif;margin:0;letter-spacing:-.02em}
   a{color:inherit;text-decoration:none}
   button{font-family:'Public Sans';cursor:pointer}
@@ -23,8 +23,10 @@
   .btn-red{background:#C8102E;color:#fff}
   .btn-dark{background:#1C1B1F;color:#fff}
   .btn-ghost{background:#fff;border:1px solid #D6D6DA;color:#1C1B1F}
-  .card{background:#fff;border:1px solid #E2E2E5;border-radius:16px;transition:box-shadow .18s,transform .18s,border-color .18s}
-  .card[onclick]:hover{box-shadow:0 16px 40px -22px rgba(28,27,31,.45);transform:translateY(-3px);border-color:#CFC6C9}
+  .card{background:#fff;border:1px solid #EDEDEF;border-radius:16px;transition:box-shadow .22s,transform .22s,border-color .18s;box-shadow:0 14px 34px -22px rgba(28,27,31,.16),0 2px 6px -2px rgba(28,27,31,.05)}
+  .card[onclick]:hover{box-shadow:0 24px 50px -20px rgba(28,27,31,.28);transform:translateY(-4px);border-color:#CFC6C9}
+  .float3d{box-shadow:0 30px 60px -24px rgba(28,27,31,.35),0 2px 10px -2px rgba(28,27,31,.08);transition:transform .35s,box-shadow .35s}
+  .float3d:hover{transform:translateY(-5px) scale(1.006)}
   .fld{width:100%;margin-top:6px;padding:12px 14px;border:1px solid #D6D6DA;border-radius:10px;outline:none}
   .fld:focus{border-color:#C8102E;box-shadow:0 0 0 3px #C8102E22}
   .lbl{font-size:13px;font-weight:600;color:#44414A}
@@ -34,18 +36,39 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1C1B1F;color:#fff;padding:13px 22px;border-radius:12px;font-weight:600;font-size:14px;z-index:999;box-shadow:0 16px 40px -12px rgba(0,0,0,.5);opacity:0;transition:opacity .25s;pointer-events:none}
   .toast.show{opacity:1}
+  @keyframes acaPulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .recoWrap{background:radial-gradient(130% 180% at 12% 0%,#FFF8EA 0%,#FBEFDA 45%,#F1E1C0 100%);position:relative;overflow:hidden;border-radius:26px;padding:30px 26px 32px;border:1px solid #EFDFB8;box-shadow:0 20px 46px -30px rgba(122,67,16,.35)}
+  .recoWrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(#00000009 1.4px,transparent 1.4px);background-size:18px 18px;opacity:.6;pointer-events:none}
+  .recoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
+  .recoCard{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px -16px rgba(28,27,31,.18);transition:transform .25s ease,box-shadow .25s ease;position:relative;cursor:pointer}
+  .recoCard:hover{transform:translateY(-6px);box-shadow:0 26px 48px -18px rgba(28,27,31,.34)}
+  .recoImg{height:150px;background:#F5EEE0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .recoDisc{position:absolute;top:10px;left:10px;background:#1C1B1F;color:#FFC94D;font-weight:800;font-size:12px;padding:5px 10px;border-radius:8px;letter-spacing:.02em}
+  .recoBody{padding:16px 16px 18px}
+  .recoPrice{font-family:'Archivo';font-weight:900;font-size:27px;color:#C8102E;letter-spacing:-.02em}
+  .recoOld{font-size:12.5px;color:#C7B79A;text-decoration:line-through;margin-left:8px}
+  .recoStockBar{height:5px;border-radius:100px;background:#F1E9D8;margin-top:10px;overflow:hidden}
+  .recoStockFill{height:100%;border-radius:100px}
+  .recoBtn{margin-top:14px;width:100%;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:14px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 10px 22px -10px rgba(200,16,46,.55);transition:transform .15s,box-shadow .15s}
+  .recoBtn:hover{transform:translateY(-2px);box-shadow:0 15px 28px -10px rgba(200,16,46,.68)}
+  @media (max-width:900px){ .recoGrid,.destGrid{grid-template-columns:repeat(2,1fr)!important} }
+  @media (max-width:560px){ .recoGrid,.destGrid{grid-template-columns:1fr!important} }
   .grid{display:grid;gap:16px}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<header style="background:#fff;border-bottom:1px solid #E2E2E5;position:sticky;top:0;z-index:50">
+<header style="background:#fff;border-bottom:1px solid #E2E2E5;position:sticky;top:0;z-index:50;box-shadow:0 4px 16px -8px rgba(28,27,31,.08)">
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px">
-    <a href="#" onclick="go('inicio');return false" style="display:flex;align-items:center;gap:11px">
+    <a href="#" onclick="go('inicio');return false" style="display:flex;align-items:center;gap:11px;flex:none">
       <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900">EA</span>
       <span style="line-height:1.05"><span style="display:block;font-family:'Archivo';font-weight:800;font-size:18px">EXPO ACA</span><span style="display:block;font-size:10.5px;color:#918A8E;font-weight:600;letter-spacing:.03em">MARKETPLACE OFICIAL ACA</span></span>
     </a>
+    <div style="flex:1;max-width:440px;display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:11px;padding:9px 14px">
+      <span style="color:#918A8E">⌕</span>
+      <input id="topSearch" placeholder="Buscar productos, marcas, rubros…" style="flex:1;border:none;background:transparent;outline:none;font-size:14px" onkeydown="topSearchGo(event)">
+    </div>
     <nav id="nav" style="display:flex;align-items:center;gap:8px"></nav>
   </div>
 </header>
@@ -96,6 +119,36 @@ function cartCount(){ return Object.values(cart).reduce((a,q)=>a+q,0); }
 function addCart(id, ev){ if(ev){ ev.stopPropagation(); } cart[id]=(cart[id]||0)+1; saveCart(); toast('Agregado al carrito 🛒'); }
 function setQty(id, q){ q=Math.max(0,q); if(q===0) delete cart[id]; else cart[id]=q; saveCart(); if(location.hash.indexOf('carrito')>=0) go('carrito'); }
 function clearCartDealer(ids){ ids.forEach(id=>delete cart[id]); saveCart(); }
+function topSearchGo(e){ if(e.key && e.key!=='Enter') return; window._catInitQ = ($('topSearch')?$('topSearch').value.trim():''); go('catalogo'); }
+
+// ---------- Analytics: tracking de eventos por producto ----------
+function trackEvent(productId, dealerId, type){
+  if(!configured() || !sb || !productId) return;
+  try{ sb.from('product_events').insert({ product_id: productId, dealer_id: dealerId||null, event_type: type, user_id: me?me.id:null }).then(()=>{}, ()=>{}); }catch(e){}
+}
+// ---------- Recomendaciones: historial local de navegación ----------
+function recoCatSlugs(){ try{ return JSON.parse(localStorage.getItem('expoaca_viewed_cats')||'[]'); }catch(e){ return []; } }
+function addRecoCat(slug){ if(!slug) return; let arr=recoCatSlugs().filter(s=>s!==slug); arr.unshift(slug); try{ localStorage.setItem('expoaca_viewed_cats', JSON.stringify(arr.slice(0,5))); }catch(e){} }
+function recoViewedIds(){ try{ return JSON.parse(localStorage.getItem('expoaca_viewed_ids')||'[]'); }catch(e){ return []; } }
+function addRecoId(id){ if(!id) return; let arr=recoViewedIds().filter(x=>x!==id); arr.unshift(id); try{ localStorage.setItem('expoaca_viewed_ids', JSON.stringify(arr.slice(0,30))); }catch(e){} }
+async function getRecommendations(){
+  const excludeIds = recoViewedIds();
+  let list = [];
+  const cats = recoCatSlugs();
+  if(cats.length){
+    const { data:catRows } = await sb.from('categories').select('id').in('slug',cats);
+    const catIds=(catRows||[]).map(c=>c.id);
+    if(catIds.length){
+      const { data } = await sb.from('products').select('*, dealers(razon,tel), categories(name,slug)').eq('paused',false).gt('stock',0).in('category_id',catIds).order('is_deal',{ascending:false}).limit(12);
+      list = (data||[]).filter(p=>!excludeIds.includes(p.id));
+    }
+  }
+  if(list.length<4){
+    const { data } = await sb.from('products').select('*, dealers(razon,tel), categories(name,slug)').eq('paused',false).gt('stock',0).order('is_deal',{ascending:false}).order('created_at',{ascending:false}).limit(14);
+    (data||[]).forEach(p=>{ if(!list.find(x=>x.id===p.id) && !excludeIds.includes(p.id)) list.push(p); });
+  }
+  return list.slice(0,4);
+}
 
 // ---------- Init ----------
 function configured(){ const c=window.SUPABASE_CONFIG||{}; return c.url && c.anonKey && !/TU-PROYECTO|TU-ANON/.test(c.url+c.anonKey); }
@@ -196,6 +249,30 @@ function productCard(p){
   </div>`;
 }
 
+// Tarjeta de recomendación — dise\u00f1o premium con precio hero y urgencia
+function recoCard(p){
+  const dealer = p.dealers?.razon || ''; const cat = p.categories?.name || '';
+  const disc = p.price_list? Math.round((1-p.price_socio/p.price_list)*100) : 0;
+  const lowStock = p.stock>0 && p.stock<=10;
+  const stockPct = Math.max(6, Math.min(100, p.stock? Math.round((p.stock/30)*100):0));
+  return `<div class="recoCard" onclick="go('producto:${p.id}')">
+    <div class="recoImg">
+      ${p.photo_url?`<img src="${esc(p.photo_url)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:`<span style="font-family:'Archivo';font-weight:800;font-size:16px;color:#9C7F45">${esc(p.brand||'')}</span>`}
+      ${disc?`<span class="recoDisc">-${disc}%</span>`:''}
+    </div>
+    <div class="recoBody">
+      <div style="font-size:10.5px;font-weight:700;color:#A98F55;text-transform:uppercase;letter-spacing:.05em">${esc(dealer)} · ${esc(cat)}</div>
+      <div style="font-weight:700;font-size:14.5px;margin-top:6px;min-height:38px;line-height:1.3">${esc(p.name)}</div>
+      <div style="margin-top:8px"><span class="recoPrice">${money(p.price_socio)}</span>${disc?`<span class="recoOld">${money(p.price_list)}</span>`:''}</div>
+      <div style="font-size:11.5px;color:#0B7A55;font-weight:700;margin-top:4px">Precio socio${disc?' · ahorrás '+disc+'%':''}</div>
+      ${lowStock
+        ? `<div style="display:flex;align-items:center;gap:6px;margin-top:11px"><span style="width:7px;height:7px;border-radius:50%;background:#C8102E;animation:acaPulse 1.3s infinite"></span><span style="font-size:12px;font-weight:700;color:#C8102E">¡Quedan ${p.stock} unidades!</span></div>`
+        : `<div class="recoStockBar"><div class="recoStockFill" style="width:${stockPct}%;background:${p.stock<15?'#E6A100':'#0E8F6E'}"></div></div>`}
+      <button class="recoBtn" onclick="event.stopPropagation();go('producto:${p.id}')">Ver producto <span>→</span></button>
+    </div>
+  </div>`;
+}
+
 function setupNotice(){
   return `<div class="card" style="padding:28px;max-width:640px;margin:20px auto">
     <h2 style="font-size:24px">Falta conectar la base de datos</h2>
@@ -231,6 +308,7 @@ async function viewCatalogo(v, slugArg){
     <div id="catInfo" style="font-size:13.5px;color:#6E646A;margin-bottom:12px"></div>
     <div id="catGrid" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))"></div>`;
   applyCatFilters();
+  if(window._catInitQ){ if($('cq')) $('cq').value = window._catInitQ; window._catInitQ=''; applyCatFilters(); }
 }
 function applyCatFilters(){
   const C=window._cat; if(!C) return;
@@ -252,18 +330,20 @@ function applyCatFilters(){
 // ---------- Inicio (Home) ----------
 async function viewInicio(v){
   if(!configured()){ await viewCatalogo(v); return; }
-  const [{data:cats},{data:deals},{data:destacados},{data:dealers}] = await Promise.all([
+  const [{data:cats},{data:deals},{data:destacados},{data:dealers}, recos] = await Promise.all([
     sb.from('categories').select('*').order('name'),
     sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('is_deal',true).eq('paused',false).gt('stock',0).or('deal_until.is.null,deal_until.gt.'+new Date().toISOString()).limit(6),
-    sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('paused',false).gt('stock',0).order('created_at',{ascending:false}).limit(8),
-    sb.from('dealers').select('*').eq('active',true).order('razon').limit(6)
+    sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('paused',false).gt('stock',0).order('created_at',{ascending:false}).limit(12),
+    sb.from('dealers').select('*').eq('active',true).order('razon').limit(6),
+    getRecommendations()
   ]);
   const catChips = (cats||[]).map(c=>`<div onclick="go('catalogo:${c.slug}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:13px;padding:16px;display:flex;align-items:center;gap:12px">
       <span style="width:44px;height:44px;border-radius:11px;background:${esc(c.tone||'#C8102E')};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800">${esc((c.name||'?')[0])}</span>
       <span style="font-weight:600;font-size:14px">${esc(c.name)}</span>
     </div>`).join('');
-  const dealCards = (deals||[]).map(productCard).join('');
-  const destCards = (destacados||[]).map(productCard).join('');
+  const recoCardsHtml = (recos||[]).map(recoCard).join('');
+  const destArr = destacados||[]; const destPages=[]; for(let i=0;i<destArr.length;i+=4) destPages.push(destArr.slice(i,i+4));
+  window._destPages = destPages;
   const dealerCards = (dealers||[]).map(d=>`<div onclick="go('expo:${d.id}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:14px;padding:18px;text-align:center">
       <span style="width:52px;height:52px;border-radius:13px;margin:0 auto;background:${esc(d.tone||'#C8102E')};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">${esc(d.initial||(d.razon||'?')[0])}</span>
       <div style="font-weight:700;font-size:15px;margin-top:10px">${esc(d.razon)}</div>
@@ -271,28 +351,22 @@ async function viewInicio(v){
       <div style="font-size:12px;color:#B0631A;font-weight:700;margin-top:6px">★ ${esc(String(d.rating||'4.7'))}</div>
     </div>`).join('');
   v.innerHTML = `
-    <section style="background:linear-gradient(115deg,#C8102E,#8E0C20);border-radius:22px;padding:44px 40px;color:#fff;position:relative;overflow:hidden;margin-bottom:32px">
-      <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:52px 52px"></div>
-      <div style="position:relative;max-width:640px">
-        <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff26;border:1px solid #ffffff40;padding:6px 13px;border-radius:100px">MARKETPLACE OFICIAL · AUTOMÓVIL CLUB ARGENTINO</span>
-        <h1 style="font-size:44px;line-height:1.02;margin-top:16px;letter-spacing:-.03em">Todo para tu vehículo,<br>al mejor precio de socio</h1>
-        <p style="font-size:17px;color:#ffffffdd;margin-top:12px;max-width:520px">Comprá accesorios, repuestos, neumáticos y equipamiento en los ExpoACA de todo el país. Beneficios exclusivos para socios.</p>
-        <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
-          <button class="btn" style="background:#fff;color:#1C1B1F" onclick="go('catalogo')">Ver catálogo completo</button>
-          <button class="btn" style="background:#ffffff1f;border:1px solid #ffffff40;color:#fff" onclick="go('buscador')">📍 Buscar ExpoACA cercano</button>
-        </div>
-      </div>
+    <section class="float3d" style="border-radius:24px;overflow:hidden;position:relative;margin-bottom:32px;min-height:360px">
+      <div id="heroTrack" style="display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)"></div>
+      <button onclick="heroNav(-1)" style="position:absolute;top:50%;left:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">‹</button>
+      <button onclick="heroNav(1)" style="position:absolute;top:50%;right:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">›</button>
+      <div id="heroDots" style="position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:8px"></div>
     </section>
 
     <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px">
-      <div class="card" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff">
+      <div class="card float3d" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff;border:none">
         <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
         <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">MARKETPLACE</span>
         <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Explorá el catálogo completo</h2>
         <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más, con precio socio.</p>
         <span style="display:inline-block;margin-top:16px;background:#fff;color:#1C1B1F;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Ver catálogo →</span></div>
       </div>
-      <div class="card" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#1C1B1F,#2A2629);color:#fff">
+      <div class="card float3d" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#1C1B1F,#2A2629);color:#fff;border:none">
         <div style="position:absolute;top:20px;right:24px;width:22px;height:22px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#C8102E;border:3px solid #fff"></div>
         <div style="position:absolute;bottom:30px;right:70px;width:16px;height:16px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#E6A100;border:3px solid #fff"></div>
         <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:40px 40px"></div>
@@ -303,25 +377,131 @@ async function viewInicio(v){
       </div>
     </div>
 
+    ${recoCardsHtml?`<div class="recoWrap" style="margin-bottom:34px">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:18px;position:relative">
+        <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#FFC94D,#E6A100);display:flex;align-items:center;justify-content:center;color:#1C1B1F;font-size:20px;box-shadow:0 8px 18px -8px rgba(230,161,0,.6)">✨</span>
+        <div><h2 style="font-size:23px;letter-spacing:-.01em">Recomendado para vos</h2><p style="font-size:13px;color:#8A7A55;margin-top:2px">Elegido según lo que estuviste mirando · precio socio por tiempo limitado</p></div>
+      </div>
+      <div class="recoGrid">${recoCardsHtml}</div>
+    </div>`:''}
+
     <h2 style="font-size:24px;margin-bottom:14px">Comprá por categoría</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:34px">${catChips||'<p style="color:#6E646A">Sin categorías.</p>'}</div>
 
-    ${dealCards?`<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px">⚡</span><h2 style="font-size:24px">Ofertas del día</h2></div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:34px">${dealCards}</div>`:''}
+    ${deals&&deals.length?`<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px">⚡</span><h2 style="font-size:24px">Ofertas del día</h2></div>
+    <div id="dealsSpot" class="float3d" style="border-radius:22px;overflow:hidden;margin-bottom:34px"></div>`:''}
 
     <div style="display:flex;align-items:end;justify-content:space-between;margin-bottom:14px"><h2 style="font-size:24px">Destacados</h2><a onclick="go('catalogo')" style="cursor:pointer;color:#C8102E;font-weight:700;font-size:14px">Ver todos →</a></div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:34px">${destCards||'<p style="color:#6E646A">Sin productos.</p>'}</div>
+    <div style="position:relative;margin-bottom:34px;overflow:hidden;border-radius:20px">
+      <div id="destTrack" style="display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)">${destPages.length?destPages.map(pg=>`<div class="destGrid" style="flex:0 0 100%;min-width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">${pg.map(productCard).join('')}</div>`).join(''):'<p style="color:#6E646A">Sin productos.</p>'}</div>
+      ${destPages.length>1?`<div id="destDots" style="display:flex;justify-content:center;gap:8px;margin-top:16px"></div>`:''}
+    </div>
 
     ${dealerCards?`<h2 style="font-size:24px;margin-bottom:14px">ExpoACA destacados</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${dealerCards}</div>`:''}
   `;
+  startHeroCarousel();
+  if(destPages.length>1) startDestCarousel(); else clearInterval(window._destInterval);
+  if(deals&&deals.length){ window._deals=deals; startDealsSpot(); } else { clearInterval(window._dealsInterval); clearInterval(window._dealsCountdown); }
+}
+
+// ---------- Destacados: carrusel de 4 en fila ----------
+function renderDest(){
+  const track=$('destTrack'), dots=$('destDots'); if(!track) return;
+  track.style.transform = 'translateX(-'+((window._destIdx||0)*100)+'%)';
+  if(dots) dots.innerHTML = (window._destPages||[]).map((_,i)=>`<button onclick="destGoTo(${i})" style="width:${i===(window._destIdx||0)?'22px':'8px'};height:8px;border-radius:100px;border:none;cursor:pointer;background:${i===(window._destIdx||0)?'#C8102E':'#D6D6DA'};transition:all .3s;padding:0"></button>`).join('');
+}
+function destGoTo(i){ window._destIdx=i; renderDest(); }
+function startDestCarousel(){
+  window._destIdx=0; clearInterval(window._destInterval);
+  renderDest();
+  window._destInterval = setInterval(()=>{ const pages=window._destPages||[]; if(pages.length>1) destGoTo(((window._destIdx||0)+1)%pages.length); }, 5000);
+}
+
+// ---------- Hero carousel (3 slides) ----------
+const HERO_SLIDES = [
+  { tag:'AUTOS Y MOTOS', title:'Encontrá todo para tu auto y moto', text:'Repuestos, neumáticos, baterías y accesorios originales, con precio exclusivo de socio.', bg:'linear-gradient(120deg,#C8102E 0%,#8E0C20 60%,#5C0715 100%)', icon:'🚗', cta:'Ver accesorios →', action:"go('catalogo:accesorios')" },
+  { tag:'VIDA AL AIRE LIBRE', title:'Todo tipo de accesorios para tu vida al aire libre', text:'Camping, pesca, náutica y equipamiento outdoor para tu próxima escapada.', bg:'linear-gradient(120deg,#0E6B4F 0%,#0B4A38 60%,#062C21 100%)', icon:'⛺', cta:'Ver accesorios →', action:"go('catalogo:aire-libre')" },
+  { tag:'BENEFICIO EXCLUSIVO', title:'¿Todavía no sos socio del ACA?', text:'Asociate y accedé a precios preferenciales en todos los ExpoACA del país.', bg:'linear-gradient(120deg,#1C1B1F 0%,#2A2629 55%,#3a3438 100%)', icon:'★', cta:'Asociate ahora →', action:"window.open('https://www.aca.org.ar/promociones/empeza-a-disfrutar-de-aca/indexas.php?idevento=373C3E&utm_source=GOOGLE&utm_medium=cpc&utm_campaign=disfruta+aca&utm_id=ASOCIACION&gad_source=1&gad_campaignid=21467502421&gbraid=0AAAAACw0_GMjpB-WNFr9-S8QxLNHeiIUy&gclid=CjwKCAjwpcTNBhA5EiwAdO1S9kwWMDI_YN0o7xr84Fo8HW0b5ZfwJxn6qAOIsffQeQk9I1LKPXGaFhoCCz4QAvD_BwE','_blank','noopener')" },
+];
+function heroSlideHTML(s){
+  return `<div style="flex:0 0 100%;min-width:100%;min-height:360px;display:flex;align-items:center;position:relative;background:${s.bg};color:#fff;padding:0 56px;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px);background-size:50px 50px"></div>
+    <div style="position:absolute;right:-30px;top:50%;transform:translateY(-50%);font-size:260px;opacity:.12;line-height:1">${s.icon}</div>
+    <div style="position:relative;max-width:600px">
+      <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff22;border:1px solid #ffffff3d;padding:6px 14px;border-radius:100px">${s.tag}</span>
+      <h1 style="font-size:38px;line-height:1.05;margin-top:16px;color:#fff;letter-spacing:-.02em">${s.title}</h1>
+      <p style="font-size:16px;color:#ffffffdd;margin-top:12px;max-width:480px">${s.text}</p>
+      <button class="btn" style="margin-top:22px;background:#fff;color:#1C1B1F" onclick="${s.action}">${s.cta}</button>
+    </div>
+  </div>`;
+}
+function renderHero(){
+  const track=$('heroTrack'), dots=$('heroDots'); if(!track) return;
+  track.innerHTML = HERO_SLIDES.map(heroSlideHTML).join('');
+  track.style.transform = 'translateX(-'+(window._heroIdx||0)*100+'%)';
+  dots.innerHTML = HERO_SLIDES.map((_,i)=>`<button onclick="heroGoTo(${i})" style="width:${i===(window._heroIdx||0)?'26px':'9px'};height:9px;border-radius:100px;border:none;cursor:pointer;background:${i===(window._heroIdx||0)?'#fff':'#ffffff70'};transition:all .3s;padding:0"></button>`).join('');
+}
+function heroGoTo(i){ window._heroIdx=i; renderHero(); }
+function heroNav(d){ window._heroIdx=((window._heroIdx||0)+d+HERO_SLIDES.length)%HERO_SLIDES.length; renderHero(); }
+function startHeroCarousel(){
+  window._heroIdx=0; clearInterval(window._heroInterval);
+  renderHero();
+  window._heroInterval = setInterval(()=>heroNav(1), 5500);
+}
+
+// ---------- Ofertas del día: carrusel destacado con cuenta regresiva ----------
+function dealSpotHTML(p){
+  const disc = p.price_list? Math.round((1-p.price_socio/p.price_list)*100) : 0;
+  return `<div style="display:grid;grid-template-columns:1.1fr .9fr;min-height:260px;background:linear-gradient(120deg,#E6A100 0%,#B0631A 55%,#7A4310 100%);color:#fff;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
+    <div style="position:relative;padding:36px 40px;display:flex;flex-direction:column;justify-content:center">
+      <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff26;border:1px solid #ffffff40;padding:6px 13px;border-radius:100px;width:fit-content">⚡ OFERTA RELÁMPAGO</span>
+      <h2 style="font-size:28px;color:#fff;margin-top:14px;line-height:1.1">${esc(p.name)}</h2>
+      <div style="font-size:13px;color:#ffffffcc;margin-top:6px">${esc(p.dealers?.razon||'')} · ${esc(p.categories?.name||'')}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px">
+        <span style="font-family:'Archivo';font-weight:900;font-size:32px;color:#fff">${money(p.price_socio)}</span>
+        <span style="font-size:15px;color:#ffffffaa;text-decoration:line-through">${money(p.price_list)}</span>
+        ${disc?`<span class="tag" style="background:#fff;color:#7A4310">-${disc}%</span>`:''}
+      </div>
+      <button class="btn" style="margin-top:18px;background:#1C1B1F;color:#fff;width:fit-content" onclick="go('producto:${p.id}')">Ver oferta →</button>
+    </div>
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#00000014">
+      <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#ffffffdd">TERMINA HOY EN</span>
+      <div id="dealCountdown" style="display:flex;gap:10px"></div>
+    </div>
+  </div>`;
+}
+function renderDealSpot(){
+  const el=$('dealsSpot'); const deals=window._deals||[]; if(!el || !deals.length) return;
+  const p = deals[window._dealIdx % deals.length];
+  el.innerHTML = dealSpotHTML(p) + `<div style="position:absolute;bottom:16px;left:40px;display:flex;gap:8px">${deals.map((_,i)=>`<button onclick="dealGoTo(${i})" style="width:${i===window._dealIdx%deals.length?'22px':'8px'};height:8px;border-radius:100px;border:none;cursor:pointer;background:${i===window._dealIdx%deals.length?'#fff':'#ffffff70'};padding:0"></button>`).join('')}</div>`;
+  el.style.position='relative';
+  renderCountdown();
+}
+function dealGoTo(i){ window._dealIdx=i; renderDealSpot(); }
+function renderCountdown(){
+  const el=$('dealCountdown'); if(!el) return;
+  const now=new Date(); const end=new Date(now); end.setHours(23,59,59,999);
+  let s=Math.max(0,Math.floor((end-now)/1000));
+  const h=String(Math.floor(s/3600)).padStart(2,'0'); s%=3600; const m=String(Math.floor(s/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0');
+  const box=(v,l)=>`<div style="text-align:center;background:#ffffff22;border-radius:10px;padding:8px 12px;min-width:52px"><div style="font-family:'Archivo';font-weight:800;font-size:22px">${v}</div><div style="font-size:10px;letter-spacing:.05em">${l}</div></div>`;
+  el.innerHTML = box(h,'HS')+box(m,'MIN')+box(ss,'SEG');
+}
+function startDealsSpot(){
+  window._dealIdx=0; clearInterval(window._dealsInterval); clearInterval(window._dealsCountdown);
+  renderDealSpot();
+  window._dealsInterval = setInterval(()=>{ const deals=window._deals||[]; if(deals.length) dealGoTo((window._dealIdx+1)%deals.length); }, 6000);
+  window._dealsCountdown = setInterval(renderCountdown, 1000);
 }
 
 // ---------- Ficha de producto (PDP) ----------
 async function viewProducto(v, id){
   if(!id){ v.innerHTML='<p>Producto no encontrado.</p>'; return; }
-  const { data:p, error } = await sb.from('products').select('*, dealers(razon,tel,sede,rating), categories(name)').eq('id',id).single();
+  const { data:p, error } = await sb.from('products').select('*, dealers(razon,tel,sede,rating), categories(name,slug)').eq('id',id).single();
   if(error||!p){ v.innerHTML=`<div class="card" style="padding:24px">Producto no encontrado. <a onclick="go('catalogo')" style="color:#C8102E;cursor:pointer">Volver</a></div>`; return; }
+  trackEvent(p.id, p.dealer_id, 'view');
+  addRecoId(p.id); addRecoCat(p.categories?.slug);
   const dealer=p.dealers?.razon||''; const cat=p.categories?.name||'';
   // Comparador: mismo artículo (por nombre) en otros expos, con stock
   const { data:others } = await sb.from('products').select('*, dealers(razon,tel,sede,rating)').ilike('name', p.name).gt('stock',0).eq('paused',false);
@@ -335,7 +515,7 @@ async function viewProducto(v, id){
       <div style="font-size:12.5px;color:#918A8E;margin-top:2px">📍 ${esc(o.dealers?.sede||'')} · ★ ${esc(String(o.dealers?.rating||'4.7'))}</div></div>
       <div style="text-align:right"><div style="font-family:'Archivo';font-weight:800;font-size:20px;color:#C8102E">${money(o.price_socio)}</div>
       <span class="tag" style="background:${o.price_socio===best?'#E3F6EE':'#ECECEE'};color:${o.price_socio===best?'#0B7A55':'#918A8E'}">${diff}</span></div>
-      <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" href="${waHref(o.dealers?.tel,d,p.name,o.price_socio)}" target="_blank" rel="noopener">✆ Comprar</a>
+      <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" href="${waHref(o.dealers?.tel,d,p.name,o.price_socio)}" target="_blank" rel="noopener" onclick="trackEvent('${o.id}','${o.dealer_id}','whatsapp_click')">✆ Comprar</a>
     </div>`;
   }).join('');
   v.innerHTML=`
@@ -355,7 +535,7 @@ async function viewProducto(v, id){
         <div style="font-size:14px;color:#6E646A;margin-top:6px">Precio no socio: <b style="color:#44414A">${money(p.price_list)}</b> · <span style="color:#0B7A55;font-weight:700">Asociate y ahorrá ${p.price_list?Math.round((1-p.price_socio/p.price_list)*100):0}%</span></div>
         </div>
         <div style="font-size:13px;color:#0E8F6E;font-weight:700;margin-top:6px">Stock disponible: ${p.stock}</div>
-        <a class="btn" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;margin-top:20px;font-size:16px;text-decoration:none" href="${waHref(p.dealers?.tel,dealer,p.name,p.price_socio)}" target="_blank" rel="noopener"><span style="font-size:19px">✆</span>Comprar por WhatsApp</a>
+        <a class="btn" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;margin-top:20px;font-size:16px;text-decoration:none" href="${waHref(p.dealers?.tel,dealer,p.name,p.price_socio)}" target="_blank" rel="noopener" onclick="trackEvent('${p.id}','${p.dealer_id}','whatsapp_click')"><span style="font-size:19px">✆</span>Comprar por WhatsApp</a>
         <button class="btn" style="width:100%;margin-top:10px;border:1.5px solid #C8102E;background:#fff;color:#C8102E" onclick="addCart('${p.id}')">＋ Agregar al carrito</button>
         <div style="font-size:12.5px;color:#918A8E;margin-top:10px;text-align:center">Coordinás la compra directo con ${esc(dealer)} por WhatsApp</div>
       </div>
@@ -852,14 +1032,15 @@ async function delProduct(id, name){ if(!confirm('¿Eliminar "'+name+'"?'))retur
 // ---------- Admin (dueño) ----------
 async function viewAdmin(v){
   if(!me || me.role!=='admin'){ v.innerHTML='<div class="card" style="padding:24px">Sección exclusiva del administrador.</div>'; return; }
-  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps}] = await Promise.all([
+  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps},{data:events}] = await Promise.all([
     sb.from('dealers').select('*').order('razon'),
     sb.from('app_users').select('*, dealers(razon)').order('created_at',{ascending:false}),
-    sb.from('products').select('id,dealer_id'),
+    sb.from('products').select('id,dealer_id,name,brand,dealers(razon)'),
     sb.from('orders').select('*, dealers(razon)').order('created_at',{ascending:false}).limit(10),
-    sb.from('dealer_applications').select('*').order('created_at',{ascending:false})
+    sb.from('dealer_applications').select('*').order('created_at',{ascending:false}),
+    sb.from('product_events').select('product_id,dealer_id,event_type,created_at').order('created_at',{ascending:false}).limit(5000)
   ]);
-  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], tab:(window._admin&&window._admin.tab)||'resumen' };
+  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], events:events||[], tab:(window._admin&&window._admin.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
       <div><h1 style="font-size:26px">Panel de administración 👑</h1>
@@ -870,6 +1051,7 @@ async function viewAdmin(v){
       <button id="atab-expos" class="btn" onclick="adminTab('expos')">Expos / Concesionarios</button>
       <button id="atab-usuarios" class="btn" onclick="adminTab('usuarios')">Usuarios y roles</button>
       <button id="atab-solicitudes" class="btn" onclick="adminTab('solicitudes')">Solicitudes${(window._admin&&window._admin.apps.filter(a=>a.estado==='nueva').length)?` <span style="background:#C8102E;color:#fff;border-radius:100px;padding:1px 7px;font-size:11px;margin-left:4px">${window._admin.apps.filter(a=>a.estado==='nueva').length}</span>`:''}</button>
+      <button id="atab-analytics" class="btn" onclick="adminTab('analytics')">📊 Analytics</button>
     </div>
     <div id="atab-body"></div>
     <div id="modal"></div>`;
@@ -877,10 +1059,11 @@ async function viewAdmin(v){
 }
 function adminTab(tab){
   window._admin.tab = tab;
-  ['resumen','expos','usuarios','solicitudes'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
+  ['resumen','expos','usuarios','solicitudes','analytics'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
   const body=$('atab-body');
   if(tab==='resumen') body.innerHTML = adminResumen();
   else if(tab==='expos') body.innerHTML = adminExpos();
+  else if(tab==='analytics') body.innerHTML = adminAnalytics();
   else if(tab==='usuarios') body.innerHTML = adminUsuarios();
   else body.innerHTML = adminSolicitudes();
 }
@@ -921,6 +1104,42 @@ function adminResumen(){
     </div>
     <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:18px;margin-bottom:14px">Pedidos recientes</h3>
     <table style="width:100%;border-collapse:collapse;font-size:14px"><tbody>${orderRows||'<tr><td style="color:#6E646A;padding:12px">Sin pedidos.</td></tr>'}</tbody></table></div>`;
+}
+function adminAnalytics(){
+  const A=window._admin; const events=A.events||[]; const prodById={}; (A.products||[]).forEach(p=>prodById[p.id]=p);
+  const views=events.filter(e=>e.event_type==='view');
+  const clicks=events.filter(e=>e.event_type==='whatsapp_click');
+  const carts=events.filter(e=>e.event_type==='cart_add');
+  const conv = views.length? Math.round(clicks.length/views.length*1000)/10 : 0;
+  const kpi=(n,l,c)=>`<div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">${l}</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px">${n}</div>${c?`<div style="font-size:12px;color:${c};margin-top:4px;font-weight:700">últimos eventos</div>`:''}</div>`;
+  const countBy = (arr)=>{ const m={}; arr.forEach(e=>{ m[e.product_id]=(m[e.product_id]||0)+1; }); return m; };
+  const viewCounts = countBy(views), clickCounts = countBy(clicks);
+  const topList = (counts, emptyMsg)=>{
+    const rows = Object.keys(counts).map(pid=>({ pid, n:counts[pid], p:prodById[pid] })).sort((a,b)=>b.n-a.n).slice(0,10);
+    if(!rows.length) return `<p style="color:#6E646A;font-size:14px;padding:8px 0">${emptyMsg}</p>`;
+    return `<table style="width:100%;border-collapse:collapse;font-size:14px">${rows.map(r=>`
+      <tr style="border-bottom:1px solid #F0F0F2"><td style="padding:10px 8px">${r.p?`<b>${esc(r.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(r.p.brand||'')} · ${esc(r.p.dealers?.razon||'')}</div>`:`<span style="color:#918A8E">Producto eliminado</span>`}</td>
+      <td style="padding:10px 8px;text-align:right"><b style="font-family:'Archivo';font-size:17px">${r.n}</b></td></tr>`).join('')}</table>`;
+  };
+  const recent = events.slice(0,15).map(e=>{
+    const p=prodById[e.product_id];
+    const lbl={view:'👁 Vio',whatsapp_click:'✆ WhatsApp',cart_add:'🛒 Carrito'}[e.event_type]||e.event_type;
+    return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:13.5px"><span>${lbl} — ${p?esc(p.name):'producto eliminado'}</span><span style="color:#918A8E">${new Date(e.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>`;
+  }).join('');
+  return `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
+      ${kpi(views.length,'Vistas de producto')}${kpi(clicks.length,'Clics en WhatsApp')}${kpi(conv+'%','Vista → WhatsApp')}${kpi(carts.length,'Agregados al carrito')}
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">🔥 Más vistos</h3>${topList(viewCounts,'Todavía no hay vistas registradas.')}</div>
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">✆ Más clics a WhatsApp</h3>${topList(clickCounts,'Todavía no hay clics registrados.')}</div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">🏆 Ranking de ExpoACA más visitados</h3>${dealerRankHtml}</div>
+      <div class="card" style="padding:20px"><h3 style="font-size:17px;margin-bottom:6px">⚠️ Alertas automáticas</h3><p style="font-size:12.5px;color:#918A8E">Productos con muchas vistas pero poca conversión a WhatsApp.</p>${alertsHtml}</div>
+    </div>
+    <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">Actividad reciente</h3>${recent||'<p style="color:#6E646A;font-size:14px">Sin actividad todavía.</p>'}</div>
+    <p style="font-size:12px;color:#918A8E;margin-top:10px">Datos de los últimos 5.000 eventos registrados en el portal.</p>`;
 }
 function adminExpos(){
   const rows=window._admin.dealers.map(d=>{
