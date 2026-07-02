@@ -125,9 +125,6 @@ async function loadMe(){
 // ---------- Nav ----------
 function renderNav(){
   const nav = $('nav'); let h = '';
-  h += `<button class="btn btn-ghost" onclick="go('inicio')">Inicio</button>`;
-  h += `<button class="btn btn-ghost" onclick="go('catalogo')">Catálogo</button>`;
-  h += `<button class="btn btn-ghost" onclick="go('buscador')">Buscar ExpoACA</button>`;
   if(!(me && (me.role==='dealer'||me.role==='admin'))) h += `<button class="btn btn-ghost" onclick="go('concesionarios')">Concesionarios</button>`;
   const cc=cartCount();
   h += `<button class="btn btn-ghost" onclick="go('carrito')" style="position:relative">🛒${cc?` <span style="background:#C8102E;color:#fff;border-radius:100px;padding:1px 7px;font-size:11px">${cc}</span>`:''}</button>`;
@@ -186,11 +183,11 @@ function productCard(p){
     <div style="padding:15px 16px;display:flex;flex-direction:column;flex:1">
       <span style="font-size:11.5px;font-weight:700;color:#918A8E">${esc(dealer)}</span>
       <div style="font-weight:600;font-size:14.5px;margin-top:5px;min-height:38px">${esc(p.name)}</div>
-      <div style="display:flex;align-items:baseline;gap:9px;margin-top:8px">
-        <span style="font-family:'Archivo';font-weight:800;font-size:20px;color:#C8102E">${money(p.price_socio)}</span>
-        <span style="font-size:13px;color:#ADA6AA;text-decoration:line-through">${money(p.price_list)}</span>
+      <div style="margin-top:8px">
+        <div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:'Archivo';font-weight:800;font-size:20px;color:#C8102E">${money(p.price_socio)}</span><span class="tag" style="background:#E3F6EE;color:#0B7A55">Socio</span></div>
+        <div style="font-size:12px;color:#918A8E;margin-top:3px">No socio: <b style="color:#44414A">${money(p.price_list)}</b></div>
       </div>
-      <span style="font-size:11.5px;color:#0E8F6E;font-weight:700;margin-top:2px">Stock: ${p.stock}</span>
+      <span style="font-size:11.5px;color:#0E8F6E;font-weight:700;margin-top:6px;display:block">Stock: ${p.stock}</span>
       <div style="display:flex;gap:8px;margin-top:12px">
         <span class="btn btn-red" style="flex:1;text-align:center">Ver producto</span>
         <button class="btn" style="background:#25D366;color:#fff;padding:9px 12px" onclick="addCart('${p.id}',event)">＋</button>
@@ -287,6 +284,25 @@ async function viewInicio(v){
       </div>
     </section>
 
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px">
+      <div class="card" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
+        <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">MARKETPLACE</span>
+        <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Explorá el catálogo completo</h2>
+        <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más, con precio socio.</p>
+        <span style="display:inline-block;margin-top:16px;background:#fff;color:#1C1B1F;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Ver catálogo →</span></div>
+      </div>
+      <div class="card" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#1C1B1F,#2A2629);color:#fff">
+        <div style="position:absolute;top:20px;right:24px;width:22px;height:22px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#C8102E;border:3px solid #fff"></div>
+        <div style="position:absolute;bottom:30px;right:70px;width:16px;height:16px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#E6A100;border:3px solid #fff"></div>
+        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:40px 40px"></div>
+        <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#E6A100">📍 TIENDAS FÍSICAS</span>
+        <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Buscá un ExpoACA cercano</h2>
+        <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Encontrá el local más próximo en el mapa y llegá con Google Maps.</p>
+        <span style="display:inline-block;margin-top:16px;background:#C8102E;color:#fff;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Abrir el mapa →</span></div>
+      </div>
+    </div>
+
     <h2 style="font-size:24px;margin-bottom:14px">Comprá por categoría</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:34px">${catChips||'<p style="color:#6E646A">Sin categorías.</p>'}</div>
 
@@ -334,8 +350,9 @@ async function viewProducto(v, id){
         <p style="color:#6E646A;font-size:15px;margin-top:10px;line-height:1.6">${esc(p.description||'Producto disponible en '+dealer+'.')}</p>
         <div style="display:flex;align-items:baseline;gap:12px;margin-top:18px">
           <span style="font-family:'Archivo';font-weight:900;font-size:38px;color:#C8102E">${money(p.price_socio)}</span>
-          <span style="font-size:17px;color:#ADA6AA;text-decoration:line-through">${money(p.price_list)}</span>
           <span class="tag" style="background:#E3F6EE;color:#0B7A55">precio socio</span>
+        </div>
+        <div style="font-size:14px;color:#6E646A;margin-top:6px">Precio no socio: <b style="color:#44414A">${money(p.price_list)}</b> · <span style="color:#0B7A55;font-weight:700">Asociate y ahorrá ${p.price_list?Math.round((1-p.price_socio/p.price_list)*100):0}%</span></div>
         </div>
         <div style="font-size:13px;color:#0E8F6E;font-weight:700;margin-top:6px">Stock disponible: ${p.stock}</div>
         <a class="btn" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;margin-top:20px;font-size:16px;text-decoration:none" href="${waHref(p.dealers?.tel,dealer,p.name,p.price_socio)}" target="_blank" rel="noopener"><span style="font-size:19px">✆</span>Comprar por WhatsApp</a>
