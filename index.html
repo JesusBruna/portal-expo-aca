@@ -101,18 +101,19 @@ function clearCartDealer(ids){ ids.forEach(id=>delete cart[id]); saveCart(); }
 function configured(){ const c=window.SUPABASE_CONFIG||{}; return c.url && c.anonKey && !/TU-PROYECTO|TU-ANON/.test(c.url+c.anonKey); }
 
 async function init(){
+  const rawHash = location.hash || '';
+  const isRecovery = /type=recovery/.test(rawHash) || (/access_token/.test(rawHash) && /recovery/.test(rawHash));
   if(!configured()){ $('cfgBanner').classList.remove('hidden'); }
   else {
     sb = supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    sb.auth.onAuthStateChange(async (_e, s)=>{ session=s; if(s){ await loadMe(); } else { me=null; } renderNav(); if(_e==='PASSWORD_RECOVERY'){ window._recovery=true; go('recuperar'); } });
     const { data } = await sb.auth.getSession();
     session = data.session;
     if(session) await loadMe();
-    sb.auth.onAuthStateChange(async (_e, s)=>{ session=s; if(s){ await loadMe(); } else { me=null; } renderNav(); if(_e==='PASSWORD_RECOVERY'){ go('recuperar'); } });
   }
   renderNav();
-  const h0 = location.hash.replace('#','');
-  if(h0.indexOf('access_token')>=0 || h0.indexOf('type=recovery')>=0){ go('recuperar'); }
-  else go(h0 || 'inicio');
+  if(isRecovery || window._recovery){ go('recuperar'); }
+  else go(location.hash.replace('#','') || 'inicio');
 }
 
 async function loadMe(){
