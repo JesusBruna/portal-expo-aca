@@ -110,7 +110,9 @@ async function init(){
     sb.auth.onAuthStateChange(async (_e, s)=>{ session=s; if(s){ await loadMe(); } else { me=null; } renderNav(); if(_e==='PASSWORD_RECOVERY'){ go('recuperar'); } });
   }
   renderNav();
-  go(location.hash.replace('#','') || 'inicio');
+  const h0 = location.hash.replace('#','');
+  if(h0.indexOf('access_token')>=0 || h0.indexOf('type=recovery')>=0){ go('recuperar'); }
+  else go(h0 || 'inicio');
 }
 
 async function loadMe(){
@@ -160,7 +162,7 @@ async function go(route){
     else if(name==='recuperar') viewRecuperar(v);
     else if(name==='panel')    await viewPanel(v);
     else if(name==='admin')    await viewAdmin(v);
-    else v.innerHTML = '<p>Página no encontrada.</p>';
+    else v.innerHTML = '<div class="card" style="padding:24px">Página no encontrada. <a onclick="go(\'inicio\')" style="color:#C8102E;cursor:pointer">Ir al inicio</a></div>';
     window.scrollTo(0,0);
   } catch(e){ v.innerHTML = `<div class="card" style="padding:22px;color:#C8102E">Error: ${esc(e.message||e)}</div>`; }
 }
@@ -583,7 +585,7 @@ async function resetPassPrompt(){
 }
 async function sendReset(email){
   if(!email){ toast('Falta el email'); return; }
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname + '#recuperar' });
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
   if(error){ toast(error.message); return; }
   toast('📧 Te enviamos un email para restablecer la contraseña');
 }
