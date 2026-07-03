@@ -122,8 +122,10 @@ function clearCartDealer(ids){ ids.forEach(id=>delete cart[id]); saveCart(); }
 function topSearchGo(e){ if(e.key && e.key!=='Enter') return; window._catInitQ = ($('topSearch')?$('topSearch').value.trim():''); go('catalogo'); }
 
 // ---------- Analytics: tracking de eventos por producto ----------
-function trackEvent(productId, dealerId, type){
-  if(!configured() || !sb || !productId) return;
+function sectionHint(text){
+  return `<div style="display:flex;gap:10px;align-items:flex-start;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#44414A;line-height:1.5"><span style="flex:none">ℹ️</span><span>${text}</span></div>`;
+}
+function trackEvent(productId, dealerId, type){  if(!configured() || !sb || !productId) return;
   try{ sb.from('product_events').insert({ product_id: productId, dealer_id: dealerId||null, event_type: type, user_id: me?me.id:null }).then(()=>{}, ()=>{}); }catch(e){}
 }
 // ---------- Recomendaciones: historial local de navegación ----------
@@ -717,7 +719,11 @@ function viewSolicitud(v){
     <div class="card" style="max-width:640px;margin:14px auto 0;padding:28px">
       <span style="font-family:'Archivo';font-weight:800;font-size:13px;color:#C8102E;letter-spacing:.06em;text-transform:uppercase">Sumate a la red</span>
       <h1 style="font-size:28px;margin-top:6px">Quiero ser concesionario</h1>
-      <p style="color:#6E646A;font-size:14px;margin-top:8px;margin-bottom:18px">Completá tus datos y el equipo de ExpoACA se contactará para darte de alta.</p>
+      <p style="color:#6E646A;font-size:14px;margin-top:8px;margin-bottom:14px">Completá tus datos y el equipo de ExpoACA revisará tu solicitud.</p>
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#44414A;line-height:1.5">
+        <span style="flex:none">ℹ️</span>
+        <span>El acceso al panel de concesionario <b>no es automático</b>. Primero enviás esta solicitud; si ACA la aprueba, vas a tener que <b>crear tu cuenta con este mismo email</b> (botón "Ingresar" → "Crear cuenta") y recién ahí el administrador te habilita como concesionario.</span>
+      </div>
       ${f('sRazon','Razón social / nombre comercial','Ej: AutoParts Pro S.A.')}
       <div class="grid" style="grid-template-columns:1fr 1fr">${f('sCuit','CUIT','30-00000000-0')}${f('sRubro','Rubro principal','Repuestos, neumáticos…')}</div>
       ${f('sSede','Estación / sede ACA asociada','Ej: Estación ACA Palermo')}
@@ -732,7 +738,7 @@ async function enviarSolicitud(){
   if(!rec.razon||!rec.email){ toast('Completá al menos razón social y email'); return; }
   const { error }=await sb.from('dealer_applications').insert(rec);
   if(error){ toast(error.message); return; }
-  toast('✅ ¡Solicitud enviada! Te vamos a contactar.'); go('concesionarios');
+  toast('✅ ¡Solicitud enviada! Cuando ACA la apruebe, creá tu cuenta con este mismo email para activar tu acceso.'); go('concesionarios');
 }
 
 // ---------- Login / registro ----------
@@ -855,7 +861,7 @@ function panelResumen(){
   const maxB=Math.max(1,...byStatus);
   const bars=ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:150px"><div style="height:${Math.round(byStatus[i]/maxB*100)}%;background:${ORDER_COLOR[s].c};border-radius:7px 7px 0 0;min-height:3px"></div></div><span style="font-size:11.5px;color:#6E646A;font-weight:600">${ORDER_LABEL[s]}</span><b style="font-size:13px">${byStatus[i]}</b></div>`).join('');
   const low=prods.filter(p=>p.stock<15).slice(0,6).map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:14px"><span>${esc(p.name)}</span><b style="color:${p.stock===0?'#C8102E':'#B0631A'}">${p.stock} u.</b></div>`).join('');
-  return `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
+  return `${sectionHint('Acá ves un pantallazo de tu negocio: ventas registradas, pedidos pendientes de preparar y qué productos tenés con poco o nulo stock.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
       ${kpi(money(ventas),'Ventas registradas')}${kpi(orders.length,'Pedidos totales')}${kpi(pend,'Pedidos a preparar',{col:'#B0631A',txt:'requieren acción'})}${kpi(prods.length,'Productos publicados',sinStock?{col:'#C8102E',txt:sinStock+' sin stock'}:{col:'#0B7A55',txt:'todo con stock'})}
     </div>
     <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start">
@@ -886,7 +892,7 @@ function panelProductos(){
       </td>
     </tr>`;
   }).join('');
-  return `<div class="card" style="padding:20px;overflow-x:auto">
+  return `${sectionHint('Gestioná tu catálogo: ajustá el stock con +/−, pausá o eliminá artículos, y elegí cuáles mostrar en Ofertas del día con su descuento.')}<div class="card" style="padding:20px;overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font-size:14px">
       <thead><tr style="text-align:left;color:#918A8E;font-size:12px;text-transform:uppercase">
         <th style="padding:8px">Producto</th><th style="padding:8px">Precio socio</th><th style="padding:8px">Disponibilidad</th><th style="padding:8px;text-align:center">Stock</th><th style="padding:8px">Estado</th><th></th>
@@ -900,8 +906,8 @@ const ORDER_LABEL = {pagado:'Pagado',a_preparar:'A preparar',enviado:'Enviado',e
 const ORDER_COLOR = {pagado:{c:'#0B7A55',b:'#E3F6EE'},a_preparar:{c:'#B0631A',b:'#FBEFE2'},enviado:{c:'#3B5BA5',b:'#E7ECF7'},entregado:{c:'#6E646A',b:'#ECECEE'},cancelado:{c:'#C8102E',b:'#FBE9EC'}};
 function panelPedidos(){
   const list = window._panel.orders;
-  if(!list.length) return '<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés pedidos registrados.</div>';
-  return '<div style="display:flex;flex-direction:column;gap:12px">'+list.map(o=>{
+  if(!list.length) return `${sectionHint('Seguí cada pedido y marcá su estado a medida que lo procesás: Pagado → A preparar → Enviado → Entregado.')}<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés pedidos registrados.</div>`;
+  return `${sectionHint('Seguí cada pedido y marcá su estado a medida que lo procesás: Pagado → A preparar → Enviado → Entregado.')}<div style="display:flex;flex-direction:column;gap:12px">`+list.map(o=>{
     const idx=ORDER_FLOW.indexOf(o.status); const col=ORDER_COLOR[o.status]||ORDER_COLOR.pagado;
     const canAdv = idx>=0 && idx<ORDER_FLOW.length-1;
     const steps = ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:${i<=idx?ORDER_COLOR[s].c:'#D6D6DA'}"></span><span style="font-size:11px;font-weight:600;color:${i<=idx?'#44414A':'#B3ABAE'}">${ORDER_LABEL[s]}</span></div>`).join('');
@@ -922,7 +928,7 @@ function panelPedidos(){
 function panelPerfil(){
   const d = window._panel.dealer||{};
   const f=(id,lbl,val,ph='')=>`<div style="margin-bottom:14px"><label class="lbl">${lbl}</label><input id="${id}" class="fld" value="${esc(val||'')}" placeholder="${ph}"></div>`;
-  return `<div class="grid" style="grid-template-columns:1.5fr 1fr;align-items:start">
+  return `${sectionHint('Estos datos aparecen en tu tienda pública. El teléfono es el WhatsApp donde te contactan los socios, y el link de Maps ubica tu expo en el buscador.')}<div class="grid" style="grid-template-columns:1.5fr 1fr;align-items:start">
     <div class="card" style="padding:24px">
       <h3 style="font-size:18px;margin-bottom:16px">Datos del concesionario</h3>
       ${f('dRazon','Razón social / nombre comercial',d.razon)}
@@ -980,8 +986,8 @@ function productForm(p){
         <div><label class="lbl">Categoría</label><select id="pCat" class="fld">${opts}</select></div>
       </div>
       <div class="grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">
-        <div><label class="lbl">Precio público</label><input id="pList" class="fld" type="number" value="${p?p.price_list:''}"></div>
-        <div><label class="lbl">Precio socio</label><input id="pSocio" class="fld" type="number" value="${p?p.price_socio:''}"></div>
+        <div><label class="lbl">Precio público</label><input id="pList" class="fld" type="number" value="${p?p.price_list:''}" oninput="suggestSocio()"></div>
+        <div><label class="lbl">Precio socio <span style="font-weight:400;color:#918A8E">(sugerido: -20%)</span></label><input id="pSocio" class="fld" type="number" value="${p?p.price_socio:''}" oninput="window._socioTouched=true"></div>
         <div><label class="lbl">Stock</label><input id="pStock" class="fld" type="number" value="${p?p.stock:''}"></div>
       </div>
       <div style="margin-bottom:12px"><label class="lbl">Foto del producto</label>
@@ -990,7 +996,15 @@ function productForm(p){
         <input type="hidden" id="pPhotoUrl" value="${p?esc(p.photo_url||''):''}">
       </div>
       <div style="margin-bottom:16px"><label class="lbl">Descripción</label><textarea id="pDesc" class="fld" style="min-height:70px">${p?esc(p.description||''):''}</textarea></div>
-      <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px"><input type="checkbox" id="pDeal" ${p&&p.is_deal?'checked':''}> Mostrar en ofertas del día</label>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px"><input type="checkbox" id="pDeal" ${p&&p.is_deal?'checked':''} onchange="toggleDealDiscount()"> Mostrar en ofertas del día</label>
+      <div id="dealDiscountBox" style="display:${p&&p.is_deal?'block':'none'};margin-bottom:12px">
+        <label class="lbl">Descuento de la oferta</label>
+        <select id="pDealDiscount" class="fld" onchange="applyDealDiscount()">
+          <option value="">Elegí un %…</option>
+          <option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="35">35%</option><option value="40">40%</option><option value="45">45%</option><option value="50">50%</option><option value="55">55%</option><option value="60">60%</option>
+        </select>
+        <div style="font-size:11.5px;color:#918A8E;margin-top:4px">Al elegir un %, se calcula automáticamente el precio socio de la oferta (editáble después).</div>
+      </div>
       <div style="margin-bottom:16px"><label class="lbl">Vence el (opcional)</label><input type="date" id="pDealUntil" class="fld" value="${p&&p.deal_until?esc(String(p.deal_until).slice(0,10)):''}"><div style="font-size:11.5px;color:#918A8E;margin-top:4px">Descuento actual: <b>${p&&p.price_list?Math.round((1-p.price_socio/p.price_list)*100):0}%</b> (surge del precio público vs. socio)</div></div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button class="btn btn-ghost" onclick="$('modal').innerHTML=''">Cancelar</button>
@@ -998,8 +1012,20 @@ function productForm(p){
       </div>
     </div></div>`;
 }
-function newProduct(){ $('modal').innerHTML = productForm(null); }
-function editProduct(p){ $('modal').innerHTML = productForm(p); }
+function newProduct(){ window._socioTouched=false; $('modal').innerHTML = productForm(null); }
+function editProduct(p){ window._socioTouched=true; $('modal').innerHTML = productForm(p); }
+function suggestSocio(){
+  if(window._socioTouched) return;
+  const lv = parseFloat($('pList').value||0); if(!lv) return;
+  $('pSocio').value = Math.round(lv*0.8);
+}
+function toggleDealDiscount(){ const box=$('dealDiscountBox'); if(box) box.style.display = $('pDeal').checked ? 'block':'none'; }
+function applyDealDiscount(){
+  const disc = parseFloat($('pDealDiscount').value); if(!disc) return;
+  const lv = parseFloat($('pList').value||0); if(!lv) return;
+  $('pSocio').value = Math.round(lv*(1-disc/100));
+  window._socioTouched = true;
+}
 function previewPhoto(inp){ const f=inp.files[0]; if(!f) return; const img=$('pPhotoPrev'); img.src=URL.createObjectURL(f); img.style.display='block'; }
 
 async function saveProduct(){
@@ -1069,9 +1095,9 @@ function adminTab(tab){
 }
 function adminSolicitudes(){
   const apps=window._admin.apps;
-  if(!apps.length) return '<div class="card" style="padding:30px;text-align:center;color:#6E646A">No hay solicitudes por ahora.</div>';
+  if(!apps.length) return `${sectionHint('Revisá las solicitudes de nuevos concesionarios: aprobá para crear el expo automáticamente, o rechazá.')}<div class="card" style="padding:30px;text-align:center;color:#6E646A">No hay solicitudes por ahora.</div>`;
   const badge={nueva:{t:'Nueva',c:'#C8102E',b:'#FBE9EC'},aprobada:{t:'Aprobada',c:'#0B7A55',b:'#E3F6EE'},rechazada:{t:'Rechazada',c:'#6E646A',b:'#ECECEE'}};
-  return '<div style="display:flex;flex-direction:column;gap:12px">'+apps.map(a=>{
+  return `${sectionHint('Revisá las solicitudes de nuevos concesionarios: aprobá para crear el expo automáticamente, o rechazá.')}<div style="display:flex;flex-direction:column;gap:12px">`+apps.map(a=>{
     const bg=badge[a.estado]||badge.nueva;
     return `<div class="card" style="padding:18px 20px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
@@ -1088,7 +1114,7 @@ async function aprobarSolicitud(a){
   if(e1){ toast('Error creando expo: '+e1.message); return; }
   const { error:e2 }=await sb.from('dealer_applications').update({estado:'aprobada'}).eq('id',a.id);
   if(e2){ toast(e2.message); return; }
-  toast('✅ Expo creado. Asignale un usuario en "Usuarios y roles".'); go('admin');
+  toast('✅ Expo creado. Pedile al postulante que cree su cuenta (Ingresar → Crear cuenta) con el email de la solicitud, y luego asignaselo en "Usuarios y roles".'); go('admin');
 }
 async function rechazarSolicitud(id){
   const { error }=await sb.from('dealer_applications').update({estado:'rechazada'}).eq('id',id);
@@ -1099,7 +1125,7 @@ function adminResumen(){
   const A=window._admin;
   const kpi=(n,l)=>`<div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">${l}</div><div style="font-family:'Archivo';font-weight:800;font-size:30px;margin-top:6px">${n}</div></div>`;
   const orderRows=A.orders.map(o=>`<tr style="border-bottom:1px solid #F0F0F2"><td style="padding:11px 8px">${esc(o.customer_name||'—')}</td><td style="padding:11px 8px">${esc(o.dealers?.razon||'')}</td><td style="padding:11px 8px">${money(o.total)}</td><td style="padding:11px 8px"><span class="tag" style="background:#EEECEE;color:#44414A">${esc(ORDER_LABEL[o.status]||o.status)}</span></td></tr>`).join('');
-  return `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
+  return `${sectionHint('Métricas generales del portal: cantidad de productos, expos, usuarios y pedidos recientes.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
       ${kpi(A.products.length,'Productos')}${kpi(A.dealers.length,'Expos / concesionarios')}${kpi(A.users.length,'Usuarios')}${kpi(A.orders.length,'Pedidos recientes')}
     </div>
     <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:18px;margin-bottom:14px">Pedidos recientes</h3>
@@ -1126,8 +1152,26 @@ function adminAnalytics(){
     const lbl={view:'👁 Vio',whatsapp_click:'✆ WhatsApp',cart_add:'🛒 Carrito'}[e.event_type]||e.event_type;
     return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:13.5px"><span>${lbl} — ${p?esc(p.name):'producto eliminado'}</span><span style="color:#918A8E">${new Date(e.created_at).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>`;
   }).join('');
-  return `
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
+  // Ranking de ExpoACA más visitados (vistas + clics de sus productos)
+  const dealerById={}; (A.dealers||[]).forEach(d=>dealerById[d.id]=d);
+  const dealerCounts={}; events.forEach(e=>{ if(!e.dealer_id) return; dealerCounts[e.dealer_id]=(dealerCounts[e.dealer_id]||0)+1; });
+  const dealerRanking = Object.keys(dealerCounts).map(id=>({ id, n:dealerCounts[id], d:dealerById[id] })).sort((a,b)=>b.n-a.n).slice(0,8);
+  const dealerRankHtml = dealerRanking.length ? dealerRanking.map((r,i)=>`<div style="display:flex;align-items:center;gap:13px;padding:10px 0;border-bottom:1px solid #F0F0F2">
+      <span style="width:26px;height:26px;border-radius:50%;background:${i<3?'#E6A100':'#ECECEE'};color:${i<3?'#1C1B1F':'#6E646A'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;flex:none">${i+1}</span>
+      <div style="flex:1;min-width:0"><b>${r.d?esc(r.d.razon):'Expo eliminado'}</b><div style="font-size:12px;color:#918A8E">${r.d?esc(r.d.sede||''):''}</div></div>
+      <b style="font-family:'Archivo';font-size:16px">${r.n}</b>
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px">Sin datos todavía.</p>';
+  // Alertas: mucha vista, poca conversión a WhatsApp → posible problema de precio/foto
+  const ALERT_MIN_VIEWS=5, ALERT_MAX_CONV=8;
+  const alerts = Object.keys(viewCounts).map(pid=>{
+    const vv=viewCounts[pid]||0, cc=clickCounts[pid]||0, cv=vv?Math.round(cc/vv*1000)/10:0;
+    return { pid, v:vv, c:cc, conv:cv, p:prodById[pid] };
+  }).filter(x=>x.v>=ALERT_MIN_VIEWS && x.conv<=ALERT_MAX_CONV).sort((a,b)=>b.v-a.v).slice(0,6);
+  const alertsHtml = alerts.length ? alerts.map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FBEFE2;border:1px solid #F0D9BF;border-radius:12px;margin-top:10px">
+      <span style="font-size:20px">⚠️</span>
+      <div style="flex:1">${a.p?`<b>${esc(a.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(a.p.dealers?.razon||'')}</div>`:'<b>Producto eliminado</b>'}<div style="font-size:12.5px;color:#7A4310;margin-top:3px">${a.v} vistas · solo ${a.c} clics a WhatsApp (${a.conv}% conversión) — revisá el precio o la foto</div></div>
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px;margin-top:8px">Sin alertas por ahora 👍</p>';
+  return `${sectionHint('Datos de los últimos 5.000 eventos: qué productos se ven más, cuáles generan más consultas por WhatsApp, ranking de expos y alertas automáticas de baja conversión.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
       ${kpi(views.length,'Vistas de producto')}${kpi(clicks.length,'Clics en WhatsApp')}${kpi(conv+'%','Vista → WhatsApp')}${kpi(carts.length,'Agregados al carrito')}
     </div>
     <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
@@ -1151,7 +1195,7 @@ function adminExpos(){
       <td style="padding:11px 8px;text-align:right;white-space:nowrap"><button class="btn btn-ghost" style="padding:8px 12px" onclick='editDealer(${JSON.stringify(d).replace(/'/g,"&#39;")})'>✎ Editar</button> <button class="btn btn-ghost" style="padding:8px 12px;color:#C8102E" onclick="delDealer('${d.id}','${esc(d.razon).replace(/'/g,'')}')">🗑 Eliminar</button></td>
     </tr>`;
   }).join('');
-  return `<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-red" onclick="newDealer()">+ Nuevo expo</button></div>
+  return `${sectionHint('Alta, edición y baja de concesionarios (ExpoACA). Cada expo gestiona sus propios productos y stock desde su panel.')}<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-red" onclick="newDealer()">+ Nuevo expo</button></div>
     <div class="card" style="padding:20px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">
     <thead><tr style="text-align:left;color:#918A8E;font-size:12px;text-transform:uppercase"><th style="padding:8px">Expo</th><th style="padding:8px">WhatsApp</th><th style="padding:8px;text-align:center">Prod.</th><th style="padding:8px">Estado</th><th></th></tr></thead>
     <tbody>${rows||'<tr><td style="padding:20px;color:#6E646A">Sin expos.</td></tr>'}</tbody></table></div>`;
@@ -1164,7 +1208,7 @@ function adminUsuarios(){
       <td style="padding:11px 8px"><select class="fld" style="margin:0;padding:8px" id="udealer-${u.id}"><option value="">— sin expo —</option>${dealerOpts(u.dealer_id)}</select></td>
       <td style="padding:11px 8px;text-align:right;white-space:nowrap"><button class="btn btn-red" style="padding:8px 14px" onclick="saveUserRole('${u.id}')">Guardar</button> <button class="btn btn-ghost" style="padding:8px 12px" onclick="sendReset('${esc(u.email||'')}')">🔑 Reset</button>${u.id===me.id?'':` <button class="btn btn-ghost" style="padding:8px 12px;color:#C8102E" onclick="delUser('${u.id}','${esc(u.email||u.full_name||'').replace(/'/g,'')}')">🗑</button>`}</td>
     </tr>`).join('');
-  return `<div class="card" style="padding:20px;overflow-x:auto"><p style="font-size:13.5px;color:#6E646A;margin-bottom:14px">Asigná el rol de cada usuario. Para un concesionario, elegí rol <b>Concesionario</b> y su <b>expo</b>.</p>
+  return `${sectionHint('Asigná el rol de cada usuario. Para un concesionario, elegí rol <b>Concesionario</b> y su <b>expo</b>. También podés reenviar el restablecimiento de contraseña o eliminar la cuenta.')}<div class="card" style="padding:20px;overflow-x:auto"><p style="font-size:13.5px;color:#6E646A;margin-bottom:14px">Asigná el rol de cada usuario. Para un concesionario, elegí rol <b>Concesionario</b> y su <b>expo</b>.</p>
     <table style="width:100%;border-collapse:collapse;font-size:14px">
     <thead><tr style="text-align:left;color:#918A8E;font-size:12px;text-transform:uppercase"><th style="padding:8px">Usuario</th><th style="padding:8px">Rol</th><th style="padding:8px">Expo asignado</th><th></th></tr></thead>
     <tbody>${rows||'<tr><td style="padding:20px;color:#6E646A">Sin usuarios.</td></tr>'}</tbody></table></div>`;
