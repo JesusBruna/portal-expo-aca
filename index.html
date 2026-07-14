@@ -11,7 +11,7 @@
 <script src="config.js"></script>
 <style>
   *{box-sizing:border-box}
-  body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:radial-gradient(120% 100% at 15% 0%,#F4EDEE 0%,#ECECEE 45%,#E7E6E9 100%);color:#1C1B1F;-webkit-font-smoothing:antialiased}
+  body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:#EAEAEC;color:#1C1B1F;-webkit-font-smoothing:antialiased}
   h1,h2,h3,h4{font-family:'Archivo',system-ui,sans-serif;margin:0;letter-spacing:-.02em}
   a{color:inherit;text-decoration:none}
   button{font-family:'Public Sans';cursor:pointer}
@@ -92,7 +92,7 @@
 <body>
 
 <!-- HEADER -->
-<header style="background:#fff;border-bottom:1px solid #E2E2E5;position:sticky;top:0;z-index:50;box-shadow:0 4px 16px -8px rgba(28,27,31,.08)">
+<header style="background:linear-gradient(180deg,#E2E2E5 0%,#CDCDD1 100%);border-bottom:1px solid #C4C4C8;position:sticky;top:0;z-index:50;box-shadow:0 4px 16px -8px rgba(28,27,31,.12)">
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px">
     <a href="#" onclick="go('inicio');return false" style="display:flex;align-items:center;gap:11px;flex:none">
       <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900">EA</span>
@@ -380,7 +380,7 @@ async function viewInicio(v){
   const destArr = destacados||[]; const destPages=[]; for(let i=0;i<destArr.length;i+=4) destPages.push(destArr.slice(i,i+4));
   window._destPages = destPages;
   const dealerCards = (dealers||[]).map(d=>`<div onclick="go('expo:${d.id}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:14px;padding:18px;text-align:center">
-      <span style="width:52px;height:52px;border-radius:13px;margin:0 auto;background:${esc(d.tone||'#C8102E')};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">${esc(d.initial||(d.razon||'?')[0])}</span>
+      <div style="width:52px;height:52px;border-radius:13px;margin:0 auto;overflow:hidden;background:${esc(d.tone||'#C8102E')};display:flex;align-items:center;justify-content:center">${d.logo_url?`<img src="${esc(d.logo_url)}" style="width:100%;height:100%;object-fit:cover">`:`<span style="color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">${esc(d.initial||(d.razon||'?')[0])}</span>`}</div>
       <div style="font-weight:700;font-size:15px;margin-top:10px">${esc(d.razon)}</div>
       <div style="font-size:12.5px;color:#918A8E;margin-top:3px">${esc(d.sede||'')}</div>
       <div style="font-size:12px;color:#B0631A;font-weight:700;margin-top:6px">★ ${esc(String(d.rating||'4.7'))}</div>
@@ -455,15 +455,17 @@ function startDestCarousel(){
 
 // ---------- Hero carousel (3 slides) ----------
 const HERO_SLIDES = [
-  { tag:'AUTOS Y MOTOS', title:'Encontrá todo para tu auto y moto', text:'Repuestos, neumáticos, baterías y accesorios originales, con precio exclusivo de socio.', bg:'linear-gradient(120deg,#C8102E 0%,#8E0C20 60%,#5C0715 100%)', icon:'🚗', cta:'Ver accesorios →', action:"go('catalogo:accesorios')" },
-  { tag:'VIDA AL AIRE LIBRE', title:'Todo tipo de accesorios para tu vida al aire libre', text:'Camping, pesca, náutica y equipamiento outdoor para tu próxima escapada.', bg:'linear-gradient(120deg,#0E6B4F 0%,#0B4A38 60%,#062C21 100%)', icon:'⛺', cta:'Ver accesorios →', action:"go('catalogo:aire-libre')" },
-  { tag:'BENEFICIO EXCLUSIVO', title:'¿Todavía no sos socio del ACA?', text:'Asociate y accedé a precios preferenciales en todos los ExpoACA del país.', bg:'linear-gradient(120deg,#1C1B1F 0%,#2A2629 55%,#3a3438 100%)', icon:'★', cta:'Asociate ahora →', action:"window.open('https://www.aca.org.ar/promociones/empeza-a-disfrutar-de-aca/indexas.php?idevento=373C3E&utm_source=GOOGLE&utm_medium=cpc&utm_campaign=disfruta+aca&utm_id=ASOCIACION&gad_source=1&gad_campaignid=21467502421&gbraid=0AAAAACw0_GMjpB-WNFr9-S8QxLNHeiIUy&gclid=CjwKCAjwpcTNBhA5EiwAdO1S9kwWMDI_YN0o7xr84Fo8HW0b5ZfwJxn6qAOIsffQeQk9I1LKPXGaFhoCCz4QAvD_BwE','_blank','noopener')" },
+  { tag:'AUTOS Y MOTOS', title:'Encontrá todo para tu auto y moto', text:'Repuestos, neumáticos, baterías y accesorios originales, con precio exclusivo de socio.', bg:'linear-gradient(120deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 60%,rgba(0,0,0,.25) 100%)', img:'images/hero-auto-moto.jpg', icon:'', cta:'Ver accesorios →', action:"go('catalogo')" },
+  { tag:'VIDA AL AIRE LIBRE', title:'Todo tipo de accesorios para tu vida al aire libre', text:'Camping, pesca, náutica y equipamiento outdoor para tu próxima escapada.', bg:'linear-gradient(120deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 60%,rgba(0,0,0,.25) 100%)', img:'images/hero-aire-libre.jpg', icon:'', cta:'Ver accesorios →', action:"go('catalogo:aire-libre')" },
+  { tag:'BENEFICIO EXCLUSIVO', title:'¿Todavía no sos socio del ACA?', text:'Asociate y accedé a precios preferenciales en todos los ExpoACA del país.', bg:'linear-gradient(100deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.72) 40%,rgba(0,0,0,.45) 75%,rgba(0,0,0,.3) 100%)', img:'images/hero-beneficio.jpg', icon:'', cta:'Asociate ahora →', action:"window.open('https://www.aca.org.ar/promociones/empeza-a-disfrutar-de-aca/indexas.php?idevento=373C3E&utm_source=GOOGLE&utm_medium=cpc&utm_campaign=disfruta+aca&utm_id=ASOCIACION&gad_source=1&gad_campaignid=21467502421&gbraid=0AAAAACw0_GMjpB-WNFr9-S8QxLNHeiIUy&gclid=CjwKCAjwpcTNBhA5EiwAdO1S9kwWMDI_YN0o7xr84Fo8HW0b5ZfwJxn6qAOIsffQeQk9I1LKPXGaFhoCCz4QAvD_BwE','_blank','noopener')" },
 ];
 function heroSlideHTML(s){
   return `<div style="flex:0 0 100%;min-width:100%;min-height:360px;display:flex;align-items:center;position:relative;background:${s.bg};color:#fff;padding:0 56px;overflow:hidden">
-    <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px);background-size:50px 50px"></div>
-    <div style="position:absolute;right:-30px;top:50%;transform:translateY(-50%);font-size:260px;opacity:.12;line-height:1">${s.icon}</div>
-    <div style="position:relative;max-width:600px">
+    ${s.img?`<img src="${s.img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0">`:''}
+    <div style="position:absolute;inset:0;background:${s.bg};z-index:1"></div>
+    ${s.img?'':'<div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px);background-size:50px 50px;z-index:1"></div>'}
+    ${s.icon?`<div style="position:absolute;right:-30px;top:50%;transform:translateY(-50%);font-size:260px;opacity:.12;line-height:1;z-index:1">${s.icon}</div>`:''}
+    <div style="position:relative;max-width:600px;z-index:2">
       <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff22;border:1px solid #ffffff3d;padding:6px 14px;border-radius:100px">${s.tag}</span>
       <h1 style="font-size:38px;line-height:1.05;margin-top:16px;color:#fff;letter-spacing:-.02em">${s.title}</h1>
       <p style="font-size:16px;color:#ffffffdd;margin-top:12px;max-width:480px">${s.text}</p>
@@ -488,8 +490,7 @@ function startHeroCarousel(){
 // ---------- Ofertas del día: carrusel destacado con cuenta regresiva ----------
 function dealSpotHTML(p){
   const disc = p.price_list? Math.round((1-p.price_socio/p.price_list)*100) : 0;
-  return `<div style="display:grid;grid-template-columns:1.1fr .9fr;min-height:260px;background:linear-gradient(120deg,#E6A100 0%,#B0631A 55%,#7A4310 100%);color:#fff;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
+  return `<div style="display:grid;grid-template-columns:1.1fr .55fr .9fr;min-height:260px;background:linear-gradient(115deg,#7A1220 0%,#4A0E17 55%,#2A0A0F 100%);color:#fff;position:relative;overflow:hidden">
     <div style="position:relative;padding:36px 40px;display:flex;flex-direction:column;justify-content:center">
       <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff26;border:1px solid #ffffff40;padding:6px 13px;border-radius:100px;width:fit-content">⚡ OFERTA RELÁMPAGO</span>
       <h2 style="font-size:28px;color:#fff;margin-top:14px;line-height:1.1">${esc(p.name)}</h2>
@@ -497,11 +498,14 @@ function dealSpotHTML(p){
       <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px">
         <span style="font-family:'Archivo';font-weight:900;font-size:32px;color:#fff">${money(p.price_socio)}</span>
         <span style="font-size:15px;color:#ffffffaa;text-decoration:line-through">${money(p.price_list)}</span>
-        ${disc?`<span class="tag" style="background:#fff;color:#7A4310">-${disc}%</span>`:''}
+        ${disc?`<span class="tag" style="background:#fff;color:#7A1220">-${disc}%</span>`:''}
       </div>
       <button class="btn" style="margin-top:18px;background:#1C1B1F;color:#fff;width:fit-content" onclick="go('producto:${p.id}')">Ver oferta →</button>
     </div>
-    <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#00000014">
+    <div style="position:relative;background:#00000022;display:flex;align-items:center;justify-content:center;padding:16px">
+      ${p.photo_url?`<img src="${esc(p.photo_url)}" style="width:100%;height:100%;max-height:230px;object-fit:cover;border-radius:14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)">`:`<div style="width:100%;height:100%;max-height:230px;border-radius:14px;background:#ffffff14;display:flex;align-items:center;justify-content:center"><span style="font-family:'Archivo';font-weight:800;font-size:15px;color:#ffffffcc">${esc(p.brand||'')}</span></div>`}
+    </div>
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#00000030">
       <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#ffffffdd">TERMINA HOY EN</span>
       <div id="dealCountdown" style="display:flex;gap:10px"></div>
     </div>
@@ -689,12 +693,10 @@ async function viewExpo(v, id){
   v.innerHTML=`
     <a onclick="go('buscador')" style="cursor:pointer;color:#6E646A;font-size:14px;font-weight:600">← Volver a los ExpoACA</a>
     <div class="card" style="overflow:hidden;margin-top:14px">
-      <div style="height:120px;background:linear-gradient(115deg,${esc(d.tone||'#C8102E')},#1C1B1F);position:relative">
-        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
-      </div>
+      <div style="height:90px;background:#EDEDEF"></div>
       <div style="padding:0 28px 24px">
         <div style="display:flex;gap:20px;align-items:flex-end;margin-top:-42px;flex-wrap:wrap">
-          <span style="width:92px;height:92px;border-radius:22px;background:${esc(d.tone||'#C8102E')};border:5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900;font-size:34px;box-shadow:0 12px 30px -12px rgba(0,0,0,.4)">${esc(d.initial||(d.razon||'E')[0])}</span>
+          <div style="width:92px;height:92px;border-radius:22px;overflow:hidden;background:${esc(d.tone||'#C8102E')};border:5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -12px rgba(0,0,0,.25)">${d.logo_url?`<img src="${esc(d.logo_url)}" style="width:100%;height:100%;object-fit:cover">`:`<span style="color:#fff;font-family:'Archivo';font-weight:900;font-size:34px">${esc(d.initial||(d.razon||'E')[0])}</span>`}</div>
           <div style="flex:1;min-width:220px;padding-bottom:4px">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="font-size:28px">${esc(d.razon)}</h1><span class="tag" style="background:#E3F6EE;color:#0B7A55">✓ Expo verificado</span></div>
             <div style="font-size:14px;color:#6E646A;margin-top:4px">${esc(d.rubro||'')} · 📍 ${esc(d.sede||d.dir||'')}</div>
@@ -963,6 +965,18 @@ function panelPerfil(){
   const f=(id,lbl,val,ph='')=>`<div style="margin-bottom:14px"><label class="lbl">${lbl}</label><input id="${id}" class="fld" value="${esc(val||'')}" placeholder="${ph}"></div>`;
   return `${sectionHint('Estos datos aparecen en tu tienda pública. El teléfono es el WhatsApp donde te contactan los socios, y el link de Maps ubica tu expo en el buscador.')}<div class="grid" style="grid-template-columns:1.5fr 1fr;align-items:start">
     <div class="card" style="padding:24px">
+      <h3 style="font-size:18px;margin-bottom:16px">Logo de tu empresa</h3>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+        <div style="width:72px;height:72px;border-radius:16px;overflow:hidden;background:#F1F1F3;border:1px solid #E2E2E5;display:flex;align-items:center;justify-content:center;flex:none">
+          <img id="dLogoPrev" src="${d.logo_url?esc(d.logo_url):''}" style="width:100%;height:100%;object-fit:cover;${d.logo_url?'':'display:none'}">
+          <span id="dLogoInitial" style="font-family:'Archivo';font-weight:800;font-size:22px;color:#44414A;${d.logo_url?'display:none':''}">${esc(d.initial||(d.razon||'E')[0])}</span>
+        </div>
+        <div>
+          <input type="file" id="dLogo" accept="image/*" class="fld" style="padding:8px" onchange="previewDealerLogo(this)">
+          <div style="font-size:12px;color:#918A8E;margin-top:5px">Se recorta automáticamente en cuadrado. Aparece en tu perfil y en "ExpoACA destacados".</div>
+        </div>
+      </div>
+      <input type="hidden" id="dLogoUrl" value="${d.logo_url?esc(d.logo_url):''}">
       <h3 style="font-size:18px;margin-bottom:16px">Datos del concesionario</h3>
       ${f('dRazon','Razón social / nombre comercial',d.razon)}
       <div class="grid" style="grid-template-columns:1fr 1fr">${f('dSede','ExpoACA / sede',d.sede)}${f('dRubro','Rubro',d.rubro)}</div>
@@ -996,14 +1010,29 @@ async function advanceOrder(id, next){
   toast('Pedido: '+ (ORDER_LABEL[next]||next)); panelTab('pedidos');
 }
 async function saveDealerProfile(){
+  let logo_url = $('dLogoUrl').value || null;
+  const file = $('dLogo') && $('dLogo').files[0];
+  if(file){
+    let toUpload = file;
+    try{ toUpload = await processProductImage(file, 500, 500); }catch(e){ toast('No se pudo ajustar el logo, se sube el original'); }
+    const path = me.dealer_id+'/logo-'+Date.now()+'.jpg';
+    const up = await sb.storage.from('product-photos').upload(path, toUpload, {upsert:true, contentType:'image/jpeg'});
+    if(up.error){ toast('Error subiendo el logo: '+up.error.message); return; }
+    logo_url = sb.storage.from('product-photos').getPublicUrl(path).data.publicUrl;
+  }
   const rec = { razon:$('dRazon').value.trim(), sede:$('dSede').value.trim(), rubro:$('dRubro').value.trim(),
     tel:$('dTel').value.trim(), email:$('dEmail').value.trim(), dir:$('dDir').value.trim(),
-    horario:$('dHorario').value.trim(), map_link:$('dMap').value.trim(), descripcion:$('dDesc').value.trim() };
+    horario:$('dHorario').value.trim(), map_link:$('dMap').value.trim(), descripcion:$('dDesc').value.trim(), logo_url };
   if(!rec.razon){ toast('Falta la razón social'); return; }
   const { error } = await sb.from('dealers').update(rec).eq('id', me.dealer_id);
   if(error){ toast(error.message); return; }
   Object.assign(window._panel.dealer, rec);
   toast('✅ Perfil actualizado — WhatsApp y datos activos en todo el portal');
+}
+function previewDealerLogo(inp){
+  const f=inp.files[0]; if(!f) return;
+  const img=$('dLogoPrev'), ini=$('dLogoInitial');
+  processProductImage(f,500,500).then(blob=>{ img.src=URL.createObjectURL(blob); img.style.display='block'; if(ini) ini.style.display='none'; }).catch(()=>{ img.src=URL.createObjectURL(f); img.style.display='block'; if(ini) ini.style.display='none'; });
 }
 
 function productForm(p){
@@ -1059,15 +1088,42 @@ function applyDealDiscount(){
   $('pSocio').value = Math.round(lv*(1-disc/100));
   window._socioTouched = true;
 }
-function previewPhoto(inp){ const f=inp.files[0]; if(!f) return; const img=$('pPhotoPrev'); img.src=URL.createObjectURL(f); img.style.display='block'; }
+function previewPhoto(inp){ const f=inp.files[0]; if(!f) return; const img=$('pPhotoPrev'); img.style.display='block'; img.src=URL.createObjectURL(f); processProductImage(f).then(blob=>{ img.src=URL.createObjectURL(blob); }).catch(()=>{}); }
+
+// Estandariza toda foto subida a un mismo formato: recorte centrado 4:3, tamaño fijo, fondo prolijo.
+// Así todas las publicaciones se ven parejas en las tarjetas, la ficha y la oferta del día.
+function processProductImage(file, targetW, targetH){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const TARGET_W=targetW||900, TARGET_H=targetH||675;
+      const canvas=document.createElement('canvas');
+      canvas.width=TARGET_W; canvas.height=TARGET_H;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#F1F1F3'; ctx.fillRect(0,0,TARGET_W,TARGET_H);
+      const srcRatio = img.width/img.height, targetRatio = TARGET_W/TARGET_H;
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      if(srcRatio > targetRatio){ sw = img.height*targetRatio; sx=(img.width-sw)/2; }
+      else if(srcRatio < targetRatio){ sh = img.width/targetRatio; sy=(img.height-sh)/2; }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, TARGET_W, TARGET_H);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob=> blob? resolve(blob) : reject(new Error('No se pudo procesar la imagen')), 'image/jpeg', 0.86);
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('No se pudo leer la imagen')); };
+    img.src=url;
+  });
+}
 
 async function saveProduct(){
   const id=$('pid').value;
   let photo_url = $('pPhotoUrl').value || null;
   const file = $('pPhoto') && $('pPhoto').files[0];
   if(file){
-    const path = me.dealer_id+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    const up = await sb.storage.from('product-photos').upload(path, file, {upsert:true});
+    let toUpload = file;
+    try{ toUpload = await processProductImage(file); }catch(e){ toast('No se pudo ajustar la foto, se sube el original'); }
+    const path = me.dealer_id+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_').replace(/\.[^.]+$/, '')+'.jpg';
+    const up = await sb.storage.from('product-photos').upload(path, toUpload, {upsert:true, contentType:'image/jpeg'});
     if(up.error){ toast('Error subiendo la foto: '+up.error.message); return; }
     photo_url = sb.storage.from('product-photos').getPublicUrl(path).data.publicUrl;
   }
