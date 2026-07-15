@@ -87,7 +87,7 @@
     header.search-collapsed #searchIconBtn{display:flex!important;order:3}
     header.not-home #searchIconBtn{display:none!important}
     header.not-home .wrap > div[style*="max-width:440px"]{display:none!important}
-    nav#nav{order:2;flex:1;justify-content:flex-end;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px!important}
+    nav#nav{order:2;flex:1 1 100%;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px!important}
     nav#nav::-webkit-scrollbar{display:none}
     nav#nav span{display:none!important}
     nav#nav .btn{padding:8px 12px!important;font-size:13px!important;white-space:nowrap}
@@ -786,7 +786,7 @@ async function viewExpo(v, id){
       </div>
       <div id="reviewFormWrap"></div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
-        ${pubReviews.length? pubReviews.map(r=>`<div class="card" style="padding:16px 18px">
+        ${pubReviews.length? pubReviews.slice(0,5).map(r=>`<div class="card" style="padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
             <div style="font-weight:700;font-size:14.5px">${esc(r.customer_name||'Socio ACA')}</div>
             <div style="color:#E6A100;font-size:14px">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
