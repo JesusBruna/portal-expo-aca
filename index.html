@@ -1020,15 +1020,16 @@ async function doUpdatePass(){
 // ---------- Panel concesionario ----------
 async function viewPanel(v){
   if(!me || me.role!=='dealer'){ v.innerHTML='<div class="card" style="padding:24px">Esta sección es para concesionarios. Si sos concesionario, pedile al administrador que active tu cuenta.</div>'; return; }
-  const [{data:dealer},{data:prods},{data:cats},{data:orders},{data:reviews}] = await Promise.all([
+  const [{data:dealer},{data:prods},{data:cats},{data:orders},{data:reviews},{data:events}] = await Promise.all([
     sb.from('dealers').select('*').eq('id', me.dealer_id).single(),
     sb.from('products').select('*, categories(name)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('categories').select('*').order('name'),
-    sb.from('orders').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
-    sb.from('dealer_reviews').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false})
+    sb.from('orders').select('*, order_items(qty,product_id)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
+    sb.from('dealer_reviews').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
+    sb.from('product_events').select('product_id,event_type').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}).limit(3000)
   ]);
   window._cats = cats||[];
-  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], reviews: reviews||[], tab: (window._panel&&window._panel.tab)||'resumen' };
+  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], reviews: reviews||[], events: events||[], tab: (window._panel&&window._panel.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
       <div style="display:flex;align-items:center;gap:12px">
@@ -1110,13 +1111,34 @@ function panelResumen(){
   const maxB=Math.max(1,...byStatus);
   const bars=ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:150px"><div style="height:${Math.round(byStatus[i]/maxB*100)}%;background:${ORDER_COLOR[s].c};border-radius:7px 7px 0 0;min-height:3px"></div></div><span style="font-size:11.5px;color:#6E646A;font-weight:600">${ORDER_LABEL[s]}</span><b style="font-size:13px">${byStatus[i]}</b></div>`).join('');
   const low=prods.filter(p=>p.stock<15).slice(0,6).map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:14px"><span>${esc(p.name)}</span><b style="color:${p.stock===0?'#C8102E':'#B0631A'}">${p.stock} u.</b></div>`).join('');
+  // Indicadores: más vistos, más comprados y recomendación (solo de ESTE expo)
+  const prodById={}; prods.forEach(p=>prodById[p.id]=p);
+  const events = P.events||[];
+  const viewCounts={}, clickCounts={};
+  events.forEach(e=>{ const m=e.event_type==='view'?viewCounts:(e.event_type==='whatsapp_click'?clickCounts:null); if(m) m[e.product_id]=(m[e.product_id]||0)+1; });
+  const topViewed = Object.keys(viewCounts).map(pid=>({pid,n:viewCounts[pid],p:prodById[pid]})).sort((a,b)=>b.n-a.n).slice(0,5);
+  const topViewedHtml = topViewed.length ? topViewed.map((r,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #F0F0F2"><span style="width:22px;height:22px;border-radius:50%;background:#ECECEE;color:#44414A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;flex:none">${i+1}</span><div style="flex:1;min-width:0">${r.p?esc(r.p.name):'Producto eliminado'}</div><b style="font-family:'Archivo';font-size:15px">${r.n}</b></div>`).join('') : '<p style="color:#6E646A;font-size:14px">Todavía no hay vistas registradas.</p>';
+  const purchCounts={};
+  orders.filter(o=>o.status==='vendido'||o.status==='entregado').forEach(o=>(o.order_items||[]).forEach(it=>{ purchCounts[it.product_id]=(purchCounts[it.product_id]||0)+(it.qty||1); }));
+  const topPurchased = Object.keys(purchCounts).map(pid=>({pid,n:purchCounts[pid],p:prodById[pid]})).sort((a,b)=>b.n-a.n).slice(0,3);
+  const topPurchasedHtml = topPurchased.length ? topPurchased.map((r,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #F0F0F2"><span style="width:22px;height:22px;border-radius:50%;background:${i===0?'#E6A100':i===1?'#C7C7CB':'#D9A066'};color:#1C1B1F;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;flex:none">${i+1}</span><div style="flex:1;min-width:0">${r.p?esc(r.p.name):'Producto eliminado'}</div><b style="font-family:'Archivo';font-size:15px">${r.n} u.</b></div>`).join('') : '<p style="color:#6E646A;font-size:14px">Todavía no tenés ventas concretadas registradas.</p>';
+  const topViewed3 = topViewed.slice(0,3);
+  const recoHtml = topViewed3.length ? topViewed3.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FBF3E7;border:1px solid #F0E3C8;border-radius:12px;margin-top:10px">
+      <span style="font-size:20px">✨</span>
+      <div style="flex:1"><b>${r.p?esc(r.p.name):'Producto eliminado'}</b><div style="font-size:12.5px;color:#8A7A55;margin-top:3px">${r.n} vistas recientes — es un buen candidato para tu Oferta del día</div></div>
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px;margin-top:8px">Todavía no hay suficientes vistas para recomendar.</p>';
   return `${sectionHint('Acá ves un pantallazo de tu negocio: ventas registradas, pedidos pendientes de preparar y qué productos tenés con poco o nulo stock.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
       ${kpi(money(ventas),'Ventas registradas')}${kpi(orders.length,'Pedidos totales')}${kpi(pend,'Consultas por WhatsApp',{col:'#3B5BA5',txt:'esperando tu respuesta'})}${kpi(prods.length,'Productos publicados',sinStock?{col:'#C8102E',txt:sinStock+' sin stock'}:{col:'#0B7A55',txt:'todo con stock'})}
     </div>
-    <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start">
+    <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start;margin-bottom:18px">
       <div class="card" style="padding:22px"><h3 style="font-size:18px;margin-bottom:6px">Pedidos por estado</h3><div style="display:flex;gap:14px;margin-top:16px">${bars}</div></div>
       <div class="card" style="padding:22px"><h3 style="font-size:18px;margin-bottom:10px">Stock bajo</h3>${low||'<p style="color:#6E646A;font-size:14px">Todo con buen stock 👌</p>'}</div>
-    </div>`;
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
+      <div class="card" style="padding:22px"><h3 style="font-size:17px;margin-bottom:10px">🔥 Tus 5 productos más vistos</h3>${topViewedHtml}</div>
+      <div class="card" style="padding:22px"><h3 style="font-size:17px;margin-bottom:10px">🏆 Tus 3 más comprados</h3>${topPurchasedHtml}</div>
+    </div>
+    <div class="card" style="padding:22px"><h3 style="font-size:17px">✨ Recomendación: lo que más están mirando de vos</h3>${recoHtml}</div>`;
 }
 
 function panelProductos(){
