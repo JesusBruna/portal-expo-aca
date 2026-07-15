@@ -37,8 +37,8 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1C1B1F;color:#fff;padding:13px 22px;border-radius:12px;font-weight:600;font-size:14px;z-index:999;box-shadow:0 16px 40px -12px rgba(0,0,0,.5);opacity:0;transition:opacity .25s;pointer-events:none}
   .toast.show{opacity:1}
   @keyframes acaPulse{0%,100%{opacity:.4}50%{opacity:1}}
-  .recoWrap{background:radial-gradient(130% 180% at 12% 0%,#FFF8EA 0%,#FBEFDA 45%,#F1E1C0 100%);position:relative;overflow:hidden;border-radius:26px;padding:30px 26px 32px;border:1px solid #EFDFB8;box-shadow:0 20px 46px -30px rgba(122,67,16,.35)}
-  .recoWrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(#00000009 1.4px,transparent 1.4px);background-size:18px 18px;opacity:.6;pointer-events:none}
+  .recoWrap{background:linear-gradient(145deg,#3a3438 0%,#221f22 55%,#0e0d0f 100%);position:relative;overflow:hidden;border-radius:26px;padding:30px 26px 32px;border:1px solid #3a3438;box-shadow:0 30px 60px -30px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06),inset 0 -12px 30px -20px rgba(0,0,0,.5)}
+  .recoWrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(#ffffff10 1.4px,transparent 1.4px);background-size:18px 18px;opacity:.6;pointer-events:none}
   .recoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
   .recoCard{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px -16px rgba(28,27,31,.18);transition:transform .25s ease,box-shadow .25s ease;position:relative;cursor:pointer}
   .recoCard:hover{transform:translateY(-6px);box-shadow:0 26px 48px -18px rgba(28,27,31,.34)}
@@ -64,6 +64,11 @@
     .dealerGrid > *{flex:0 0 42%!important;scroll-snap-align:start}
   }
   @media (max-width:480px){
+    .dealSpotCard{grid-template-columns:1fr!important;min-height:auto!important}
+    .dealSpotText{order:1;padding:22px 22px 14px!important}
+    .dealSpotImg{order:2;min-height:160px;padding:14px 22px!important}
+    .dealSpotImg img,.dealSpotImg div{max-height:160px!important}
+    .dealSpotCountdown{order:3;flex-direction:row!important;padding:14px 22px!important;gap:14px!important}
     .dealSpotPrice{flex-wrap:wrap;gap:8px!important}
     .dealSpotMain{font-size:22px!important}
     .dealSpotOld{font-size:12px!important}
@@ -456,7 +461,7 @@ async function viewInicio(v){
     ${recoCardsHtml?`<div class="recoWrap" style="margin-bottom:34px">
       <div style="display:flex;align-items:center;gap:11px;margin-bottom:18px;position:relative">
         <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#FFC94D,#E6A100);display:flex;align-items:center;justify-content:center;color:#1C1B1F;font-size:20px;box-shadow:0 8px 18px -8px rgba(230,161,0,.6)">✨</span>
-        <div><h2 style="font-size:23px;letter-spacing:-.01em">Recomendado para vos</h2><p style="font-size:13px;color:#8A7A55;margin-top:2px">Elegido según lo que estuviste mirando · precio socio por tiempo limitado</p></div>
+        <div><h2 style="font-size:23px;letter-spacing:-.01em;color:#fff">Recomendado para vos</h2><p style="font-size:13px;color:#B3ABAE;margin-top:2px">Elegido según lo que estuviste mirando · precio socio por tiempo limitado</p></div>
       </div>
       <div class="recoGrid">${recoCardsHtml}</div>
     </div>`:''}
@@ -491,6 +496,7 @@ function destGoTo(i){ window._destIdx=i; renderDest(); }
 function startDestCarousel(){
   window._destIdx=0; clearInterval(window._destInterval);
   renderDest();
+  if(window.innerWidth<=560) return; // en mobile es carrusel táctil, sin auto-avance
   window._destInterval = setInterval(()=>{ const pages=window._destPages||[]; if(pages.length>1) destGoTo(((window._destIdx||0)+1)%pages.length); }, 5000);
 }
 
@@ -531,8 +537,8 @@ function startHeroCarousel(){
 // ---------- Ofertas del día: carrusel destacado con cuenta regresiva ----------
 function dealSpotHTML(p){
   const disc = p.price_list? Math.round((1-p.price_socio/p.price_list)*100) : 0;
-  return `<div style="display:grid;grid-template-columns:1.1fr .55fr .9fr;min-height:260px;background:linear-gradient(115deg,#7A1220 0%,#4A0E17 55%,#2A0A0F 100%);color:#fff;position:relative;overflow:hidden">
-    <div style="position:relative;padding:36px 40px;display:flex;flex-direction:column;justify-content:center">
+  return `<div class="dealSpotCard" style="display:grid;grid-template-columns:1.1fr .55fr .9fr;min-height:260px;background:linear-gradient(115deg,#7A1220 0%,#4A0E17 55%,#2A0A0F 100%);color:#fff;position:relative;overflow:hidden">
+    <div style="position:relative;padding:36px 40px;display:flex;flex-direction:column;justify-content:center" class="dealSpotText">
       <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;background:#ffffff26;border:1px solid #ffffff40;padding:6px 13px;border-radius:100px;width:fit-content">⚡ OFERTA RELÁMPAGO</span>
       <h2 style="font-size:28px;color:#fff;margin-top:14px;line-height:1.1">${esc(p.name)}</h2>
       <div style="font-size:13px;color:#ffffffcc;margin-top:6px">${esc(p.dealers?.razon||'')} · ${esc(p.categories?.name||'')}</div>
@@ -543,10 +549,10 @@ function dealSpotHTML(p){
       </div>
       <button class="btn" style="margin-top:18px;background:#1C1B1F;color:#fff;width:fit-content" onclick="go('producto:${p.id}')">Ver oferta →</button>
     </div>
-    <div style="position:relative;background:#00000022;display:flex;align-items:center;justify-content:center;padding:16px">
+    <div style="position:relative;background:#00000022;display:flex;align-items:center;justify-content:center;padding:16px" class="dealSpotImg">
       ${p.photo_url?`<img src="${esc(p.photo_url)}" style="width:100%;height:100%;max-height:230px;object-fit:cover;border-radius:14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)">`:`<div style="width:100%;height:100%;max-height:230px;border-radius:14px;background:#ffffff14;display:flex;align-items:center;justify-content:center"><span style="font-family:'Archivo';font-weight:800;font-size:15px;color:#ffffffcc">${esc(p.brand||'')}</span></div>`}
     </div>
-    <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#00000030">
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#00000030" class="dealSpotCountdown">
       <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#ffffffdd">TERMINA HOY EN</span>
       <div id="dealCountdown" style="display:flex;gap:10px"></div>
     </div>
