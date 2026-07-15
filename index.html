@@ -210,6 +210,22 @@ function sectionHint(text){
 function trackEvent(productId, dealerId, type){  if(!configured() || !sb || !productId) return;
   try{ sb.from('product_events').insert({ product_id: productId, dealer_id: dealerId||null, event_type: type, user_id: me?me.id:null }).then(()=>{}, ()=>{}); }catch(e){}
 }
+// Al hacer clic en "Comprar por WhatsApp" queda registrado un pedido en estado 'consulta'.
+// El concesionario después marca a mano si se concretó y si se entregó.
+function logWhatsAppOrder(productId, dealerId, price, productName){
+  trackEvent(productId, dealerId, 'whatsapp_click');
+  if(!configured() || !sb || !dealerId) return;
+  (async()=>{
+    try{
+      const { data:order, error } = await sb.from('orders').insert({
+        dealer_id: dealerId, customer_id: me?me.id:null,
+        customer_name: (me&&me.full_name) || 'Consulta por WhatsApp', is_socio: !!(me&&me.is_socio),
+        total: price||0, status:'consulta'
+      }).select().single();
+      if(!error && order){ await sb.from('order_items').insert({ order_id: order.id, product_id: productId, qty:1, unit_price: price||0 }); }
+    }catch(e){}
+  })();
+}
 // ---------- Recomendaciones: historial local de navegación ----------
 function recoCatSlugs(){ try{ return JSON.parse(localStorage.getItem('expoaca_viewed_cats')||'[]'); }catch(e){ return []; } }
 function addRecoCat(slug){ if(!slug) return; let arr=recoCatSlugs().filter(s=>s!==slug); arr.unshift(slug); try{ localStorage.setItem('expoaca_viewed_cats', JSON.stringify(arr.slice(0,5))); }catch(e){} }
@@ -620,7 +636,7 @@ async function viewProducto(v, id){
       <div style="font-size:12.5px;color:#918A8E;margin-top:2px">📍 ${esc(o.dealers?.sede||'')} · ★ ${esc(String(o.dealers?.rating||'4.7'))}</div></div>
       <div style="text-align:right"><div style="font-family:'Archivo';font-weight:800;font-size:20px;color:#C8102E">${money(o.price_socio)}</div>
       <span class="tag" style="background:${o.price_socio===best?'#E3F6EE':'#ECECEE'};color:${o.price_socio===best?'#0B7A55':'#918A8E'}">${diff}</span></div>
-      <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" href="${waHref(o.dealers?.tel,d,p.name,o.price_socio)}" target="_blank" rel="noopener" onclick="trackEvent('${o.id}','${o.dealer_id}','whatsapp_click')">✆ Comprar</a>
+      <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" href="${waHref(o.dealers?.tel,d,p.name,o.price_socio)}" target="_blank" rel="noopener" onclick="logWhatsAppOrder('${o.id}','${o.dealer_id}',${o.price_socio},'${esc(p.name).replace(/'/g,'')}')">✆ Comprar</a>
     </div>`;
   }).join('');
   v.innerHTML=`
@@ -640,7 +656,7 @@ async function viewProducto(v, id){
         <div style="font-size:14px;color:#6E646A;margin-top:6px">Precio no socio: <b style="color:#44414A">${money(p.price_list)}</b> · <span style="color:#0B7A55;font-weight:700">Asociate y ahorrá ${p.price_list?Math.round((1-p.price_socio/p.price_list)*100):0}%</span></div>
         </div>
         <div style="font-size:13px;color:#0E8F6E;font-weight:700;margin-top:6px">Stock disponible: ${p.stock}</div>
-        <a class="btn" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;margin-top:20px;font-size:16px;text-decoration:none" href="${waHref(p.dealers?.tel,dealer,p.name,p.price_socio)}" target="_blank" rel="noopener" onclick="trackEvent('${p.id}','${p.dealer_id}','whatsapp_click')"><span style="font-size:19px">✆</span>Comprar por WhatsApp</a>
+        <a class="btn" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;margin-top:20px;font-size:16px;text-decoration:none" href="${waHref(p.dealers?.tel,dealer,p.name,p.price_socio)}" target="_blank" rel="noopener" onclick="logWhatsAppOrder('${p.id}','${p.dealer_id}',${p.price_socio},'${esc(p.name).replace(/'/g,'')}')"><span style="font-size:19px">✆</span>Comprar por WhatsApp</a>
         <button class="btn" style="width:100%;margin-top:10px;border:1.5px solid #C8102E;background:#fff;color:#C8102E" onclick="addCart('${p.id}')">＋ Agregar al carrito</button>
         <div style="font-size:12.5px;color:#918A8E;margin-top:10px;text-align:center">Coordinás la compra directo con ${esc(dealer)} por WhatsApp</div>
       </div>
@@ -724,7 +740,7 @@ async function checkout(dealerId){
   const dealer=list[0].dealers;
   const cliente = (me&&me.full_name)||'';
   // registrar pedido
-  const { data:order, error } = await sb.from('orders').insert({ dealer_id:dealerId, customer_id: me?me.id:null, customer_name: cliente||'Cliente web', is_socio: !!(me&&me.is_socio), total, status:'pagado' }).select().single();
+  const { data:order, error } = await sb.from('orders').insert({ dealer_id:dealerId, customer_id: me?me.id:null, customer_name: cliente||'Cliente web', is_socio: !!(me&&me.is_socio), total, status:'consulta' }).select().single();
   if(!error && order){
     const items=list.map(p=>({ order_id:order.id, product_id:p.id, qty:cart[p.id]||1, unit_price:p.price_socio }));
     await sb.from('order_items').insert(items);
@@ -1085,8 +1101,8 @@ function panelValoraciones(){
 }
 function panelResumen(){
   const P=window._panel; const prods=P.prods, orders=P.orders;
-  const ventas = orders.filter(o=>o.status!=='cancelado').reduce((a,o)=>a+(o.total||0),0);
-  const pend = orders.filter(o=>o.status==='pagado'||o.status==='a_preparar').length;
+  const ventas = orders.filter(o=>o.status==='vendido'||o.status==='entregado').reduce((a,o)=>a+(o.total||0),0);
+  const pend = orders.filter(o=>o.status==='consulta').length;
   const sinStock = prods.filter(p=>p.stock===0).length;
   const kpi=(n,l,c)=>`<div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">${l}</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px">${n}</div>${c?`<div style="font-size:12.5px;font-weight:700;margin-top:6px;color:${c.col}">${c.txt}</div>`:''}</div>`;
   // mini gráfico: pedidos por estado
@@ -1095,7 +1111,7 @@ function panelResumen(){
   const bars=ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:150px"><div style="height:${Math.round(byStatus[i]/maxB*100)}%;background:${ORDER_COLOR[s].c};border-radius:7px 7px 0 0;min-height:3px"></div></div><span style="font-size:11.5px;color:#6E646A;font-weight:600">${ORDER_LABEL[s]}</span><b style="font-size:13px">${byStatus[i]}</b></div>`).join('');
   const low=prods.filter(p=>p.stock<15).slice(0,6).map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F0F2;font-size:14px"><span>${esc(p.name)}</span><b style="color:${p.stock===0?'#C8102E':'#B0631A'}">${p.stock} u.</b></div>`).join('');
   return `${sectionHint('Acá ves un pantallazo de tu negocio: ventas registradas, pedidos pendientes de preparar y qué productos tenés con poco o nulo stock.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
-      ${kpi(money(ventas),'Ventas registradas')}${kpi(orders.length,'Pedidos totales')}${kpi(pend,'Pedidos a preparar',{col:'#B0631A',txt:'requieren acción'})}${kpi(prods.length,'Productos publicados',sinStock?{col:'#C8102E',txt:sinStock+' sin stock'}:{col:'#0B7A55',txt:'todo con stock'})}
+      ${kpi(money(ventas),'Ventas registradas')}${kpi(orders.length,'Pedidos totales')}${kpi(pend,'Consultas por WhatsApp',{col:'#3B5BA5',txt:'esperando tu respuesta'})}${kpi(prods.length,'Productos publicados',sinStock?{col:'#C8102E',txt:sinStock+' sin stock'}:{col:'#0B7A55',txt:'todo con stock'})}
     </div>
     <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start">
       <div class="card" style="padding:22px"><h3 style="font-size:18px;margin-bottom:6px">Pedidos por estado</h3><div style="display:flex;gap:14px;margin-top:16px">${bars}</div></div>
@@ -1134,26 +1150,37 @@ function panelProductos(){
     </table></div>`;
 }
 
-const ORDER_FLOW = ['pagado','a_preparar','enviado','entregado'];
-const ORDER_LABEL = {pagado:'Pagado',a_preparar:'A preparar',enviado:'Enviado',entregado:'Entregado',cancelado:'Cancelado'};
-const ORDER_COLOR = {pagado:{c:'#0B7A55',b:'#E3F6EE'},a_preparar:{c:'#B0631A',b:'#FBEFE2'},enviado:{c:'#3B5BA5',b:'#E7ECF7'},entregado:{c:'#6E646A',b:'#ECECEE'},cancelado:{c:'#C8102E',b:'#FBE9EC'}};
+const ORDER_FLOW = ['consulta','vendido','entregado'];
+const ORDER_LABEL = {consulta:'Consulta por WhatsApp',vendido:'Venta concretada',no_vendido:'No se concretó',entregado:'Entregado',pagado:'Pagado',a_preparar:'A preparar',enviado:'Enviado',cancelado:'Cancelado'};
+const ORDER_COLOR = {consulta:{c:'#3B5BA5',b:'#E7ECF7'},vendido:{c:'#0B7A55',b:'#E3F6EE'},no_vendido:{c:'#C8102E',b:'#FBE9EC'},entregado:{c:'#6E646A',b:'#ECECEE'},pagado:{c:'#0B7A55',b:'#E3F6EE'},a_preparar:{c:'#B0631A',b:'#FBEFE2'},enviado:{c:'#3B5BA5',b:'#E7ECF7'},cancelado:{c:'#C8102E',b:'#FBE9EC'}};
 function panelPedidos(){
   const list = window._panel.orders;
-  if(!list.length) return `${sectionHint('Seguí cada pedido y marcá su estado a medida que lo procesás: Pagado → A preparar → Enviado → Entregado.')}<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés pedidos registrados.</div>`;
-  return `${sectionHint('Seguí cada pedido y marcá su estado a medida que lo procesás: Pagado → A preparar → Enviado → Entregado.')}<div style="display:flex;flex-direction:column;gap:12px">`+list.map(o=>{
-    const idx=ORDER_FLOW.indexOf(o.status); const col=ORDER_COLOR[o.status]||ORDER_COLOR.pagado;
-    const canAdv = idx>=0 && idx<ORDER_FLOW.length-1;
-    const steps = ORDER_FLOW.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:${i<=idx?ORDER_COLOR[s].c:'#D6D6DA'}"></span><span style="font-size:11px;font-weight:600;color:${i<=idx?'#44414A':'#B3ABAE'}">${ORDER_LABEL[s]}</span></div>`).join('');
+  const HINT='Cada consulta de WhatsApp queda acá sola. Marcá vos si se concretó la venta y, si fue así, cuándo la entregaste — eso arma tus ventas registradas ($).';
+  if(!list.length) return `${sectionHint(HINT)}<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés pedidos registrados.</div>`;
+  return `${sectionHint(HINT)}<div style="display:flex;flex-direction:column;gap:12px">`+list.map(o=>{
+    const col=ORDER_COLOR[o.status]||ORDER_COLOR.consulta;
+    let actions='';
+    if(o.status==='consulta'){
+      actions = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;color:#44414A;font-weight:600">¿Se concretó la venta?</span>
+        <button class="btn" style="padding:8px 14px;font-size:13px;background:#0B7A55;color:#fff" onclick="setOrderResult('${o.id}','vendido')">Sí</button>
+        <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px" onclick="setOrderResult('${o.id}','no_vendido')">No</button></div>`;
+    } else if(o.status==='vendido'){
+      actions = `<button class="btn btn-dark" style="padding:9px 15px;font-size:13px" onclick="setOrderResult('${o.id}','entregado')">Marcar Entregado →</button>`;
+    }
+    const steps = ORDER_FLOW.map((s)=>{
+      const reached = o.status===s || (s==='consulta') || (s==='vendido'&&(o.status==='vendido'||o.status==='entregado')) || (s==='entregado'&&o.status==='entregado');
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:${reached?ORDER_COLOR[s].c:'#D6D6DA'}"></span><span style="font-size:11px;font-weight:600;color:${reached?'#44414A':'#B3ABAE'}">${ORDER_LABEL[s]}</span></div>`;
+    }).join('');
     return `<div class="card" style="padding:18px 20px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div style="display:flex;align-items:center;gap:14px"><b style="font-family:'Archivo';color:#C8102E">#${esc((o.id||'').slice(0,8))}</b>
         <div><div style="font-weight:700;font-size:15px">${esc(o.customer_name||'Cliente')}</div><div style="font-size:12.5px;color:#918A8E">${o.is_socio?'Socio ACA':'Cliente'} · ${money(o.total)}</div></div></div>
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <span class="tag" style="background:${col.b};color:${col.c}">${ORDER_LABEL[o.status]||o.status}</span>
-          ${canAdv?`<button class="btn btn-dark" style="padding:9px 15px;font-size:13px" onclick="advanceOrder('${o.id}','${ORDER_FLOW[idx+1]}')">Marcar ${ORDER_LABEL[ORDER_FLOW[idx+1]]} →</button>`:''}
+          ${actions}
         </div>
       </div>
-      <div style="display:flex;margin-top:16px">${steps}</div>
+      ${o.status!=='no_vendido'?`<div style="display:flex;margin-top:16px">${steps}</div>`:''}
     </div>`;
   }).join('')+'</div>';
 }
@@ -1201,7 +1228,7 @@ async function adjustStock(id, delta){
   if(error){ toast(error.message); return; }
   p.stock = nv; panelTab('productos');
 }
-async function advanceOrder(id, next){
+async function setOrderResult(id, next){
   const { error } = await sb.from('orders').update({status:next}).eq('id',id);
   if(error){ toast(error.message); return; }
   const o = window._panel.orders.find(x=>x.id===id); if(o) o.status=next;
@@ -1345,16 +1372,17 @@ async function delProduct(id, name){ if(!confirm('¿Eliminar "'+name+'"?'))retur
 // ---------- Admin (dueño) ----------
 async function viewAdmin(v){
   if(!me || me.role!=='admin'){ v.innerHTML='<div class="card" style="padding:24px">Sección exclusiva del administrador.</div>'; return; }
-  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps},{data:events},{data:reviews}] = await Promise.all([
+  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps},{data:events},{data:reviews},{data:soldOrders}] = await Promise.all([
     sb.from('dealers').select('*').order('razon'),
     sb.from('app_users').select('*, dealers(razon)').order('created_at',{ascending:false}),
     sb.from('products').select('id,dealer_id,name,brand,dealers(razon)'),
     sb.from('orders').select('*, dealers(razon)').order('created_at',{ascending:false}).limit(10),
     sb.from('dealer_applications').select('*').order('created_at',{ascending:false}),
     sb.from('product_events').select('product_id,dealer_id,event_type,created_at').order('created_at',{ascending:false}).limit(5000),
-    sb.from('dealer_reviews').select('*, dealers(razon)').order('created_at',{ascending:false})
+    sb.from('dealer_reviews').select('*, dealers(razon)').order('created_at',{ascending:false}),
+    sb.from('orders').select('status, order_items(qty,product_id)').in('status',['vendido','entregado'])
   ]);
-  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], events:events||[], reviews:reviews||[], tab:(window._admin&&window._admin.tab)||'resumen' };
+  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], events:events||[], reviews:reviews||[], soldOrders:soldOrders||[], tab:(window._admin&&window._admin.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
       <div><h1 style="font-size:26px">Panel de administración 👑</h1>
@@ -1430,8 +1458,8 @@ function adminAnalytics(){
   const kpi=(n,l,c)=>`<div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">${l}</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px">${n}</div>${c?`<div style="font-size:12px;color:${c};margin-top:4px;font-weight:700">últimos eventos</div>`:''}</div>`;
   const countBy = (arr)=>{ const m={}; arr.forEach(e=>{ m[e.product_id]=(m[e.product_id]||0)+1; }); return m; };
   const viewCounts = countBy(views), clickCounts = countBy(clicks);
-  const topList = (counts, emptyMsg)=>{
-    const rows = Object.keys(counts).map(pid=>({ pid, n:counts[pid], p:prodById[pid] })).sort((a,b)=>b.n-a.n).slice(0,10);
+  const topList = (counts, emptyMsg, limit)=>{
+    const rows = Object.keys(counts).map(pid=>({ pid, n:counts[pid], p:prodById[pid] })).sort((a,b)=>b.n-a.n).slice(0,limit||10);
     if(!rows.length) return `<p style="color:#6E646A;font-size:14px;padding:8px 0">${emptyMsg}</p>`;
     return `<table style="width:100%;border-collapse:collapse;font-size:14px">${rows.map(r=>`
       <tr style="border-bottom:1px solid #F0F0F2"><td style="padding:10px 8px">${r.p?`<b>${esc(r.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(r.p.brand||'')} · ${esc(r.p.dealers?.razon||'')}</div>`:`<span style="color:#918A8E">Producto eliminado</span>`}</td>
@@ -1461,11 +1489,31 @@ function adminAnalytics(){
       <span style="font-size:20px">⚠️</span>
       <div style="flex:1">${a.p?`<b>${esc(a.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(a.p.dealers?.razon||'')}</div>`:'<b>Producto eliminado</b>'}<div style="font-size:12.5px;color:#7A4310;margin-top:3px">${a.v} vistas · solo ${a.c} clics a WhatsApp (${a.conv}% conversión) — revisá el precio o la foto</div></div>
     </div>`).join('') : '<p style="color:#6E646A;font-size:14px;margin-top:8px">Sin alertas por ahora 👍</p>';
+  // Top 3 productos más comprados del país (ventas concretadas o entregadas)
+  const purchCounts={};
+  (A.soldOrders||[]).forEach(o=>(o.order_items||[]).forEach(it=>{ purchCounts[it.product_id]=(purchCounts[it.product_id]||0)+(it.qty||1); }));
+  const topPurchased = Object.keys(purchCounts).map(pid=>({pid,n:purchCounts[pid],p:prodById[pid]})).sort((a,b)=>b.n-a.n).slice(0,3);
+  const topPurchasedHtml = topPurchased.length ? topPurchased.map((r,i)=>`<div style="display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #F0F0F2">
+      <span style="width:28px;height:28px;border-radius:50%;background:${i===0?'#E6A100':i===1?'#C7C7CB':'#D9A066'};color:#1C1B1F;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none">${i+1}</span>
+      <div style="flex:1;min-width:0">${r.p?`<b>${esc(r.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(r.p.brand||'')} · ${esc(r.p.dealers?.razon||'')}</div>`:'<b>Producto eliminado</b>'}</div>
+      <b style="font-family:'Archivo';font-size:17px">${r.n} u.</b>
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px">Todavía no hay ventas concretadas registradas.</p>';
+  // Recomendación: 3 productos que más están mirando los clientes ahora
+  const topViewed3 = Object.keys(viewCounts).map(pid=>({pid,n:viewCounts[pid],p:prodById[pid]})).sort((a,b)=>b.n-a.n).slice(0,3);
+  const recoHtml = topViewed3.length ? topViewed3.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#FBF3E7;border:1px solid #F0E3C8;border-radius:12px;margin-top:10px">
+      <span style="font-size:20px">✨</span>
+      <div style="flex:1">${r.p?`<b>${esc(r.p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(r.p.brand||'')} · ${esc(r.p.dealers?.razon||'')}</div>`:'<b>Producto eliminado</b>'}<div style="font-size:12.5px;color:#8A7A55;margin-top:3px">${r.n} vistas recientes — considerá sumarlo a Ofertas del día o Recomendados</div></div>
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px;margin-top:8px">Todavía no hay suficientes vistas para recomendar.</p>';
   return `${sectionHint('Datos de los últimos 5.000 eventos: qué productos se ven más, cuáles generan más consultas por WhatsApp, ranking de expos y alertas automáticas de baja conversión.')}<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:18px">
       ${kpi(views.length,'Vistas de producto')}${kpi(clicks.length,'Clics en WhatsApp')}${kpi(conv+'%','Vista → WhatsApp')}${kpi(carts.length,'Agregados al carrito')}
     </div>
     <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
-      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">🔥 Más vistos</h3>${topList(viewCounts,'Todavía no hay vistas registradas.')}</div>
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">🔥 Top 5 más vistos</h3>${topList(viewCounts,'Todavía no hay vistas registradas.',5)}</div>
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">🏆 Top 3 más comprados del país</h3>${topPurchasedHtml}</div>
+    </div>
+    <div class="card" style="padding:20px;margin-bottom:18px"><h3 style="font-size:17px">✨ Recomendación: lo que más están mirando ahora</h3>${recoHtml}</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
+      <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">👁 Más vistos (top 10)</h3>${topList(viewCounts,'Todavía no hay vistas registradas.')}</div>
       <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">✆ Más clics a WhatsApp</h3>${topList(clickCounts,'Todavía no hay clics registrados.')}</div>
     </div>
     <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;margin-bottom:18px">
