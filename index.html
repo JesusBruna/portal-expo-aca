@@ -218,18 +218,15 @@ function logWhatsAppOrder(productId, dealerId, price, productName){
   if(!configured() || !sb || !dealerId) return;
   (async()=>{
     try{
-      const { data:order, error } = await sb.from('orders').insert({
-        dealer_id: dealerId, customer_id: me?me.id:null,
+      const orderId = crypto.randomUUID();
+      const { error } = await sb.from('orders').insert({
+        id: orderId, dealer_id: dealerId, customer_id: me?me.id:null,
         customer_name: (me&&me.full_name) || 'Consulta por WhatsApp', is_socio: !!(me&&me.is_socio),
         total: price||0, status:'consulta'
-      }).select().single();
+      });
       if(error){ console.error('logWhatsAppOrder orders.insert error:', error); alert('⚠️ No se pudo registrar el pedido:\n'+error.message); return; }
-      if(order){
-        const { error:itemErr } = await sb.from('order_items').insert({ order_id: order.id, product_id: productId, qty:1, unit_price: price||0 });
-        if(itemErr){ console.error('logWhatsAppOrder order_items.insert error:', itemErr); alert('⚠️ Pedido creado pero sin ítem:\n'+itemErr.message); }
-      } else {
-        console.log('logWhatsAppOrder: pedido creado sin data (revisar policy select "with check")');
-      }
+      const { error:itemErr } = await sb.from('order_items').insert({ order_id: orderId, product_id: productId, qty:1, unit_price: price||0 });
+      if(itemErr){ console.error('logWhatsAppOrder order_items.insert error:', itemErr); alert('⚠️ Pedido creado pero sin ítem:\n'+itemErr.message); }
     }catch(e){ console.error('logWhatsAppOrder exception:', e); alert('⚠️ Error registrando el pedido:\n'+(e.message||e)); }
   })();
 }
@@ -747,14 +744,13 @@ async function checkout(dealerId){
   let total=0; const itemsTxt=list.map(p=>{ const q=cart[p.id]||1; total+=p.price_socio*q; return `• ${p.name} x${q} (${money(p.price_socio*q)})`; }).join('%0A');
   const dealer=list[0].dealers;
   const cliente = (me&&me.full_name)||'';
-  // registrar pedido
-  const { data:order, error } = await sb.from('orders').insert({ dealer_id:dealerId, customer_id: me?me.id:null, customer_name: cliente||'Cliente web', is_socio: !!(me&&me.is_socio), total, status:'consulta' }).select().single();
+  // registrar pedido — generamos el id acá para no depender de leerlo de vuelta (RLS bloquea esa lectura si el comprador no tiene sesión)
+  const orderId = crypto.randomUUID();
+  const { error } = await sb.from('orders').insert({ id:orderId, dealer_id:dealerId, customer_id: me?me.id:null, customer_name: cliente||'Cliente web', is_socio: !!(me&&me.is_socio), total, status:'consulta' });
   if(error){ console.error('checkout orders.insert error:', error); alert('⚠️ No se pudo registrar el pedido:\n'+error.message); return; }
-  if(order){
-    const items=list.map(p=>({ order_id:order.id, product_id:p.id, qty:cart[p.id]||1, unit_price:p.price_socio }));
-    const { error:itemErr } = await sb.from('order_items').insert(items);
-    if(itemErr){ console.error('checkout order_items.insert error:', itemErr); alert('⚠️ Pedido creado pero sin ítems:\n'+itemErr.message); }
-  }
+  const items=list.map(p=>({ order_id:orderId, product_id:p.id, qty:cart[p.id]||1, unit_price:p.price_socio }));
+  const { error:itemErr } = await sb.from('order_items').insert(items);
+  if(itemErr){ console.error('checkout order_items.insert error:', itemErr); alert('⚠️ Pedido creado pero sin ítems:\n'+itemErr.message); }
   const num=(dealer?.tel||'').replace(/\D/g,'');
   const itemsPlain = list.map(p=>{ const q=cart[p.id]||1; return q>1? `${p.name} x${q}` : p.name; }).join(', ');
   const msg=encodeURIComponent(`Hola ${dealer?.razon||''}, me interesa comprar: ${itemsPlain} ¿Está disponible?`);
