@@ -413,13 +413,16 @@ function applyCatFilters(){
 // ---------- Inicio (Home) ----------
 async function viewInicio(v){
   if(!configured()){ await viewCatalogo(v); return; }
-  const [{data:cats},{data:deals},{data:destacados},{data:dealers}, recos] = await Promise.all([
+  const [{data:cats},{data:deals},{data:destacados},{data:dealers}, recos, {data:pubReviewsAll}] = await Promise.all([
     sb.from('categories').select('*').order('name'),
     sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('is_deal',true).eq('paused',false).gt('stock',0).or('deal_until.is.null,deal_until.gt.'+new Date().toISOString()).limit(6),
     sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('paused',false).gt('stock',0).order('created_at',{ascending:false}).limit(12),
     sb.from('dealers').select('*').eq('active',true).order('razon').limit(6),
-    getRecommendations()
+    getRecommendations(),
+    sb.from('dealer_reviews').select('dealer_id,rating').gte('rating',4)
   ]);
+  const ratingByDealer = {};
+  (pubReviewsAll||[]).forEach(r=>{ (ratingByDealer[r.dealer_id] = ratingByDealer[r.dealer_id]||[]).push(r.rating); });
   const catChips = (cats||[]).map(c=>`<div onclick="go('catalogo:${c.slug}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:13px;padding:16px;display:flex;align-items:center;gap:12px">
       <span style="width:44px;height:44px;border-radius:11px;background:${esc(c.tone||'#C8102E')};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:800">${esc((c.name||'?')[0])}</span>
       <span style="font-weight:600;font-size:14px">${esc(c.name)}</span>
@@ -427,12 +430,15 @@ async function viewInicio(v){
   const recoCardsHtml = (recos||[]).map(recoCard).join('');
   const destArr = destacados||[]; const destPages=[]; for(let i=0;i<destArr.length;i+=4) destPages.push(destArr.slice(i,i+4));
   window._destPages = destPages;
-  const dealerCards = (dealers||[]).map(d=>`<div onclick="go('expo:${d.id}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:14px;padding:18px;text-align:center">
+  const dealerCards = (dealers||[]).map(d=>{
+    const rs=ratingByDealer[d.id]; const avg = rs&&rs.length? (rs.reduce((a,b)=>a+b,0)/rs.length) : parseFloat(d.rating||4.7);
+    return `<div onclick="go('expo:${d.id}')" style="cursor:pointer;background:#fff;border:1px solid #E2E2E5;border-radius:14px;padding:18px;text-align:center">
       <div style="width:52px;height:52px;border-radius:13px;margin:0 auto;overflow:hidden;background:${esc(d.tone||'#C8102E')};display:flex;align-items:center;justify-content:center">${d.logo_url?`<img src="${esc(d.logo_url)}" style="width:100%;height:100%;object-fit:cover">`:`<span style="color:#fff;font-family:'Archivo';font-weight:800;font-size:18px">${esc(d.initial||(d.razon||'?')[0])}</span>`}</div>
       <div style="font-weight:700;font-size:15px;margin-top:10px">${esc(d.razon)}</div>
       <div style="font-size:12.5px;color:#918A8E;margin-top:3px">${esc(d.sede||'')}</div>
-      <div style="font-size:12px;color:#B0631A;font-weight:700;margin-top:6px">★ ${esc(String(d.rating||'4.7'))}</div>
-    </div>`).join('');
+      <div style="font-size:12px;color:#B0631A;font-weight:700;margin-top:6px">★ ${avg.toFixed(1)}</div>
+    </div>`;
+  }).join('');
   window._homeDealers = dealers||[];
   v.innerHTML = `
     <section class="float3d" style="border-radius:24px;overflow:hidden;position:relative;margin-bottom:32px;min-height:360px">
