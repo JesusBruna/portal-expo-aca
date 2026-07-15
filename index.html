@@ -148,7 +148,7 @@
   <div class="wrap" style="padding:44px 24px 30px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:28px">
     <div>
       <div style="display:flex;align-items:center;gap:10px"><span style="width:38px;height:38px;border-radius:10px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900;font-size:15px">EA</span><span style="font-family:'Archivo';font-weight:800;font-size:16px;color:#fff">EXPO ACA</span></div>
-      <p style="font-size:13.5px;line-height:1.6;margin-top:12px;max-width:300px">El marketplace oficial de ACA. Todo para tu vehículo, con beneficios exclusivos para socios.</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:12px;max-width:300px">El marketplace oficial de ACA. Todo para tu vehículo y mas, con beneficios exclusivos para socios.</p>
     </div>
     <div>
       <div style="color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Comprar</div>
@@ -159,7 +159,7 @@
       <div style="display:flex;flex-direction:column;gap:9px;font-size:14px"><a onclick="go('concesionarios')" style="cursor:pointer">Portal de concesionarios</a><a onclick="go('solicitud')" style="cursor:pointer">Quiero ser concesionario</a><a onclick="go('login')" style="cursor:pointer">Ingresar</a></div>
     </div>
   </div>
-  <div style="border-top:1px solid #332F33"><div class="wrap" style="padding:16px 24px;font-size:12.5px;color:#6E646A;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span>© 2026 ACA · EXPO ACA</span><span>La Rural, Buenos Aires</span></div></div>
+  <div style="border-top:1px solid #332F33"><div class="wrap" style="padding:16px 24px;font-size:12.5px;color:#6E646A;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span>© 2026 ACA · EXPO ACA</span><span><br></br></span></div></div>
 </footer>
 
 <div id="toast" class="toast"></div>
@@ -433,6 +433,7 @@ async function viewInicio(v){
       <div style="font-size:12.5px;color:#918A8E;margin-top:3px">${esc(d.sede||'')}</div>
       <div style="font-size:12px;color:#B0631A;font-weight:700;margin-top:6px">★ ${esc(String(d.rating||'4.7'))}</div>
     </div>`).join('');
+  window._homeDealers = dealers||[];
   v.innerHTML = `
     <section class="float3d" style="border-radius:24px;overflow:hidden;position:relative;margin-bottom:32px;min-height:360px">
       <div id="heroTrack" style="display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)"></div>
@@ -445,7 +446,7 @@ async function viewInicio(v){
       <div class="card float3d" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:radial-gradient(120% 160% at 15% 0%,#E23A50 0%,#C8102E 42%,#7A0E1E 100%);color:#fff;border:none">
         <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">MARKETPLACE</span>
         <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Explorá el catálogo completo</h2>
-        <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más, con precio socio.</p>
+        <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más.</p>
         <span style="display:inline-block;margin-top:16px;background:#fff;color:#1C1B1F;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Ver catálogo →</span></div>
       </div>
       <div class="card float3d" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:radial-gradient(120% 160% at 85% 0%,#3a3438 0%,#242226 45%,#0e0d0f 100%);color:#fff;border:none">
@@ -461,7 +462,7 @@ async function viewInicio(v){
     ${recoCardsHtml?`<div class="recoWrap" style="margin-bottom:34px">
       <div style="display:flex;align-items:center;gap:11px;margin-bottom:18px;position:relative">
         <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#FFC94D,#E6A100);display:flex;align-items:center;justify-content:center;color:#1C1B1F;font-size:20px;box-shadow:0 8px 18px -8px rgba(230,161,0,.6)">✨</span>
-        <div><h2 style="font-size:23px;letter-spacing:-.01em;color:#fff">Recomendado para vos</h2><p style="font-size:13px;color:#B3ABAE;margin-top:2px">Elegido según lo que estuviste mirando · precio socio por tiempo limitado</p></div>
+        <div><h2 style="font-size:23px;letter-spacing:-.01em;color:#fff">Recomendado para vos</h2><p style="font-size:13px;color:#B3ABAE;margin-top:2px">Elegido según lo que estuviste mirando · precio para socio por tiempo limitado</p></div>
       </div>
       <div class="recoGrid">${recoCardsHtml}</div>
     </div>`:''}
@@ -472,7 +473,7 @@ async function viewInicio(v){
     ${deals&&deals.length?`<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px">⚡</span><h2 style="font-size:24px">Ofertas del día</h2></div>
     <div id="dealsSpot" class="float3d" style="border-radius:22px;overflow:hidden;margin-bottom:34px"></div>`:''}
 
-    <div style="display:flex;align-items:end;justify-content:space-between;margin-bottom:14px"><h2 style="font-size:24px">Destacados</h2><a onclick="go('catalogo')" style="cursor:pointer;color:#C8102E;font-weight:700;font-size:14px">Ver todos →</a></div>
+    <div style="display:flex;align-items:end;justify-content:space-between;margin-bottom:14px"><h2 style="font-size:24px">Articulos destacados</h2><a onclick="go('catalogo')" style="cursor:pointer;color:#C8102E;font-weight:700;font-size:14px">Ver todos →</a></div>
     <div style="position:relative;margin-bottom:34px;overflow:hidden;border-radius:20px">
       <div id="destTrack" style="display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)">${destPages.length?destPages.map(pg=>`<div class="destGrid" style="flex:0 0 100%;min-width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">${pg.map(productCard).join('')}</div>`).join(''):'<p style="color:#6E646A">Sin productos.</p>'}</div>
       ${destPages.length>1?`<div id="destDots" style="display:flex;justify-content:center;gap:8px;margin-top:16px"></div>`:''}
@@ -480,6 +481,16 @@ async function viewInicio(v){
 
     ${dealerCards?`<h2 style="font-size:24px;margin-bottom:14px">ExpoACA destacados</h2>
     <div class="grid dealerGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${dealerCards}</div>`:''}
+
+    <div class="card float3d" style="overflow:hidden;position:relative;margin-top:34px;padding:30px 32px;background:linear-gradient(120deg,#2A2629 0%,#1C1B1F 60%,#0e0d0f 100%);color:#fff;border:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px">
+      <div style="max-width:520px">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;background:#ffffff1a;border:1px solid #ffffff30;padding:6px 13px;border-radius:100px;color:#E6A100">⭐ TU OPINIÓN VALE</span>
+        <h2 style="font-size:26px;color:#fff;margin-top:12px;line-height:1.1">Valorá tu compra</h2>
+        <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px">Contanos cómo te fue con el expo que elegiste. Ayudás a otros socios y a mejorar el servicio.</p>
+      </div>
+      <button class="btn btn-red" onclick="openHomeReviewModal()" style="flex:none">Dejar mi valoración →</button>
+    </div>
+    <div id="homeReviewModalWrap"></div>
   `;
   startHeroCarousel();
   if(destPages.length>1) startDestCarousel(); else clearInterval(window._destInterval);
@@ -724,13 +735,17 @@ async function viewExpo(v, id){
   const { data:d, error } = await sb.from('dealers').select('*').eq('id',id).single();
   if(error||!d){ v.innerHTML=`<div class="card" style="padding:24px">Expo no encontrado. <a onclick="go('buscador')" style="color:#C8102E;cursor:pointer">Volver</a></div>`; return; }
   const { data:prods } = await sb.from('products').select('*, dealers(razon,tel), categories(name)').eq('dealer_id',id).eq('paused',false).gt('stock',0).order('created_at',{ascending:false});
+  const { data:reviews } = await sb.from('dealer_reviews').select('*').eq('dealer_id',id).order('created_at',{ascending:false});
+  const pubReviews = (reviews||[]).filter(r=>r.rating>=4);
+  const avgRating = pubReviews.length ? (pubReviews.reduce((a,r)=>a+r.rating,0)/pubReviews.length) : parseFloat(d.rating||4.7);
+  window._expoReviewDealer = id;
   const list = prods||[];
   const ofertas = list.filter(p=>p.is_deal && (!p.deal_until || new Date(p.deal_until)>new Date()));
   // agrupar por rubro
   const groups={}; list.forEach(p=>{ const k=p.categories?.name||'Otros'; (groups[k]=groups[k]||[]).push(p); });
   const anio = d.created_at? new Date(d.created_at).getFullYear() : new Date().getFullYear();
   const stars = '★★★★★';
-  const rate = Math.max(0,Math.min(5, Math.round(parseFloat(d.rating||4.7))));
+  const rate = Math.max(0,Math.min(5, Math.round(avgRating)));
   const stat=(n,l)=>`<div style="text-align:center"><div style="font-family:'Archivo';font-weight:800;font-size:24px">${n}</div><div style="font-size:12px;color:#918A8E">${l}</div></div>`;
   const grouped = Object.keys(groups).map(cat=>`
     <div style="margin-top:30px">
@@ -747,7 +762,7 @@ async function viewExpo(v, id){
           <div style="flex:1;min-width:220px;padding-bottom:4px">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="font-size:28px">${esc(d.razon)}</h1><span class="tag" style="background:#E3F6EE;color:#0B7A55">✓ Expo verificado</span></div>
             <div style="font-size:14px;color:#6E646A;margin-top:4px">${esc(d.rubro||'')} · 📍 ${esc(d.sede||d.dir||'')}</div>
-            <div style="margin-top:6px;font-size:14px"><span style="color:#E6A100;letter-spacing:2px">${stars.slice(0,rate)}</span><span style="color:#D6D6DA;letter-spacing:2px">${stars.slice(rate)}</span> <b>${esc(String(d.rating||'4.7'))}</b></div>
+            <div style="margin-top:6px;font-size:14px"><span style="color:#E6A100;letter-spacing:2px">${stars.slice(0,rate)}</span><span style="color:#D6D6DA;letter-spacing:2px">${stars.slice(rate)}</span> <b>${avgRating.toFixed(1)}</b> <span style="color:#918A8E;font-size:12.5px">(${pubReviews.length} valoración${pubReviews.length===1?'':'es'})</span></div>
           </div>
           <a class="btn" style="background:#25D366;color:#fff;text-decoration:none;padding-bottom:12px" href="${waHref(d.tel,d.razon,'consulta general',0)}" target="_blank" rel="noopener">✆ Contactar</a>
         </div>
@@ -763,7 +778,87 @@ async function viewExpo(v, id){
 
     <div style="margin-top:34px"><h2 style="font-size:23px">Catálogo por rubro</h2></div>
     ${grouped||'<div class="card" style="padding:30px;text-align:center;color:#6E646A;margin-top:16px">Este expo todavía no publicó productos.</div>'}
+
+    <div style="margin-top:40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <h2 style="font-size:23px">Valoraciones de socios</h2>
+        <button class="btn btn-red" onclick="openReviewForm()">⭐ Dejar tu valoración</button>
+      </div>
+      <div id="reviewFormWrap"></div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+        ${pubReviews.length? pubReviews.map(r=>`<div class="card" style="padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div style="font-weight:700;font-size:14.5px">${esc(r.customer_name||'Socio ACA')}</div>
+            <div style="color:#E6A100;font-size:14px">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+          </div>
+          ${r.comment?`<p style="font-size:13.5px;color:#44414A;margin-top:8px;line-height:1.5">${esc(r.comment)}</p>`:''}
+          <div style="font-size:11.5px;color:#918A8E;margin-top:6px">${new Date(r.created_at).toLocaleDateString('es-AR')}</div>
+        </div>`).join('') : '<p style="color:#6E646A;font-size:14px">Todavía no hay valoraciones públicas de este expo.</p>'}
+      </div>
+    </div>
   `;
+}
+function openHomeReviewModal(){
+  const wrap=$('homeReviewModalWrap'); if(!wrap) return;
+  const dealers=window._homeDealers||[];
+  window._homeReviewStars = window._homeReviewStars || 5;
+  const starBtns=(n)=>Array.from({length:5},(_,i)=>`<button type="button" onclick="setHomeReviewStars(${i+1})" style="border:none;background:transparent;font-size:28px;cursor:pointer;color:${i<n?'#E6A100':'#D6D6DA'}">★</button>`).join('');
+  const opts = dealers.map(d=>`<option value="${d.id}">${esc(d.razon)}</option>`).join('');
+  wrap.innerHTML=`<div style="position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:200" onclick="if(event.target===this)$('homeReviewModalWrap').innerHTML=''">
+    <div class="card" style="width:480px;max-width:94vw;max-height:90vh;overflow:auto;padding:24px">
+      <h3 style="font-size:20px;margin-bottom:14px">Valorá tu compra</h3>
+      <label class="lbl">¿En qué ExpoACA compraste?</label>
+      <select id="hrDealer" class="fld" style="margin-top:6px;margin-bottom:14px">${opts||'<option value="">No hay expos disponibles</option>'}</select>
+      <div id="hrStars" style="margin-bottom:10px">${starBtns(window._homeReviewStars)}</div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <input id="hrName" class="fld" placeholder="Tu nombre">
+        <input id="hrEmail" class="fld" placeholder="Tu email">
+      </div>
+      <input id="hrPhone" class="fld" placeholder="Tu teléfono (opcional)" style="margin-bottom:12px">
+      <textarea id="hrComment" class="fld" style="min-height:80px;margin-bottom:12px" placeholder="Contá tu experiencia…"></textarea>
+      <div style="font-size:12px;color:#918A8E;margin-bottom:14px">💙 Gracias por compartir tu experiencia — nos ayudás a seguir mejorando y a que otros socios elijan mejor.</div>
+      <div style="display:flex;gap:10px"><button class="btn btn-red" onclick="submitHomeReview()">Enviar valoración</button><button class="btn btn-ghost" onclick="$('homeReviewModalWrap').innerHTML=''">Cancelar</button></div>
+    </div></div>`;
+}
+function setHomeReviewStars(n){ window._homeReviewStars=n; openHomeReviewModal(); }
+async function submitHomeReview(){
+  const dealer_id = $('hrDealer')?.value;
+  if(!dealer_id){ toast('Elegí a qué ExpoACA le querés dejar tu valoración'); return; }
+  const rating = window._homeReviewStars||5;
+  const rec={ dealer_id, rating, comment:($('hrComment')?.value||'').trim(),
+    customer_name:($('hrName')?.value||'').trim(), customer_email:($('hrEmail')?.value||'').trim(), customer_phone:($('hrPhone')?.value||'').trim() };
+  const { error } = await sb.from('dealer_reviews').insert(rec);
+  if(error){ toast(error.message); return; }
+  $('homeReviewModalWrap').innerHTML='';
+  toast(rating>=4? '✅ ¡Gracias por tu valoración!' : '✅ Gracias, tu comentario fue enviado al equipo de ACA');
+}
+function openReviewForm(){
+  const wrap=$('reviewFormWrap'); if(!wrap) return;
+  window._reviewStars = window._reviewStars || 5;
+  const starBtns=(n)=>Array.from({length:5},(_,i)=>`<button type="button" onclick="setReviewStars(${i+1})" style="border:none;background:transparent;font-size:26px;cursor:pointer;color:${i<n?'#E6A100':'#D6D6DA'}">★</button>`).join('');
+  wrap.innerHTML=`<div class="card" style="padding:20px">
+    <div id="reviewStars" style="margin-bottom:10px">${starBtns(window._reviewStars)}</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+      <input id="rvName" class="fld" placeholder="Tu nombre">
+      <input id="rvEmail" class="fld" placeholder="Tu email">
+    </div>
+    <input id="rvPhone" class="fld" placeholder="Tu teléfono (opcional)" style="margin-bottom:12px">
+    <textarea id="rvComment" class="fld" style="min-height:80px;margin-bottom:12px" placeholder="Contá tu experiencia con este expo…"></textarea>
+    <div style="font-size:12px;color:#918A8E;margin-bottom:12px">💙 Gracias por compartir tu experiencia — nos ayudás a seguir mejorando y a que otros socios elijan mejor.</div>
+    <div style="display:flex;gap:10px"><button class="btn btn-red" onclick="submitReview()">Enviar valoración</button><button class="btn btn-ghost" onclick="$('reviewFormWrap').innerHTML=''">Cancelar</button></div>
+  </div>`;
+}
+function setReviewStars(n){ window._reviewStars=n; openReviewForm(); }
+async function submitReview(){
+  const dealer_id=window._expoReviewDealer; if(!dealer_id) return;
+  const rating=window._reviewStars||5;
+  const rec={ dealer_id, rating, comment:($('rvComment')?.value||'').trim(),
+    customer_name:($('rvName')?.value||'').trim(), customer_email:($('rvEmail')?.value||'').trim(), customer_phone:($('rvPhone')?.value||'').trim() };
+  const { error } = await sb.from('dealer_reviews').insert(rec);
+  if(error){ toast(error.message); return; }
+  $('reviewFormWrap').innerHTML='';
+  toast(rating>=4? '✅ ¡Gracias por tu valoración!' : '✅ Gracias, tu comentario fue enviado al equipo de ACA');
+  go('expo:'+dealer_id);
 }
 
 // ---------- Concesionarios (landing) ----------
@@ -1194,15 +1289,16 @@ async function delProduct(id, name){ if(!confirm('¿Eliminar "'+name+'"?'))retur
 // ---------- Admin (dueño) ----------
 async function viewAdmin(v){
   if(!me || me.role!=='admin'){ v.innerHTML='<div class="card" style="padding:24px">Sección exclusiva del administrador.</div>'; return; }
-  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps},{data:events}] = await Promise.all([
+  const [{data:dealers},{data:users},{data:products},{data:orders},{data:apps},{data:events},{data:reviews}] = await Promise.all([
     sb.from('dealers').select('*').order('razon'),
     sb.from('app_users').select('*, dealers(razon)').order('created_at',{ascending:false}),
     sb.from('products').select('id,dealer_id,name,brand,dealers(razon)'),
     sb.from('orders').select('*, dealers(razon)').order('created_at',{ascending:false}).limit(10),
     sb.from('dealer_applications').select('*').order('created_at',{ascending:false}),
-    sb.from('product_events').select('product_id,dealer_id,event_type,created_at').order('created_at',{ascending:false}).limit(5000)
+    sb.from('product_events').select('product_id,dealer_id,event_type,created_at').order('created_at',{ascending:false}).limit(5000),
+    sb.from('dealer_reviews').select('*, dealers(razon)').order('created_at',{ascending:false})
   ]);
-  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], events:events||[], tab:(window._admin&&window._admin.tab)||'resumen' };
+  window._admin = { dealers:dealers||[], users:users||[], products:products||[], orders:orders||[], apps:apps||[], events:events||[], reviews:reviews||[], tab:(window._admin&&window._admin.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
       <div><h1 style="font-size:26px">Panel de administración 👑</h1>
@@ -1214,6 +1310,7 @@ async function viewAdmin(v){
       <button id="atab-usuarios" class="btn" onclick="adminTab('usuarios')">Usuarios y roles</button>
       <button id="atab-solicitudes" class="btn" onclick="adminTab('solicitudes')">Solicitudes${(window._admin&&window._admin.apps.filter(a=>a.estado==='nueva').length)?` <span style="background:#C8102E;color:#fff;border-radius:100px;padding:1px 7px;font-size:11px;margin-left:4px">${window._admin.apps.filter(a=>a.estado==='nueva').length}</span>`:''}</button>
       <button id="atab-analytics" class="btn" onclick="adminTab('analytics')">📊 Analytics</button>
+      <button id="atab-valoraciones" class="btn" onclick="adminTab('valoraciones')">⚠️ Valoraciones${(window._admin&&window._admin.reviews.filter(r=>r.rating<=3&&r.status==='nueva').length)?` <span style="background:#C8102E;color:#fff;border-radius:100px;padding:1px 7px;font-size:11px;margin-left:4px">${window._admin.reviews.filter(r=>r.rating<=3&&r.status==='nueva').length}</span>`:''}</button>
     </div>
     <div id="atab-body"></div>
     <div id="modal"></div>`;
@@ -1221,11 +1318,12 @@ async function viewAdmin(v){
 }
 function adminTab(tab){
   window._admin.tab = tab;
-  ['resumen','expos','usuarios','solicitudes','analytics'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
+  ['resumen','expos','usuarios','solicitudes','analytics','valoraciones'].forEach(t=>{ const b=$('atab-'+t); if(b){ b.style.background=t===tab?'#C8102E':'transparent'; b.style.color=t===tab?'#fff':'#44414A'; }});
   const body=$('atab-body');
   if(tab==='resumen') body.innerHTML = adminResumen();
   else if(tab==='expos') body.innerHTML = adminExpos();
   else if(tab==='analytics') body.innerHTML = adminAnalytics();
+  else if(tab==='valoraciones') body.innerHTML = adminValoraciones();
   else if(tab==='usuarios') body.innerHTML = adminUsuarios();
   else body.innerHTML = adminSolicitudes();
 }
@@ -1320,6 +1418,32 @@ function adminAnalytics(){
     </div>
     <div class="card" style="padding:20px;overflow-x:auto"><h3 style="font-size:17px;margin-bottom:10px">Actividad reciente</h3>${recent||'<p style="color:#6E646A;font-size:14px">Sin actividad todavía.</p>'}</div>
     <p style="font-size:12px;color:#918A8E;margin-top:10px">Datos de los últimos 5.000 eventos registrados en el portal.</p>`;
+}
+function adminValoraciones(){
+  const all=window._admin.reviews||[];
+  const bad=all.filter(r=>r.rating<=3);
+  const good=all.filter(r=>r.rating>=4);
+  const rows = bad.length ? bad.map(r=>`<div class="card" style="padding:16px 18px;margin-bottom:12px;border-color:${r.status==='atendida'?'#E2E2E5':'#F0D9BF'};background:${r.status==='atendida'?'#fff':'#FBEFE2'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="color:#E6A100">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span><b>${esc(r.dealers?.razon||'Expo eliminado')}</b></div>
+        <span class="tag" style="background:${r.status==='atendida'?'#ECECEE':'#C8102E'};color:${r.status==='atendida'?'#6E646A':'#fff'}">${r.status==='atendida'?'Atendida':'Nueva'}</span>
+      </div>
+      ${r.comment?`<p style="font-size:14px;color:#44414A;margin-top:10px;line-height:1.5">"${esc(r.comment)}"</p>`:''}
+      <div style="font-size:13px;color:#6E646A;margin-top:8px">${esc(r.customer_name||'Sin nombre')} · ${esc(r.customer_email||'sin email')} · ${esc(r.customer_phone||'sin teléfono')}</div>
+      <div style="font-size:11.5px;color:#918A8E;margin-top:4px">${new Date(r.created_at).toLocaleString('es-AR')}</div>
+      ${r.status!=='atendida'?`<button class="btn btn-dark" style="margin-top:10px;padding:9px 14px;font-size:13px" onclick="marcarReviewAtendida('${r.id}')">Marcar como atendida</button>`:''}
+    </div>`).join('') : '<p style="color:#6E646A;font-size:14px">No hay valoraciones de 1 a 3 estrellas por ahora 👍</p>';
+  return `${sectionHint('Las valoraciones de 4 y 5 estrellas se publican solas en el perfil del expo. Las de 1 a 3 estrellas llegan acá con los datos de contacto para que puedas actuar.')}
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:18px">
+      <div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">Públicas (4-5 ★)</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px">${good.length}</div></div>
+      <div class="card" style="padding:20px"><div style="font-size:13px;color:#918A8E;font-weight:600">A revisar (1-3 ★)</div><div style="font-family:'Archivo';font-weight:800;font-size:28px;margin-top:6px;color:#C8102E">${bad.filter(r=>r.status!=='atendida').length}</div></div>
+    </div>
+    ${rows}`;
+}
+async function marcarReviewAtendida(id){
+  const { error } = await sb.from('dealer_reviews').update({status:'atendida'}).eq('id',id);
+  if(error){ toast(error.message); return; }
+  toast('Marcada como atendida'); go('admin');
 }
 function adminExpos(){
   const rows=window._admin.dealers.map(d=>{
