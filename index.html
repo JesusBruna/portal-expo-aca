@@ -1034,7 +1034,7 @@ async function viewPanel(v){
     sb.from('dealers').select('*').eq('id', me.dealer_id).single(),
     sb.from('products').select('*, categories(name)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('categories').select('*').order('name'),
-    sb.from('orders').select('*, order_items(qty,product_id)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
+    sb.from('orders').select('*, order_items(qty,product_id,products(name,stock))').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('dealer_reviews').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('product_events').select('product_id,event_type').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}).limit(3000)
   ]);
@@ -1191,6 +1191,7 @@ function panelPedidos(){
   if(!list.length) return `${sectionHint(HINT)}<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés pedidos registrados.</div>`;
   return `${sectionHint(HINT)}<div style="display:flex;flex-direction:column;gap:12px">`+list.map(o=>{
     const col=ORDER_COLOR[o.status]||ORDER_COLOR.consulta;
+    const itemsTxt=(o.order_items||[]).map(it=>`${esc(it.products?.name||'Producto eliminado')} <span style="color:#918A8E">x${it.qty}</span>`).join(', ');
     let actions='';
     if(o.status==='consulta'){
       actions = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;color:#44414A;font-weight:600">¿Se concretó la venta?</span>
@@ -1205,8 +1206,13 @@ function panelPedidos(){
     }).join('');
     return `<div class="card" style="padding:18px 20px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:14px"><b style="font-family:'Archivo';color:#C8102E">#${esc((o.id||'').slice(0,8))}</b>
-        <div><div style="font-weight:700;font-size:15px">${esc(o.customer_name||'Cliente')}</div><div style="font-size:12.5px;color:#918A8E">${o.is_socio?'Socio ACA':'Cliente'} · ${money(o.total)}</div></div></div>
+        <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:200px">
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:15px">${esc(o.customer_name||'Cliente')} <span style="font-weight:500;color:#918A8E;font-size:12.5px">· ${o.is_socio?'Socio ACA':'Cliente'}</span></div>
+            <div style="font-size:13.5px;color:#44414A;margin-top:4px">${itemsTxt||'<span style="color:#918A8E">Sin detalle de artículos</span>'}</div>
+            <div style="font-size:11.5px;color:#B3ABAE;margin-top:4px">Pedido #${esc((o.id||'').slice(0,8))} · Total: <b style="color:#44414A">${money(o.total)}</b></div>
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <span class="tag" style="background:${col.b};color:${col.c}">${ORDER_LABEL[o.status]||o.status}</span>
           ${actions}
@@ -1263,8 +1269,25 @@ async function adjustStock(id, delta){
 async function setOrderResult(id, next){
   const { error } = await sb.from('orders').update({status:next}).eq('id',id);
   if(error){ toast(error.message); return; }
-  const o = window._panel.orders.find(x=>x.id===id); if(o) o.status=next;
-  toast('Pedido: '+ (ORDER_LABEL[next]||next)); panelTab('pedidos');
+  const o = window._panel.orders.find(x=>x.id===id);
+  if(o){
+    o.status=next;
+    if(next==='vendido'){
+      for(const it of (o.order_items||[])){
+        if(!it.product_id) continue;
+        const cur = it.products?.stock ?? null;
+        const nv = cur==null? null : Math.max(0, cur-(it.qty||1));
+        if(nv!=null){
+          await sb.from('products').update({stock:nv}).eq('id',it.product_id);
+          const p = window._panel.prods.find(x=>x.id===it.product_id); if(p) p.stock=nv;
+        }
+      }
+      toast('✅ Venta confirmada — stock descontado');
+    } else {
+      toast('Pedido: '+ (ORDER_LABEL[next]||next));
+    }
+  }
+  panelTab('pedidos');
 }
 async function saveDealerProfile(){
   let logo_url = $('dLogoUrl').value || null;
