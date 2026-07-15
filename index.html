@@ -1158,6 +1158,7 @@ function panelProductos(){
     return `<tr style="border-bottom:1px solid #F0F0F2">
       <td style="padding:12px 8px"><b>${esc(p.name)}</b><div style="font-size:12px;color:#918A8E">${esc(p.brand||'')} · ${esc(p.categories?.name||'')}</div></td>
       <td style="padding:12px 8px;color:#C8102E;font-weight:700">${money(p.price_socio)}</td>
+      <td style="padding:12px 8px;color:#44414A;font-weight:600">${money(p.price_list)}</td>
       <td style="padding:12px 8px"><span class="tag" style="background:${st.b};color:${st.c}">${st.t}</span></td>
       <td style="padding:12px 8px">
         <div style="display:flex;align-items:center;gap:8px;justify-content:center">
@@ -1177,7 +1178,7 @@ function panelProductos(){
   return `${sectionHint('Gestioná tu catálogo: ajustá el stock con +/−, pausá o eliminá artículos, y elegí cuáles mostrar en Ofertas del día con su descuento.')}<div class="card" style="padding:20px;overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font-size:14px">
       <thead><tr style="text-align:left;color:#918A8E;font-size:12px;text-transform:uppercase">
-        <th style="padding:8px">Producto</th><th style="padding:8px">Precio socio</th><th style="padding:8px">Disponibilidad</th><th style="padding:8px;text-align:center">Stock</th><th style="padding:8px">Estado</th><th></th>
+        <th style="padding:8px">Producto</th><th style="padding:8px">Precio socio</th><th style="padding:8px">Precio no socio</th><th style="padding:8px">Disponibilidad</th><th style="padding:8px;text-align:center">Stock</th><th style="padding:8px">Estado</th><th></th>
       </tr></thead>
       <tbody>${rows||'<tr><td style="padding:20px;color:#6E646A">Todavía no publicaste productos. Clic en "+ Nuevo artículo".</td></tr>'}</tbody>
     </table></div>`;
