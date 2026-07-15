@@ -990,14 +990,15 @@ async function doUpdatePass(){
 // ---------- Panel concesionario ----------
 async function viewPanel(v){
   if(!me || me.role!=='dealer'){ v.innerHTML='<div class="card" style="padding:24px">Esta sección es para concesionarios. Si sos concesionario, pedile al administrador que active tu cuenta.</div>'; return; }
-  const [{data:dealer},{data:prods},{data:cats},{data:orders}] = await Promise.all([
+  const [{data:dealer},{data:prods},{data:cats},{data:orders},{data:reviews}] = await Promise.all([
     sb.from('dealers').select('*').eq('id', me.dealer_id).single(),
     sb.from('products').select('*, categories(name)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('categories').select('*').order('name'),
-    sb.from('orders').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false})
+    sb.from('orders').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
+    sb.from('dealer_reviews').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false})
   ]);
   window._cats = cats||[];
-  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], tab: (window._panel&&window._panel.tab)||'resumen' };
+  window._panel = { dealer: dealer||{}, prods: prods||[], orders: orders||[], reviews: reviews||[], tab: (window._panel&&window._panel.tab)||'resumen' };
   v.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
       <div style="display:flex;align-items:center;gap:12px">
@@ -1012,6 +1013,7 @@ async function viewPanel(v){
       <button id="ptab-productos" class="btn" onclick="panelTab('productos')">Productos y stock</button>
       <button id="ptab-pedidos" class="btn" onclick="panelTab('pedidos')">Pedidos</button>
       <button id="ptab-perfil" class="btn" onclick="panelTab('perfil')">Perfil del expo</button>
+      <button id="ptab-valoraciones" class="btn" onclick="panelTab('valoraciones')">⭐ Valoraciones</button>
     </div>
     <div id="ptab-body"></div>
     <div id="modal"></div>`;
@@ -1020,12 +1022,44 @@ async function viewPanel(v){
 
 function panelTab(tab){
   window._panel.tab = tab;
-  ['resumen','productos','pedidos','perfil'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
+  ['resumen','productos','pedidos','perfil','valoraciones'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
   const body=$('ptab-body');
   if(tab==='resumen') body.innerHTML = panelResumen();
   else if(tab==='productos') body.innerHTML = panelProductos();
   else if(tab==='pedidos') body.innerHTML = panelPedidos();
+  else if(tab==='valoraciones') body.innerHTML = panelValoraciones();
   else body.innerHTML = panelPerfil();
+}
+function panelValoraciones(){
+  const reviews = window._panel.reviews||[];
+  if(!reviews.length) return `${sectionHint('Acá vas a ver todas las valoraciones que dejan tus clientes, de 1 a 5 estrellas.')}<div class="card" style="padding:30px;text-align:center;color:#6E646A">Todavía no tenés valoraciones.</div>`;
+  const avg = (reviews.reduce((a,r)=>a+r.rating,0)/reviews.length).toFixed(1);
+  const counts=[1,2,3,4,5].map(n=>reviews.filter(r=>r.rating===n).length);
+  const bars = [5,4,3,2,1].map(n=>{ const c=counts[n-1]; const pct = reviews.length? Math.round(c/reviews.length*100):0;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-size:12.5px;color:#6E646A;width:34px">${n}★</span><div style="flex:1;height:8px;background:#ECECEE;border-radius:100px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${n>=4?'#0B7A55':n===3?'#B0631A':'#C8102E'};border-radius:100px"></div></div><span style="font-size:12px;color:#918A8E;width:24px;text-align:right">${c}</span></div>`;
+  }).join('');
+  const rows = reviews.map(r=>{
+    const pub = r.rating>=4;
+    return `<div class="card" style="padding:16px 18px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="color:#E6A100">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span><b>${esc(r.customer_name||'Socio ACA')}</b></div>
+        <span class="tag" style="background:${pub?'#E3F6EE':'#ECECEE'};color:${pub?'#0B7A55':'#6E646A'}">${pub?'Pública':'Privada'}</span>
+      </div>
+      ${r.comment?`<p style="font-size:14px;color:#44414A;margin-top:10px;line-height:1.5">"${esc(r.comment)}"</p>`:''}
+      <div style="font-size:12.5px;color:#918A8E;margin-top:8px">${esc(r.customer_email||'')}${r.customer_phone?' · '+esc(r.customer_phone):''}</div>
+      <div style="font-size:11.5px;color:#918A8E;margin-top:4px">${new Date(r.created_at).toLocaleString('es-AR')}</div>
+    </div>`;
+  }).join('');
+  return `${sectionHint('Acá ves TODAS tus valoraciones (1 a 5 estrellas). Solo las de 4 y 5 se muestran públicamente en tu perfil.')}
+    <div class="grid" style="grid-template-columns:1fr 1.4fr;margin-bottom:20px;align-items:start">
+      <div class="card" style="padding:22px;text-align:center">
+        <div style="font-family:'Archivo';font-weight:800;font-size:40px">${avg}</div>
+        <div style="color:#E6A100;font-size:18px;margin-top:4px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div>
+        <div style="font-size:13px;color:#918A8E;margin-top:6px">${reviews.length} valoración${reviews.length===1?'':'es'} en total</div>
+      </div>
+      <div class="card" style="padding:22px">${bars}</div>
+    </div>
+    ${rows}`;
 }
 function panelResumen(){
   const P=window._panel; const prods=P.prods, orders=P.orders;
