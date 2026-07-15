@@ -329,7 +329,7 @@ async function go(route){
 // WhatsApp helper
 function waHref(tel, dealer, prodName, price){
   const num = (tel||'').replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${dealer}! Soy socio ACA y me interesa comprar por ExpoACA: ${prodName} (${money(price)}). ¿Está disponible?`);
+  const msg = prodName==='consulta general' ? encodeURIComponent(`Hola ${dealer}! Te contacto desde el marketplace ExpoACA.`) : encodeURIComponent(`Hola ${dealer}, me interesa comprar: ${prodName} ¿Está disponible?`);
   return `https://wa.me/${num}?text=${msg}`;
 }
 // Tarjeta de producto reutilizable (linkea a la ficha)
@@ -756,7 +756,8 @@ async function checkout(dealerId){
     if(itemErr){ console.error('checkout order_items.insert error:', itemErr); alert('⚠️ Pedido creado pero sin ítems:\n'+itemErr.message); }
   }
   const num=(dealer?.tel||'').replace(/\D/g,'');
-  const msg=`Hola ${dealer?.razon||''}! Soy socio ACA y quiero comprar por ExpoACA:%0A${itemsTxt}%0A%0ATotal: ${money(total)}%0A¿Coordinamos?`;
+  const itemsPlain = list.map(p=>{ const q=cart[p.id]||1; return q>1? `${p.name} x${q}` : p.name; }).join(', ');
+  const msg=encodeURIComponent(`Hola ${dealer?.razon||''}, me interesa comprar: ${itemsPlain} ¿Está disponible?`);
   window.open(`https://wa.me/${num}?text=${msg}`,'_blank','noopener');
   clearCartDealer(list.map(p=>p.id));
   toast('✅ Pedido registrado y enviado por WhatsApp');
@@ -1034,7 +1035,7 @@ async function viewPanel(v){
     sb.from('dealers').select('*').eq('id', me.dealer_id).single(),
     sb.from('products').select('*, categories(name)').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('categories').select('*').order('name'),
-    sb.from('orders').select('*, order_items(qty,product_id,products(name,stock))').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
+    sb.from('orders').select('*, order_items(qty,product_id,unit_price,products(name,stock,price_socio,price_list))').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('dealer_reviews').select('*').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}),
     sb.from('product_events').select('product_id,event_type').eq('dealer_id', me.dealer_id).order('created_at',{ascending:false}).limit(3000)
   ]);
@@ -1194,9 +1195,10 @@ function panelPedidos(){
     const itemsTxt=(o.order_items||[]).map(it=>`${esc(it.products?.name||'Producto eliminado')} <span style="color:#918A8E">x${it.qty}</span>`).join(', ');
     let actions='';
     if(o.status==='consulta'){
-      actions = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;color:#44414A;font-weight:600">¿Se concretó la venta?</span>
-        <button class="btn" style="padding:8px 14px;font-size:13px;background:#0B7A55;color:#fff" onclick="setOrderResult('${o.id}','vendido')">Sí</button>
-        <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px" onclick="setOrderResult('${o.id}','no_vendido')">No</button></div>`;
+      actions = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;color:#44414A;font-weight:600">¿Se vendió?</span>
+        <button class="btn" style="padding:8px 12px;font-size:12.5px;background:#0B7A55;color:#fff" onclick="setOrderResult('${o.id}','vendido','socio')">Sí · precio socio</button>
+        <button class="btn" style="padding:8px 12px;font-size:12.5px;background:#3B5BA5;color:#fff" onclick="setOrderResult('${o.id}','vendido','no_socio')">Sí · no socio</button>
+        <button class="btn btn-ghost" style="padding:8px 12px;font-size:12.5px" onclick="setOrderResult('${o.id}','no_vendido')">No se vendió</button></div>`;
     } else if(o.status==='vendido'){
       actions = `<button class="btn btn-dark" style="padding:9px 15px;font-size:13px" onclick="setOrderResult('${o.id}','entregado')">Marcar Entregado →</button>`;
     }
@@ -1210,7 +1212,7 @@ function panelPedidos(){
           <div style="flex:1">
             <div style="font-weight:700;font-size:15px">${esc(o.customer_name||'Cliente')} <span style="font-weight:500;color:#918A8E;font-size:12.5px">· ${o.is_socio?'Socio ACA':'Cliente'}</span></div>
             <div style="font-size:13.5px;color:#44414A;margin-top:4px">${itemsTxt||'<span style="color:#918A8E">Sin detalle de artículos</span>'}</div>
-            <div style="font-size:11.5px;color:#B3ABAE;margin-top:4px">Pedido #${esc((o.id||'').slice(0,8))} · Total: <b style="color:#44414A">${money(o.total)}</b></div>
+            <div style="font-size:11.5px;color:#B3ABAE;margin-top:4px">Pedido #${esc((o.id||'').slice(0,8))} · Total: <b style="color:#44414A">${money(o.total)}</b>${o.status==='vendido'||o.status==='entregado'?` <span style="color:#918A8E">(${o.price_type==='no_socio'?'precio no socio':'precio socio'})</span>`:''}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -1266,27 +1268,30 @@ async function adjustStock(id, delta){
   if(error){ toast(error.message); return; }
   p.stock = nv; panelTab('productos');
 }
-async function setOrderResult(id, next){
-  const { error } = await sb.from('orders').update({status:next}).eq('id',id);
-  if(error){ toast(error.message); return; }
+async function setOrderResult(id, next, priceType){
   const o = window._panel.orders.find(x=>x.id===id);
-  if(o){
-    o.status=next;
-    if(next==='vendido'){
-      for(const it of (o.order_items||[])){
-        if(!it.product_id) continue;
-        const cur = it.products?.stock ?? null;
-        const nv = cur==null? null : Math.max(0, cur-(it.qty||1));
-        if(nv!=null){
-          await sb.from('products').update({stock:nv}).eq('id',it.product_id);
-          const p = window._panel.prods.find(x=>x.id===it.product_id); if(p) p.stock=nv;
-        }
-      }
-      toast('✅ Venta confirmada — stock descontado');
-    } else {
-      toast('Pedido: '+ (ORDER_LABEL[next]||next));
+  const patch = { status: next };
+  if(next==='vendido'){
+    priceType = priceType==='no_socio' ? 'no_socio' : 'socio';
+    let newTotal = 0;
+    for(const it of (o?.order_items||[])){
+      if(!it.product_id){ newTotal += (it.unit_price||0)*(it.qty||1); continue; }
+      // Leer el stock ACTUAL de la base (no el cacheado) para descontar bien
+      const { data:fresh } = await sb.from('products').select('stock,price_socio,price_list').eq('id',it.product_id).single();
+      const curStock = fresh?.stock ?? it.products?.stock ?? 0;
+      const nv = Math.max(0, curStock-(it.qty||1));
+      await sb.from('products').update({stock:nv}).eq('id',it.product_id);
+      const p = window._panel.prods.find(x=>x.id===it.product_id); if(p) p.stock=nv;
+      const unit = priceType==='no_socio' ? (fresh?.price_list ?? it.products?.price_list ?? it.unit_price) : (fresh?.price_socio ?? it.products?.price_socio ?? it.unit_price);
+      newTotal += unit*(it.qty||1);
     }
+    patch.total = newTotal;
+    patch.price_type = priceType;
   }
+  const { error } = await sb.from('orders').update(patch).eq('id',id);
+  if(error){ toast(error.message); return; }
+  if(o){ Object.assign(o, patch); }
+  toast(next==='vendido' ? '✅ Venta confirmada — stock descontado' : 'Pedido: '+ (ORDER_LABEL[next]||next));
   panelTab('pedidos');
 }
 async function saveDealerProfile(){
