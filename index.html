@@ -802,14 +802,16 @@ function openHomeReviewModal(){
   const wrap=$('homeReviewModalWrap'); if(!wrap) return;
   const dealers=window._homeDealers||[];
   window._homeReviewStars = window._homeReviewStars || 5;
-  const starBtns=(n)=>Array.from({length:5},(_,i)=>`<button type="button" onclick="setHomeReviewStars(${i+1})" style="border:none;background:transparent;font-size:28px;cursor:pointer;color:${i<n?'#E6A100':'#D6D6DA'}">★</button>`).join('');
   const opts = dealers.map(d=>`<option value="${d.id}">${esc(d.razon)}</option>`).join('');
   wrap.innerHTML=`<div style="position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:200" onclick="if(event.target===this)$('homeReviewModalWrap').innerHTML=''">
     <div class="card" style="width:480px;max-width:94vw;max-height:90vh;overflow:auto;padding:24px">
       <h3 style="font-size:20px;margin-bottom:14px">Valorá tu compra</h3>
       <label class="lbl">¿En qué ExpoACA compraste?</label>
-      <select id="hrDealer" class="fld" style="margin-top:6px;margin-bottom:14px">${opts||'<option value="">No hay expos disponibles</option>'}</select>
-      <div id="hrStars" style="margin-bottom:10px">${starBtns(window._homeReviewStars)}</div>
+      <select id="hrDealer" class="fld" style="margin-top:6px;margin-bottom:14px">
+        <option value="" selected>Elegí un ExpoACA…</option>
+        ${opts}
+      </select>
+      <div id="hrStars" style="margin-bottom:10px">${homeStarBtnsHtml()}</div>
       <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
         <input id="hrName" class="fld" placeholder="Tu nombre">
         <input id="hrEmail" class="fld" placeholder="Tu email">
@@ -820,7 +822,11 @@ function openHomeReviewModal(){
       <div style="display:flex;gap:10px"><button class="btn btn-red" onclick="submitHomeReview()">Enviar valoración</button><button class="btn btn-ghost" onclick="$('homeReviewModalWrap').innerHTML=''">Cancelar</button></div>
     </div></div>`;
 }
-function setHomeReviewStars(n){ window._homeReviewStars=n; openHomeReviewModal(); }
+function homeStarBtnsHtml(){
+  const n=window._homeReviewStars||5;
+  return Array.from({length:5},(_,i)=>`<button type="button" onclick="setHomeReviewStars(${i+1})" style="border:none;background:transparent;font-size:28px;cursor:pointer;color:${i<n?'#E6A100':'#D6D6DA'}">★</button>`).join('');
+}
+function setHomeReviewStars(n){ window._homeReviewStars=n; const el=$('hrStars'); if(el) el.innerHTML=homeStarBtnsHtml(); }
 async function submitHomeReview(){
   const dealer_id = $('hrDealer')?.value;
   if(!dealer_id){ toast('Elegí a qué ExpoACA le querés dejar tu valoración'); return; }
