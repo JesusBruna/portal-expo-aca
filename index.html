@@ -51,8 +51,18 @@
   .recoStockFill{height:100%;border-radius:100px}
   .recoBtn{margin-top:14px;width:100%;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:14px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 10px 22px -10px rgba(200,16,46,.55);transition:transform .15s,box-shadow .15s}
   .recoBtn:hover{transform:translateY(-2px);box-shadow:0 15px 28px -10px rgba(200,16,46,.68)}
-  @media (max-width:900px){ .recoGrid,.destGrid{grid-template-columns:repeat(2,1fr)!important} }
-  @media (max-width:560px){ .recoGrid,.destGrid{grid-template-columns:1fr!important} }
+  @media (max-width:900px){ .destGrid{grid-template-columns:repeat(2,1fr)!important} }
+  @media (max-width:560px){
+    .destGrid{display:flex!important;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:12px;scroll-snap-type:x mandatory;padding-bottom:4px}
+    .destGrid::-webkit-scrollbar{display:none}
+    .destGrid > *{flex:0 0 62%!important;scroll-snap-align:start}
+    .recoGrid{display:flex!important;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:12px;scroll-snap-type:x mandatory;padding-bottom:4px}
+    .recoGrid::-webkit-scrollbar{display:none}
+    .recoGrid .recoCard{flex:0 0 62%;scroll-snap-align:start}
+    .dealerGrid{display:flex!important;grid-template-columns:none!important;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:12px;scroll-snap-type:x mandatory;padding-bottom:4px}
+    .dealerGrid::-webkit-scrollbar{display:none}
+    .dealerGrid > *{flex:0 0 42%!important;scroll-snap-align:start}
+  }
   .grid{display:grid;gap:16px}
 
   /* ===================== RESPONSIVE (base iPhone 17 / ~393px) ===================== */
@@ -61,10 +71,16 @@
     header .wrap{flex-wrap:wrap;height:auto;padding-top:10px;padding-bottom:10px;row-gap:8px}
     .tagSubtitle{display:none!important}
     #topSearch{font-size:16px}
-    header .wrap > div[style*="max-width:440px"]{order:3;max-width:100%!important;flex:1 1 100%!important}
-    nav#nav{order:2;flex:1;justify-content:flex-end;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    header .wrap > div[style*="max-width:440px"]{order:3;max-width:100%!important;flex:1 1 100%!important;transition:max-height .2s,opacity .2s,padding .2s,margin .2s,border-width .2s;overflow:hidden}
+    header.search-collapsed .wrap > div[style*="max-width:440px"]{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;border-width:0!important;margin:0!important}
+    #searchIconBtn{display:none}
+    header.search-collapsed #searchIconBtn{display:flex!important;order:3}
+    nav#nav{order:2;flex:1;justify-content:flex-end;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px!important}
     nav#nav::-webkit-scrollbar{display:none}
     nav#nav span{display:none!important}
+    nav#nav .btn{padding:8px 12px!important;font-size:13px!important;white-space:nowrap}
+    header .wrap > a[href="#"]{gap:8px!important}
+    .heroArrow{width:32px!important;height:32px!important;font-size:15px!important}
     .grid{grid-template-columns:1fr!important;gap:14px}
     h1{font-size:24px!important}
     h2{font-size:20px!important}
@@ -98,10 +114,11 @@
       <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900">EA</span>
       <span style="line-height:1.05"><span style="display:block;font-family:'Archivo';font-weight:800;font-size:18px">EXPO ACA</span><span class="tagSubtitle" style="display:block;font-size:10.5px;color:#918A8E;font-weight:600;letter-spacing:.03em">MARKETPLACE OFICIAL ACA</span></span>
     </a>
-    <div style="flex:1;max-width:440px;display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:11px;padding:9px 14px">
+    <div id="searchBarWrap" style="flex:1;max-width:440px;display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:11px;padding:9px 14px">
       <span style="color:#918A8E">⌕</span>
       <input id="topSearch" placeholder="Buscar productos, marcas, rubros…" style="flex:1;border:none;background:transparent;outline:none;font-size:14px;min-width:0" onkeydown="topSearchGo(event)">
     </div>
+    <button id="searchIconBtn" onclick="openMobileSearch()" style="display:none;width:38px;height:38px;border-radius:50%;border:1px solid #E2E2E5;background:#fff;align-items:center;justify-content:center;font-size:16px;color:#44414A;flex:none">⌕</button>
     <nav id="nav" style="display:flex;align-items:center;gap:8px"></nav>
   </div>
 </header>
@@ -153,6 +170,24 @@ function addCart(id, ev){ if(ev){ ev.stopPropagation(); } cart[id]=(cart[id]||0)
 function setQty(id, q){ q=Math.max(0,q); if(q===0) delete cart[id]; else cart[id]=q; saveCart(); if(location.hash.indexOf('carrito')>=0) go('carrito'); }
 function clearCartDealer(ids){ ids.forEach(id=>delete cart[id]); saveCart(); }
 function topSearchGo(e){ if(e.key && e.key!=='Enter') return; window._catInitQ = ($('topSearch')?$('topSearch').value.trim():''); go('catalogo'); }
+function openMobileSearch(){
+  const header=document.querySelector('header'); if(header) header.classList.remove('search-collapsed');
+  window._searchPinned = true;
+  setTimeout(()=>{ const inp=$('topSearch'); if(inp) inp.focus(); }, 50);
+}
+(function initHeaderScrollCollapse(){
+  let lastY = window.scrollY||0;
+  window.addEventListener('scroll', ()=>{
+    if(window.innerWidth>820) return;
+    const header=document.querySelector('header'); if(!header) return;
+    const y=window.scrollY||0;
+    if(y<40){ header.classList.remove('search-collapsed'); window._searchPinned=false; lastY=y; return; }
+    if(window._searchPinned && document.activeElement===$('topSearch')) { lastY=y; return; }
+    if(y>lastY+4){ header.classList.add('search-collapsed'); window._searchPinned=false; }
+    else if(y<lastY-4){ header.classList.remove('search-collapsed'); }
+    lastY=y;
+  }, { passive:true });
+})();
 
 // ---------- Analytics: tracking de eventos por producto ----------
 function sectionHint(text){
@@ -388,23 +423,21 @@ async function viewInicio(v){
   v.innerHTML = `
     <section class="float3d" style="border-radius:24px;overflow:hidden;position:relative;margin-bottom:32px;min-height:360px">
       <div id="heroTrack" style="display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)"></div>
-      <button onclick="heroNav(-1)" style="position:absolute;top:50%;left:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">‹</button>
-      <button onclick="heroNav(1)" style="position:absolute;top:50%;right:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">›</button>
+      <button onclick="heroNav(-1)" class="heroArrow" style="position:absolute;top:50%;left:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">‹</button>
+      <button onclick="heroNav(1)" class="heroArrow" style="position:absolute;top:50%;right:16px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:#ffffff2e;color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(6px)">›</button>
       <div id="heroDots" style="position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:8px"></div>
     </section>
 
     <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px">
-      <div class="card float3d" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#C8102E,#8E0C20);color:#fff;border:none">
-        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff14 1px,transparent 1px),linear-gradient(90deg,#ffffff14 1px,transparent 1px);background-size:44px 44px"></div>
+      <div class="card float3d" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:radial-gradient(120% 160% at 15% 0%,#E23A50 0%,#C8102E 42%,#7A0E1E 100%);color:#fff;border:none">
         <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">MARKETPLACE</span>
         <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Explorá el catálogo completo</h2>
         <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más, con precio socio.</p>
         <span style="display:inline-block;margin-top:16px;background:#fff;color:#1C1B1F;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Ver catálogo →</span></div>
       </div>
-      <div class="card float3d" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:linear-gradient(120deg,#1C1B1F,#2A2629);color:#fff;border:none">
+      <div class="card float3d" onclick="go('buscador')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:radial-gradient(120% 160% at 85% 0%,#3a3438 0%,#242226 45%,#0e0d0f 100%);color:#fff;border:none">
         <div style="position:absolute;top:20px;right:24px;width:22px;height:22px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#C8102E;border:3px solid #fff"></div>
         <div style="position:absolute;bottom:30px;right:70px;width:16px;height:16px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:#E6A100;border:3px solid #fff"></div>
-        <div style="position:absolute;inset:0;background-image:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:40px 40px"></div>
         <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#E6A100">📍 TIENDAS FÍSICAS</span>
         <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Buscá un ExpoACA cercano</h2>
         <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Encontrá el local más próximo en el mapa y llegá con Google Maps.</p>
@@ -433,7 +466,7 @@ async function viewInicio(v){
     </div>
 
     ${dealerCards?`<h2 style="font-size:24px;margin-bottom:14px">ExpoACA destacados</h2>
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${dealerCards}</div>`:''}
+    <div class="grid dealerGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${dealerCards}</div>`:''}
   `;
   startHeroCarousel();
   if(destPages.length>1) startDestCarousel(); else clearInterval(window._destInterval);
