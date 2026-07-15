@@ -222,8 +222,12 @@ function logWhatsAppOrder(productId, dealerId, price, productName){
         customer_name: (me&&me.full_name) || 'Consulta por WhatsApp', is_socio: !!(me&&me.is_socio),
         total: price||0, status:'consulta'
       }).select().single();
-      if(!error && order){ await sb.from('order_items').insert({ order_id: order.id, product_id: productId, qty:1, unit_price: price||0 }); }
-    }catch(e){}
+      if(error){ console.error('logWhatsAppOrder orders.insert error:', error); toast('⚠️ No se pudo registrar el pedido: '+error.message); return; }
+      if(order){
+        const { error:itemErr } = await sb.from('order_items').insert({ order_id: order.id, product_id: productId, qty:1, unit_price: price||0 });
+        if(itemErr){ console.error('logWhatsAppOrder order_items.insert error:', itemErr); toast('⚠️ Pedido creado pero sin ítem: '+itemErr.message); }
+      }
+    }catch(e){ console.error('logWhatsAppOrder exception:', e); toast('⚠️ Error registrando el pedido: '+(e.message||e)); }
   })();
 }
 // ---------- Recomendaciones: historial local de navegación ----------
