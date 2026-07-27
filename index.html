@@ -1327,8 +1327,8 @@ function previewDealerLogo(inp){
 //  tocar la lógica de dibujo.
 // ============================================================
 const KIT_TEMPLATES = {
-  story:  { w:1080, h:1920, photoH:1180, pad:56, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif" },
-  post:   { w:1080, h:1080, photoH:620,  pad:52, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif" },
+  story:  { w:1080, h:1920, photoH:1180, pad:56, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif", titleLines:2, titleSize:50, priceSize:74, compact:false },
+  post:   { w:1080, h:1080, photoH:520,  pad:48, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif", titleLines:1, titleSize:38, priceSize:56, compact:true },
 };
 const KIT_LIMIT_ACTIVAS = 12; // catálogo prolijo: máximo de productos con foto a incluir
 let _kitBusy = false; // rate-limit simple del lado del navegador
@@ -1370,82 +1370,106 @@ async function drawKitCanvas(type, product, dealer){
     const scale = Math.max(pw/photo.width, ph/photo.height);
     const sw=pw/scale, sh=ph/scale, sx=(photo.width-sw)/2, sy=(photo.height-sh)/2;
     ctx.drawImage(photo, sx,sy,sw,sh, 0,0,pw,ph);
-    const shadow = ctx.createLinearGradient(0,ph-220,0,ph);
-    shadow.addColorStop(0,'rgba(20,19,22,0)'); shadow.addColorStop(1,T.dark);
-    ctx.fillStyle=shadow; ctx.fillRect(0,ph-220,pw,220);
   }catch(e){
     ctx.fillStyle='#2A2629'; ctx.fillRect(0,0,T.w,T.photoH);
     ctx.fillStyle='#918A8E'; ctx.font='40px '+T.font; ctx.textAlign='center';
     ctx.fillText(product.brand||product.name||'ExpoACA', T.w/2, T.photoH/2);
     ctx.textAlign='left';
   }
+  // Scrim superior (para que el texto de marca se lea sobre cualquier foto)
+  const topScrim = ctx.createLinearGradient(0,0,0,120);
+  topScrim.addColorStop(0,'rgba(0,0,0,.55)'); topScrim.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=topScrim; ctx.fillRect(0,0,T.w,120);
+  // Scrim inferior de la foto, fusiona con el panel oscuro de abajo
+  const botScrim = ctx.createLinearGradient(0,T.photoH-200,0,T.photoH);
+  botScrim.addColorStop(0,'rgba(20,19,22,0)'); botScrim.addColorStop(1,T.dark);
+  ctx.fillStyle=botScrim; ctx.fillRect(0,T.photoH-200,T.w,200);
+  // Repintamos sólido el panel inferior para evitar cualquier franja clara entre foto y datos
+  ctx.fillStyle=T.dark; ctx.fillRect(0,T.photoH,T.w,T.h-T.photoH);
 
   // Cinta de marca ACA arriba
   ctx.fillStyle=T.accent; ctx.fillRect(0,0,T.w,10);
   ctx.fillStyle='#fff'; ctx.font='bold 30px '+T.font; ctx.textBaseline='middle';
-  ctx.fillText('EXPO ACA', T.pad, 60);
-  ctx.textAlign='right'; ctx.fillStyle='#E6A100'; ctx.font='bold 24px '+T.font;
-  ctx.fillText('MARKETPLACE OFICIAL', T.w-T.pad, 60);
+  ctx.fillText('EXPO ACA', T.pad, 66);
+  ctx.textAlign='right'; ctx.fillStyle='#E6A100'; ctx.font='bold 22px '+T.font;
+  ctx.fillText('MARKETPLACE OFICIAL', T.w-T.pad, 66);
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
 
-  let y = T.photoH + 70;
+  let y = T.photoH + (T.compact?46:68);
   // Logo + nombre del concesionario
-  const logoSize=88;
+  const logoSize = T.compact?64:88;
   try{
     if(dealer.logo_url){
       const logo=await loadImg(dealer.logo_url, true);
-      roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 18); ctx.save(); ctx.clip();
+      roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 16); ctx.save(); ctx.clip();
       const s=Math.max(logoSize/logo.width, logoSize/logo.height);
       ctx.drawImage(logo, T.pad-((logo.width*s-logoSize)/2), y-logoSize+18-((logo.height*s-logoSize)/2), logo.width*s, logo.height*s);
       ctx.restore();
     } else {
-      ctx.fillStyle=T.accent; roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 18); ctx.fill();
-      ctx.fillStyle='#fff'; ctx.font='bold 34px '+T.font; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=T.accent; roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 16); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='bold '+(T.compact?26:34)+'px '+T.font; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText((dealer.initial||(dealer.razon||'E')[0]||'E').toUpperCase(), T.pad+logoSize/2, y-logoSize/2+18);
       ctx.textAlign='left'; ctx.textBaseline='alphabetic';
     }
   }catch(e){}
-  ctx.fillStyle='#fff'; ctx.font='bold 34px '+T.font;
-  ctx.fillText(dealer.razon||'', T.pad+logoSize+22, y-30);
-  ctx.fillStyle='#B3ABAE'; ctx.font='26px '+T.font;
-  ctx.fillText(dealer.sede||'ExpoACA', T.pad+logoSize+22, y+8);
+  ctx.fillStyle='#fff'; ctx.font='bold '+(T.compact?24:34)+'px '+T.font;
+  ctx.fillText(dealer.razon||'', T.pad+logoSize+18, y-(T.compact?18:30));
+  ctx.fillStyle='#B3ABAE'; ctx.font=(T.compact?'18px ':'26px ')+T.font;
+  ctx.fillText(dealer.sede||'ExpoACA', T.pad+logoSize+18, y+(T.compact?10:10));
 
-  y += 70;
-  // Título del producto
-  ctx.fillStyle='#fff'; ctx.font='bold 52px '+T.font;
-  y += wrapText(ctx, product.name||'', T.pad, y+50, T.w-T.pad*2-260, 60, 2) * 60 - 4;
+  y += (T.compact?46:90);
+  // Título del producto (según plantilla: 1 o 2 líneas)
+  ctx.fillStyle='#fff'; ctx.font='bold '+T.titleSize+'px '+T.font;
+  const titleLH = T.titleSize+8;
+  const titleLines = wrapText(ctx, product.name||'', T.pad, y+T.titleSize-4, T.w-T.pad*2-(T.compact?0:260), titleLH, T.titleLines);
+  y += titleLines*titleLH + (T.compact?16:26);
 
   // Precio destacado
-  y += 30;
-  ctx.fillStyle=T.accent; ctx.font='bold 30px '+T.font;
+  ctx.fillStyle=T.accent; ctx.font='bold '+(T.compact?20:28)+'px '+T.font;
   ctx.fillText('PRECIO SOCIO', T.pad, y);
-  y += 66;
-  ctx.fillStyle='#fff'; ctx.font='bold 76px '+T.font;
-  ctx.fillText(money(product.price_socio), T.pad, y);
+  y += (T.compact?46:74);
+  ctx.font='bold '+T.priceSize+'px '+T.font;
+  const priceTxt = money(product.price_socio);
+  const priceWidth = ctx.measureText(priceTxt).width;
+  ctx.fillStyle='#fff'; ctx.fillText(priceTxt, T.pad, y);
   if(product.price_list && product.price_list>product.price_socio){
-    ctx.fillStyle='#918A8E'; ctx.font='34px '+T.font;
-    const oldTxt=money(product.price_list); const w=ctx.measureText(oldTxt).width;
-    ctx.fillText(oldTxt, T.pad+ctx.measureText(money(product.price_socio)).width+28, y);
-    ctx.strokeStyle='#918A8E'; ctx.lineWidth=3; ctx.beginPath();
-    const lx=T.pad+ctx.measureText(money(product.price_socio)).width+28;
-    ctx.moveTo(lx,y-12); ctx.lineTo(lx+w,y-12); ctx.stroke();
+    const oldTxt=money(product.price_list);
+    const oldSize = T.compact?22:32;
+    const oldX = T.pad+priceWidth+24, oldY = y-(T.compact?8:14);
+    ctx.font=oldSize+'px '+T.font; ctx.fillStyle='#918A8E';
+    const oldW = ctx.measureText(oldTxt).width;
+    ctx.fillText(oldTxt, oldX, oldY);
+    ctx.strokeStyle='#918A8E'; ctx.lineWidth=2.5; ctx.beginPath();
+    ctx.moveTo(oldX,oldY-8); ctx.lineTo(oldX+oldW,oldY-8); ctx.stroke();
   }
+  y += (T.compact?24:20);
 
-  // QR + contacto abajo a la derecha
-  const qrSize=170;
-  const slug = dealer.slug || dealer.id;
+  // QR (si entra en el espacio restante) + contacto, todo en flujo desde "y"
+  const qrSize = T.compact?110:170;
+  const contactBlockH = (T.compact?34+38+28:48+42+34); // alto aprox del bloque de texto de contacto
+  const spaceLeft = T.h - y;
+  const showQr = spaceLeft >= (qrSize+30);
   const link = 'https://expoaca.netlify.app/#expo:'+dealer.id;
-  try{
-    const qrImg = await loadImg('https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='+encodeURIComponent(link), true);
-    ctx.fillStyle='#fff'; roundRectPath(ctx, T.w-T.pad-qrSize-20, T.h-qrSize-64, qrSize+20, qrSize+20, 16); ctx.fill();
-    ctx.drawImage(qrImg, T.w-T.pad-qrSize-10, T.h-qrSize-54, qrSize, qrSize);
-  }catch(e){}
-  ctx.fillStyle='#fff'; ctx.font='bold 30px '+T.font;
-  ctx.fillText('📲 Contactanos', T.pad, T.h-150);
-  ctx.fillStyle='#E6A100'; ctx.font='bold 34px '+T.font;
-  ctx.fillText(dealer.tel||'', T.pad, T.h-100);
-  ctx.fillStyle='#918A8E'; ctx.font='24px '+T.font;
-  ctx.fillText('expoaca.com/c/'+ (dealer.slug||slug), T.pad, T.h-60);
+  const contactMaxW = showQr ? (T.w-T.pad*2-qrSize-40) : (T.w-T.pad*2);
+  if(showQr){
+    try{
+      const qrImg = await loadImg('https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='+encodeURIComponent(link), true);
+      const qrY = T.h - qrSize - 30;
+      ctx.fillStyle='#fff'; roundRectPath(ctx, T.w-T.pad-qrSize-16, qrY-10, qrSize+16, qrSize+16, 14); ctx.fill();
+      ctx.drawImage(qrImg, T.w-T.pad-qrSize-8, qrY-2, qrSize, qrSize);
+    }catch(e){}
+  }
+  let cy = y + (T.compact?26:34);
+  ctx.fillStyle='#B3ABAE'; ctx.font='bold '+(T.compact?18:26)+'px '+T.font;
+  ctx.fillText('CONTACTANOS', T.pad, cy);
+  cy += (T.compact?30:48);
+  ctx.fillStyle='#E6A100'; ctx.font='bold '+(T.compact?24:34)+'px '+T.font;
+  const telTxt = dealer.tel || '';
+  const maxChars = Math.max(6, Math.floor(contactMaxW / (T.compact?15:20)));
+  ctx.fillText(telTxt.length>maxChars ? telTxt.slice(0,maxChars) : telTxt, T.pad, cy);
+  cy += (T.compact?26:42);
+  ctx.fillStyle='#918A8E'; ctx.font=(T.compact?'16px ':'24px ')+T.font;
+  ctx.fillText('expoaca.com/c/'+(dealer.slug||dealer.id), T.pad, cy);
 
   return canvas;
 }
