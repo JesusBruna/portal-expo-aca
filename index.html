@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="config.js"></script>
 <style>
   *{box-sizing:border-box}
@@ -38,7 +39,6 @@
   .toast.show{opacity:1}
   @keyframes acaPulse{0%,100%{opacity:.4}50%{opacity:1}}
   .recoWrap{background:linear-gradient(145deg,#3a3438 0%,#221f22 55%,#0e0d0f 100%);position:relative;overflow:hidden;border-radius:26px;padding:30px 26px 32px;border:1px solid #3a3438;box-shadow:0 30px 60px -30px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06),inset 0 -12px 30px -20px rgba(0,0,0,.5)}
-  .recoWrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(#ffffff10 1.4px,transparent 1.4px);background-size:18px 18px;opacity:.6;pointer-events:none}
   .recoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
   .recoCard{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px -16px rgba(28,27,31,.18);transition:transform .25s ease,box-shadow .25s ease;position:relative;cursor:pointer}
   .recoCard:hover{transform:translateY(-6px);box-shadow:0 26px 48px -18px rgba(28,27,31,.34)}
@@ -127,7 +127,7 @@
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px">
     <a href="#" onclick="go('inicio');return false" style="display:flex;align-items:center;gap:11px;flex:none">
       <span style="width:40px;height:40px;border-radius:11px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900">EA</span>
-      <span style="line-height:1.05"><span style="display:block;font-family:'Archivo';font-weight:800;font-size:18px">EXPO ACA</span><span class="tagSubtitle" style="display:block;font-size:10.5px;color:#918A8E;font-weight:600;letter-spacing:.03em">MARKETPLACE OFICIAL ACA</span></span>
+      <span style="line-height:1.05"><span style="display:block;font-family:'Archivo';font-weight:800;font-size:18px">EXPO ACA</span><span class="tagSubtitle" style="display:block;font-size:10.5px;color:#918A8E;font-weight:600;letter-spacing:.03em">Tienda online</span></span>
     </a>
     <div id="searchBarWrap" style="flex:1;max-width:440px;display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E2E2E5;border-radius:11px;padding:9px 14px">
       <span style="color:#918A8E">⌕</span>
@@ -151,7 +151,7 @@
   <div class="wrap" style="padding:44px 24px 30px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:28px">
     <div>
       <div style="display:flex;align-items:center;gap:10px"><span style="width:38px;height:38px;border-radius:10px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Archivo';font-weight:900;font-size:15px">EA</span><span style="font-family:'Archivo';font-weight:800;font-size:16px;color:#fff">EXPO ACA</span></div>
-      <p style="font-size:13.5px;line-height:1.6;margin-top:12px;max-width:300px">El marketplace oficial de ACA. Todo para tu vehículo y mas, con beneficios exclusivos para socios.</p>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:12px;max-width:300px">La tienda online oficial de ACA. Todo para tu vehículo y mas, con beneficios exclusivos para socios.</p>
     </div>
     <div>
       <div style="color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Comprar</div>
@@ -472,7 +472,7 @@ async function viewInicio(v){
 
     <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px">
       <div class="card float3d" onclick="go('catalogo')" style="cursor:pointer;overflow:hidden;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;background:radial-gradient(120% 160% at 15% 0%,#E23A50 0%,#C8102E 42%,#7A0E1E 100%);color:#fff;border:none">
-        <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">MARKETPLACE</span>
+        <div style="position:relative"><span style="font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85">TIENDA ONLINE</span>
         <h2 style="font-size:28px;color:#fff;margin-top:6px;line-height:1.05">Explorá el catálogo completo</h2>
         <p style="font-size:14.5px;color:#ffffffcc;margin-top:8px;max-width:320px">Accesorios, repuestos, neumáticos y más.</p>
         <span style="display:inline-block;margin-top:16px;background:#fff;color:#1C1B1F;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px">Ver catálogo →</span></div>
@@ -1052,6 +1052,7 @@ async function viewPanel(v){
       <button id="ptab-pedidos" class="btn" onclick="panelTab('pedidos')">Pedidos</button>
       <button id="ptab-perfil" class="btn" onclick="panelTab('perfil')">Perfil del expo</button>
       <button id="ptab-valoraciones" class="btn" onclick="panelTab('valoraciones')">⭐ Valoraciones</button>
+      <button id="ptab-kit" class="btn" onclick="panelTab('kit')">📣 Difundí tu participación</button>
     </div>
     <div id="ptab-body"></div>
     <div id="modal"></div>`;
@@ -1060,8 +1061,9 @@ async function viewPanel(v){
 
 function panelTab(tab){
   window._panel.tab = tab;
-  ['resumen','productos','pedidos','perfil','valoraciones'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
+  ['resumen','productos','pedidos','perfil','valoraciones','kit'].forEach(t=>{ const b=$('ptab-'+t); if(b){ b.style.background = t===tab?'#C8102E':'transparent'; b.style.color = t===tab?'#fff':'#44414A'; }});
   const body=$('ptab-body');
+  if(tab==='kit') return renderKitTab(body);
   if(tab==='resumen') body.innerHTML = panelResumen();
   else if(tab==='productos') body.innerHTML = panelProductos();
   else if(tab==='pedidos') body.innerHTML = panelPedidos();
@@ -1316,6 +1318,234 @@ function previewDealerLogo(inp){
   const img=$('dLogoPrev'), ini=$('dLogoInitial');
   processProductImage(f,500,500).then(blob=>{ img.src=URL.createObjectURL(blob); img.style.display='block'; if(ini) ini.style.display='none'; }).catch(()=>{ img.src=URL.createObjectURL(f); img.style.display='block'; if(ini) ini.style.display='none'; });
 }
+
+// ============================================================
+//  KIT DE DIFUSIÓN — genera piezas gráficas (Story/Post/Catálogo)
+//  Render 100% en el navegador con <canvas>, sin depender de
+//  ninguna herramienta de diseño externa. El objeto KIT_TEMPLATES
+//  de más abajo define colores/posiciones y se puede ajustar sin
+//  tocar la lógica de dibujo.
+// ============================================================
+const KIT_TEMPLATES = {
+  story:  { w:1080, h:1920, photoH:1180, pad:56, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif" },
+  post:   { w:1080, h:1080, photoH:620,  pad:52, accent:'#C8102E', dark:'#1C1B1F', font:"'Archivo',sans-serif" },
+};
+const KIT_LIMIT_ACTIVAS = 12; // catálogo prolijo: máximo de productos con foto a incluir
+let _kitBusy = false; // rate-limit simple del lado del navegador
+const _kitCache = new Map(); // cache en memoria: se regenera solo si cambia el producto (id+updated_at) o el logo del expo
+
+function kitKey(productId, type, dealer){ return productId+'|'+type+'|'+(dealer.logo_url||'')+'|'+(dealer.tel||''); }
+
+function loadImg(src, cross){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(); if(cross) img.crossOrigin='anonymous';
+    img.onload=()=>resolve(img); img.onerror=reject; img.src=src;
+  });
+}
+function roundRectPath(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrapText(ctx,text,x,y,maxWidth,lineHeight,maxLines){
+  const words=(text||'').split(' '); let line=''; let lines=0; const out=[];
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxWidth && line){ out.push(line.trim()); line=words[i]+' '; lines++; if(lines>=maxLines-1){ break; } } else line=test;
+  }
+  out.push(line.trim());
+  out.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l, x, y+i*lineHeight));
+  return out.length;
+}
+
+async function drawKitCanvas(type, product, dealer){
+  const T = KIT_TEMPLATES[type];
+  const canvas = document.createElement('canvas'); canvas.width=T.w; canvas.height=T.h;
+  const ctx = canvas.getContext('2d');
+  // Fondo institucional con degradado
+  const bg = ctx.createLinearGradient(0,0,T.w,T.h);
+  bg.addColorStop(0,'#141316'); bg.addColorStop(1,T.dark);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,T.w,T.h);
+
+  // Foto del producto (recortada tipo "cover")
+  try{
+    const photo = await loadImg(product.photo_url, true);
+    const ph=T.photoH, pw=T.w;
+    const scale = Math.max(pw/photo.width, ph/photo.height);
+    const sw=pw/scale, sh=ph/scale, sx=(photo.width-sw)/2, sy=(photo.height-sh)/2;
+    ctx.drawImage(photo, sx,sy,sw,sh, 0,0,pw,ph);
+    const shadow = ctx.createLinearGradient(0,ph-220,0,ph);
+    shadow.addColorStop(0,'rgba(20,19,22,0)'); shadow.addColorStop(1,T.dark);
+    ctx.fillStyle=shadow; ctx.fillRect(0,ph-220,pw,220);
+  }catch(e){
+    ctx.fillStyle='#2A2629'; ctx.fillRect(0,0,T.w,T.photoH);
+    ctx.fillStyle='#918A8E'; ctx.font='40px '+T.font; ctx.textAlign='center';
+    ctx.fillText(product.brand||product.name||'ExpoACA', T.w/2, T.photoH/2);
+    ctx.textAlign='left';
+  }
+
+  // Cinta de marca ACA arriba
+  ctx.fillStyle=T.accent; ctx.fillRect(0,0,T.w,10);
+  ctx.fillStyle='#fff'; ctx.font='bold 30px '+T.font; ctx.textBaseline='middle';
+  ctx.fillText('EXPO ACA', T.pad, 60);
+  ctx.textAlign='right'; ctx.fillStyle='#E6A100'; ctx.font='bold 24px '+T.font;
+  ctx.fillText('MARKETPLACE OFICIAL', T.w-T.pad, 60);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+
+  let y = T.photoH + 70;
+  // Logo + nombre del concesionario
+  const logoSize=88;
+  try{
+    if(dealer.logo_url){
+      const logo=await loadImg(dealer.logo_url, true);
+      roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 18); ctx.save(); ctx.clip();
+      const s=Math.max(logoSize/logo.width, logoSize/logo.height);
+      ctx.drawImage(logo, T.pad-((logo.width*s-logoSize)/2), y-logoSize+18-((logo.height*s-logoSize)/2), logo.width*s, logo.height*s);
+      ctx.restore();
+    } else {
+      ctx.fillStyle=T.accent; roundRectPath(ctx, T.pad, y-logoSize+18, logoSize, logoSize, 18); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='bold 34px '+T.font; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText((dealer.initial||(dealer.razon||'E')[0]||'E').toUpperCase(), T.pad+logoSize/2, y-logoSize/2+18);
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    }
+  }catch(e){}
+  ctx.fillStyle='#fff'; ctx.font='bold 34px '+T.font;
+  ctx.fillText(dealer.razon||'', T.pad+logoSize+22, y-30);
+  ctx.fillStyle='#B3ABAE'; ctx.font='26px '+T.font;
+  ctx.fillText(dealer.sede||'ExpoACA', T.pad+logoSize+22, y+8);
+
+  y += 70;
+  // Título del producto
+  ctx.fillStyle='#fff'; ctx.font='bold 52px '+T.font;
+  y += wrapText(ctx, product.name||'', T.pad, y+50, T.w-T.pad*2-260, 60, 2) * 60 - 4;
+
+  // Precio destacado
+  y += 30;
+  ctx.fillStyle=T.accent; ctx.font='bold 30px '+T.font;
+  ctx.fillText('PRECIO SOCIO', T.pad, y);
+  y += 66;
+  ctx.fillStyle='#fff'; ctx.font='bold 76px '+T.font;
+  ctx.fillText(money(product.price_socio), T.pad, y);
+  if(product.price_list && product.price_list>product.price_socio){
+    ctx.fillStyle='#918A8E'; ctx.font='34px '+T.font;
+    const oldTxt=money(product.price_list); const w=ctx.measureText(oldTxt).width;
+    ctx.fillText(oldTxt, T.pad+ctx.measureText(money(product.price_socio)).width+28, y);
+    ctx.strokeStyle='#918A8E'; ctx.lineWidth=3; ctx.beginPath();
+    const lx=T.pad+ctx.measureText(money(product.price_socio)).width+28;
+    ctx.moveTo(lx,y-12); ctx.lineTo(lx+w,y-12); ctx.stroke();
+  }
+
+  // QR + contacto abajo a la derecha
+  const qrSize=170;
+  const slug = dealer.slug || dealer.id;
+  const link = 'https://expoaca.netlify.app/#expo:'+dealer.id;
+  try{
+    const qrImg = await loadImg('https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='+encodeURIComponent(link), true);
+    ctx.fillStyle='#fff'; roundRectPath(ctx, T.w-T.pad-qrSize-20, T.h-qrSize-64, qrSize+20, qrSize+20, 16); ctx.fill();
+    ctx.drawImage(qrImg, T.w-T.pad-qrSize-10, T.h-qrSize-54, qrSize, qrSize);
+  }catch(e){}
+  ctx.fillStyle='#fff'; ctx.font='bold 30px '+T.font;
+  ctx.fillText('📲 Contactanos', T.pad, T.h-150);
+  ctx.fillStyle='#E6A100'; ctx.font='bold 34px '+T.font;
+  ctx.fillText(dealer.tel||'', T.pad, T.h-100);
+  ctx.fillStyle='#918A8E'; ctx.font='24px '+T.font;
+  ctx.fillText('expoaca.com/c/'+ (dealer.slug||slug), T.pad, T.h-60);
+
+  return canvas;
+}
+
+async function getKitCanvas(type, product, dealer){
+  const key = kitKey(product.id, type, dealer);
+  if(_kitCache.has(key)) return _kitCache.get(key);
+  const canvas = await drawKitCanvas(type, product, dealer);
+  _kitCache.set(key, canvas);
+  return canvas;
+}
+
+function kitDownloadCanvas(canvas, filename){
+  canvas.toBlob(blob=>{
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  }, 'image/png');
+}
+
+function renderKitTab(body){
+  const P=window._panel; const dealer=P.dealer||{};
+  const withPhoto = P.prods.filter(p=>p.photo_url && !p.paused);
+  window._kitSel = window._kitSel || (withPhoto[0] && withPhoto[0].id);
+  const opts = withPhoto.map(p=>`<option value="${p.id}" ${p.id===window._kitSel?'selected':''}>${esc(p.name)}</option>`).join('');
+  body.innerHTML = `
+    ${sectionHint('Elegí un producto o promoción con foto ya cargada y generá piezas gráficas listas para publicar en tus redes, con tu logo, tu WhatsApp y un QR único que lleva directo a tu vidriera dentro de ExpoACA. Se regeneran solo si cambiás la foto, el logo o el teléfono.')}
+    ${!withPhoto.length? `<div class="card" style="padding:24px;text-align:center;color:#6E646A">Todavía no tenés productos con foto. Subí una foto en "Productos y stock" → editar artículo.</div>` : `
+    <div class="card" style="padding:20px;margin-bottom:16px">
+      <label class="lbl">Producto / promoción</label>
+      <select id="kitProductSel" class="fld" onchange="window._kitSel=this.value; renderKitPreview()">${opts}</select>
+    </div>
+    <div id="kitPreviewWrap"></div>
+    <div class="card" style="padding:20px;margin-top:16px">
+      <h3 style="font-size:16px;margin-bottom:10px">Catálogo completo</h3>
+      <p style="font-size:13px;color:#6E646A;margin-bottom:12px">Un PDF con todas tus promociones activas (hasta ${KIT_LIMIT_ACTIVAS}), una por página, con el mismo diseño institucional.</p>
+      <button id="kitPdfBtn" class="btn btn-red" onclick="downloadKitCatalogPDF()">📄 Descargar catálogo en PDF</button>
+    </div>`}
+  `;
+  if(withPhoto.length) renderKitPreview();
+}
+
+async function renderKitPreview(){
+  const P=window._panel, dealer=P.dealer||{};
+  const product = P.prods.find(p=>p.id===window._kitSel); if(!product) return;
+  const wrap=$('kitPreviewWrap'); if(!wrap) return;
+  wrap.innerHTML = `<div class="grid" style="grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card" style="padding:16px;text-align:center"><h4 style="font-size:14px;margin-bottom:10px">Story de Instagram (1080×1920)</h4><div id="kitStoryHolder" style="background:#F1F1F3;border-radius:10px;min-height:220px;display:flex;align-items:center;justify-content:center;color:#918A8E;font-size:13px">Generando…</div><button class="btn btn-red" style="margin-top:12px;width:100%" onclick="downloadKitPNG('story')">⬇ Descargar Story (PNG)</button></div>
+    <div class="card" style="padding:16px;text-align:center"><h4 style="font-size:14px;margin-bottom:10px">Post cuadrado (1080×1080)</h4><div id="kitPostHolder" style="background:#F1F1F3;border-radius:10px;min-height:220px;display:flex;align-items:center;justify-content:center;color:#918A8E;font-size:13px">Generando…</div><button class="btn btn-red" style="margin-top:12px;width:100%" onclick="downloadKitPNG('post')">⬇ Descargar Post (PNG)</button></div>
+  </div>`;
+  try{
+    const [storyC, postC] = await Promise.all([ getKitCanvas('story',product,dealer), getKitCanvas('post',product,dealer) ]);
+    const sh=$('kitStoryHolder'), ph=$('kitPostHolder');
+    if(sh){ sh.innerHTML=''; const img=document.createElement('img'); img.src=storyC.toDataURL('image/png'); img.style.cssText='width:100%;max-width:180px;border-radius:8px;box-shadow:0 8px 20px -8px rgba(0,0,0,.3)'; sh.appendChild(img); sh.style.display='block'; }
+    if(ph){ ph.innerHTML=''; const img=document.createElement('img'); img.src=postC.toDataURL('image/png'); img.style.cssText='width:100%;max-width:220px;border-radius:8px;box-shadow:0 8px 20px -8px rgba(0,0,0,.3)'; ph.appendChild(img); ph.style.display='block'; }
+  }catch(e){ toast('No se pudo generar la vista previa: '+(e.message||e)); }
+}
+
+async function downloadKitPNG(type){
+  if(_kitBusy){ toast('Esperá un segundo, ya se está generando una pieza…'); return; }
+  _kitBusy=true; setTimeout(()=>_kitBusy=false, 1500);
+  const P=window._panel, dealer=P.dealer||{};
+  const product = P.prods.find(p=>p.id===window._kitSel); if(!product) return;
+  try{
+    const canvas = await getKitCanvas(type, product, dealer);
+    const slug=(dealer.slug||'expo').toString();
+    kitDownloadCanvas(canvas, slug+'-'+type+'.png');
+    toast('✅ '+(type==='story'?'Story':'Post')+' descargado');
+  }catch(e){ toast('Error generando la imagen: '+(e.message||e)); }
+}
+
+async function downloadKitCatalogPDF(){
+  if(_kitBusy){ toast('Esperá un segundo…'); return; }
+  _kitBusy=true;
+  const btn=$('kitPdfBtn'); if(btn){ btn.disabled=true; btn.textContent='Generando catálogo…'; }
+  try{
+    const P=window._panel, dealer=P.dealer||{};
+    const items = P.prods.filter(p=>p.photo_url && !p.paused && p.stock>0).slice(0,KIT_LIMIT_ACTIVAS);
+    if(!items.length){ toast('No hay promociones activas con foto y stock para incluir.'); return; }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:'portrait', unit:'px', format:[1080,1350] });
+    for(let i=0;i<items.length;i++){
+      const canvas = await getKitCanvas('post', items[i], dealer);
+      // reencuadrar el post (1080x1080) dentro de la página del catálogo (1080x1350), con footer institucional
+      const page = document.createElement('canvas'); page.width=1080; page.height=1350;
+      const ctx=page.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1080,1350);
+      ctx.drawImage(canvas,0,0,1080,1080,0,0,1080,1080);
+      ctx.fillStyle='#1C1B1F'; ctx.fillRect(0,1080,1080,270);
+      ctx.fillStyle='#fff'; ctx.font='bold 30px Archivo,sans-serif';
+      ctx.fillText('Catálogo de promociones · '+(dealer.razon||''), 50, 1160);
+      ctx.fillStyle='#B3ABAE'; ctx.font='22px Archivo,sans-serif';
+      ctx.fillText('Página '+(i+1)+' de '+items.length+' · expoaca.com/c/'+(dealer.slug||dealer.id), 50, 1200);
+      if(i>0) pdf.addPage([1080,1350],'portrait');
+      pdf.addImage(page.toDataURL('image/jpeg',0.92), 'JPEG', 0,0,1080,1350);
+    }
+    pdf.save((dealer.slug||'expo')+'-catalogo.pdf');
+    toast('✅ Catálogo PDF descargado ('+items.length+' promociones)');
+  }catch(e){ toast('Error generando el PDF: '+(e.message||e)); }
+  finally{ _kitBusy=false; if(btn){ btn.disabled=false; btn.textContent='📄 Descargar catálogo en PDF'; } }
+}
+
 
 function productForm(p){
   const cats = window._cats||[];
