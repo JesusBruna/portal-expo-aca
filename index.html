@@ -1449,7 +1449,7 @@ async function drawKitCanvas(type, product, dealer){
   const contactBlockH = (T.compact?34+38+28:48+42+34); // alto aprox del bloque de texto de contacto
   const spaceLeft = T.h - y;
   const showQr = spaceLeft >= (qrSize+30);
-  const link = 'https://expoaca.netlify.app/#expo:'+dealer.id;
+  const link = 'https://tienda-virtual-expoaca.netlify.app/#expo:'+dealer.id;
   const contactMaxW = showQr ? (T.w-T.pad*2-qrSize-40) : (T.w-T.pad*2);
   if(showQr){
     try{
